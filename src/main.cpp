@@ -1,27 +1,9 @@
-/*******************************************************************************************
-*
-*   raylib [shaders] example - Multiple sample2D with default batch system
-*
-*   NOTE: This example requires raylib OpenGL 3.3 or ES2 versions for shaders support,
-*         OpenGL 1.1 does not support shaders, recompile raylib to OpenGL 3.3 version.
-*
-*   NOTE: Shaders used in this example are #version 330 (OpenGL 3.3), to test this example
-*         on OpenGL ES 2.0 platforms (Android, Raspberry Pi, HTML5), use #version 100 shaders
-*         raylib comes with shaders ready for both versions, check raylib/shaders install folder
-*
-*   Example originally created with raylib 3.5, last time updated with raylib 3.5
-*
-*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
-*   BSD-like license that allows static linking with closed source software
-*
-*   Copyright (c) 2020-2023 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-
 #include "raylib.h"
+#include "game.h"
 #include <iostream>
 
 #define GLSL_VERSION 330
+#define RAYGUI_IMPLEMENTATION
 
 //------------------------------------------------------------------------------------
 // Program main entry point
