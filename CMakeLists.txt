@@ -31,10 +31,6 @@ file(GLOB_RECURSE data resources/*)
 add_executable(${PROJECT_NAME} ${sources} ${data})
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
-target_include_directories(${PROJECT_NAME} PUBLIC 
-                           ${CMAKE_SOURCE_DIR}/src/game
-                           ${CMAKE_SOURCE_DIR}/src/level
-                           ${CMAKE_SOURCE_DIR}/src/player
-                           ${CMAKE_SOURCE_DIR}/src/UI)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
 file(COPY resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

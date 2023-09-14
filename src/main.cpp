@@ -1,6 +1,7 @@
 // im here
 #include "raylib.h"
 #include "game.h"
+#include "player.h"
 #include <iostream>
 
 #define GLSL_VERSION 330
@@ -13,8 +14,8 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1600;
-    const int screenHeight = 758;
+    const int screenWidth = 800;
+    const int screenHeight = 450;
 
     Vector2 mousePos;
 
@@ -30,10 +31,11 @@ int main()
 
 
     // Main game loop
+    Player player;
     while (!WindowShouldClose())                // Detect window close button or ESC key
     {
         //----------------------------------------------------------------------------------
-        
+
         mousePos.x = (float) (GetMouseX()) / screenWidth;
         mousePos.y = (float) (GetMouseY()) / screenHeight;
         SetShaderValue(shader, mousePosLoc, &mousePos.x, SHADER_UNIFORM_VEC2);
@@ -50,7 +52,7 @@ int main()
 
             EndShaderMode();
             DrawFPS(10, 10);
-
+            player.update();
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
