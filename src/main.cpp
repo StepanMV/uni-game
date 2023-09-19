@@ -31,7 +31,7 @@ int main()
 
 
     // Main game loop
-    Player player;
+
     while (!WindowShouldClose())                // Detect window close button or ESC key
     {
         //----------------------------------------------------------------------------------
@@ -52,7 +52,6 @@ int main()
 
             EndShaderMode();
             DrawFPS(10, 10);
-            player.update();
         EndDrawing();
         //----------------------------------------------------------------------------------
     }

@@ -26,7 +26,7 @@ public:
     void update();
 
 private:
-    int *x, *y;
+    int *x, *y;//vec2?
     int width, height;
     std::map<std::string, Animation> animations;
     std::map<std::string, Texture2D> textures;

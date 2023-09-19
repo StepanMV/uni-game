@@ -1,21 +1,21 @@
-#include "raylib.h"
+#pragma once
+#include "entity.h"
 
-static const int screenWidth = 800;
-static const int screenHeight = 450;
-
-class Player {
+class Player: public Entity {
     public:
-        Player() = default;
+        Player();
+
+        virtual void render() override;
+        virtual void behaviour();
+        virtual void move() override;
+        void moveRight();
+        void moveLeft();
+        virtual void jump() override;
+        virtual void dash() override;
+        virtual void falling() override;
+        virtual void takeDamage() override;
 
         ~Player();
-
-        void update();
-
     private:
-        Vector2 plPos = {0, screenHeight - 90};
-        Vector2 plSpeed = {0, 0};
-        bool direction = true;
-        Texture2D textureRight = LoadTexture("resources/images/playerRight.png");
-        Texture2D textureLeft = LoadTexture("resources/images/playerLeft.png");
-        Texture2D texture = textureRight;
+        //
 };
