@@ -5,7 +5,7 @@ class Particle: public Object {
     public:
         Particle(double _time);
         
-        virtual void render() override;
+        virtual void update() override;
 
         ~Particle();
     private:

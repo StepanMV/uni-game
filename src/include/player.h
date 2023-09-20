@@ -5,8 +5,7 @@ class Player: public Entity {
     public:
         Player();
 
-        virtual void render() override;
-        virtual void behaviour();
+        virtual void update() override;
         virtual void move() override;
         void moveRight();
         void moveLeft();

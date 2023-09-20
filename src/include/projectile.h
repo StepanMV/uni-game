@@ -5,7 +5,7 @@ class Projectile: public Object {
     public:
         Projectile(unsigned _damage);
 
-        virtual void render() override;
+        virtual void update() override;
         void moveStraight();
         void moveHoming();
         void bounce();
