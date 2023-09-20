@@ -5,7 +5,7 @@ class Tile: public Object {
     public:
         Tile();
 
-        virtual void render() override;
+        virtual void update() override;
 
         ~Tile();
     private:
