@@ -5,9 +5,8 @@
 
 class Object {
     public:
-        virtual void render() = 0;
+        virtual void update() = 0;
     protected:
-        int x, y;//vec2?
+        Vec2 pos;
         Renderer renderer;
-        Physics physics;
 };
