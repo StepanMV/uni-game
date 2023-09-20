@@ -6,7 +6,6 @@ class Enemy: public Entity {
         Enemy();
 
         virtual void update() override;
-        virtual void behaviour() override;
         virtual void move() override;
         virtual void jump() override;
         virtual void dash() override;
