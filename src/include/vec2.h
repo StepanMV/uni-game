@@ -9,6 +9,9 @@ class Vec2 {
         Vec2& operator-=(const Vec2& v);
         Vec2& operator*=(const double& k);
 
+        double getX() const;
+        double getY() const;
+
         ~Vec2() = default;
     private:
         double x = 0, y = 0;
@@ -17,3 +20,4 @@ class Vec2 {
 Vec2 operator+(const Vec2& v1, const Vec2& v2);
 Vec2 operator-(const Vec2& v1, const Vec2& v2);
 Vec2 operator*(const Vec2& v, const double& k);
+Vec2 operator*(const double& k, const Vec2& v);
