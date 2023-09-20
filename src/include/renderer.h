@@ -1,36 +1,39 @@
 #pragma once
-#include <map>
+#include <unordered_map>
 #include <string>
 #include "animation.h"
 #include "cppshader.h"
 #include "raylib.h"
+#include "vec2.h"
 
 class Renderer {
 public:
-    Renderer(int* x, int* y, int width, int height);
+    Renderer(Vec2* pos, int width, int height);
 
-    void saveTexture(std::string name, std::string path);
+    void saveSprite(std::string name, std::string path);
 
-    void saveAnimation(std::string name, std::string path, int speed);
+    void saveAnimation(std::string name, std::string path, double fps);
 
     void saveShader(std::string name, CppShader& shader);
 
-    void setTexture(std::string name);
-
-    void setAnimation(std::string name);
+    void setState(std::string name);
 
     void setRotation(double rotation);
+
+    void flip(bool flip = true);
 
     void addShader(std::string name);
 
     void update();
 
 private:
-    int *x, *y;//vec2?
+    Vec2* pos;
     int width, height;
-    std::map<std::string, Animation> animations;
-    std::map<std::string, Texture2D> textures;
-    std::map<std::string, CppShader> shaders;
+    double rotation = 0;
+    bool flipped = false;
+    std::unordered_map<std::string, Animation> animations;
+    std::unordered_map<std::string, Image> sprites;
+    std::unordered_map<std::string, CppShader> shaders;
     std::string currentAnimation;
-    std::string currentTexture;
+    std::string currentSprite;
 };

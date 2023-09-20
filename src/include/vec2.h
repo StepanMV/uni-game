@@ -1,19 +1,18 @@
 #pragma once
+#include "raylib.h"
 
 class Vec2 {
     public:
         Vec2() = default;
         Vec2(double _x, double _y);
 
+        Vector2 toRaylib();
+
         Vec2& operator+=(const Vec2& v);
         Vec2& operator-=(const Vec2& v);
         Vec2& operator*=(const double& k);
 
-        double getX() const;
-        double getY() const;
-
         ~Vec2() = default;
-    private:
         double x = 0, y = 0;
 };
 

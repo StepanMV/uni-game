@@ -25,6 +25,6 @@ private:
 	void draw();
 
     Level level;
-    Camera2D camera;
+    Camera2D camera = {0};
 
 };
