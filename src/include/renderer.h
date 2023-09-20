@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 #include "animation.h"
-#include "myshader.h"
+#include "cppshader.h"
 #include "raylib.h"
 
 class Renderer {
@@ -13,7 +13,7 @@ public:
 
     void saveAnimation(std::string name, std::string path, int speed);
 
-    void saveShader(std::string name, MyShader& shader);
+    void saveShader(std::string name, CppShader& shader);
 
     void setTexture(std::string name);
 
@@ -30,7 +30,7 @@ private:
     int width, height;
     std::map<std::string, Animation> animations;
     std::map<std::string, Texture2D> textures;
-    std::map<std::string, MyShader> shaders;
+    std::map<std::string, CppShader> shaders;
     std::string currentAnimation;
     std::string currentTexture;
 };

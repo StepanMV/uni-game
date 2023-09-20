@@ -1,20 +1,22 @@
 #pragma once
 
+#include "vec2.h"
+
 class Physics {
     public:
-        Physics(int* _x, int* _y);
+        Physics(Vec2* pos);
 
-        void falling();
-        void setGravity(bool enable);
-        void applyForce();
-        void target(int& x, int& y);
-        void jump();//
-        void flight();//объединить с jump()?
+        void useGravity(bool enable);
+        void applyForce(Vec2& force);
+        void setAccel(Vec2& accel);
+        void addAccel(Vec2& accel);
+        //void target(int& x, int& y);
         void apply();
 
         ~Physics();
     private:
-        int *x, *y;// Vec2
-        int xSpeed, ySpeed;//Vec2
-        int xAcc, yAcc;//Vec2
+        Vec2* pos;
+        Vec2 speed;
+        Vec2 accel;
+        bool gravity = true;
 };
