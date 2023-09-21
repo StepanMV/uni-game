@@ -3,9 +3,14 @@
 
 class Player: public Entity {
     public:
-        Player();
+        Player() = default;
+
+        virtual Player& spawn(Vec2 pos, Vec2 size) override;
 
         virtual void update() override;
+        virtual void onCollision(Tile* other) override;
+        virtual void onCollision(Entity* other) override;
+        /*
         virtual void move() override;
         void moveRight();
         void moveLeft();
@@ -13,8 +18,7 @@ class Player: public Entity {
         virtual void dash() override;
         virtual void falling() override;
         virtual void takeDamage() override;
-
-        ~Player();
+        */
     private:
         //
 };

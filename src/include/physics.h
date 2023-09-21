@@ -4,22 +4,23 @@
 
 class Physics {
     public:
-        Physics(Vec2* _pos, double _maxMoveSpeed, double _maxFallSpeed, double _maxFlySpeed,  double _friction = 1, double _gravity = 1);
+        Physics() = default;
+        Physics(Vec2* _pos);
 
-        void setSpeed(Vec2& _speed);
-        void addSpeed(Vec2& _speed);
-        void setAccel(Vec2& _accel);
-        void addAccel(Vec2& _accel);
-        void setFriction(double _friction);
-        void setGravity(double _gravity);
+        void setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
+        void setForces(double gravity, double friction);
+
         //void target(int& x, int& y);
-        void apply();
+        void applyAccel();
 
-        ~Physics();
-    private:
         Vec2* pos;
-        Vec2 speed = Vec2();
-        Vec2 accel = Vec2();
+        Vec2 speed;
+        Vec2 accel;
+
+    private:
+        Vec2 frictionVec() const;
         double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
         double friction, gravity;
+
+        bool onGround = false;
 };

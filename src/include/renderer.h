@@ -8,32 +8,38 @@
 
 class Renderer {
 public:
-    Renderer(Vec2* pos, int width, int height);
+    Renderer() = default;
+    Renderer(Vec2* pos, Vec2* size);
 
-    void saveSprite(std::string name, std::string path);
+    ~Renderer();
 
-    void saveAnimation(std::string name, std::string path, double fps);
+    void saveSprite(std::string ID, std::string path);
 
-    void saveShader(std::string name, CppShader& shader);
+    void saveAnimation(std::string ID, std::string path, double fps);
 
-    void setState(std::string name);
+    void saveShader(std::string ID, CppShader& shader);
+
+    void setState(std::string ID, bool flip = false);
 
     void setRotation(double rotation);
 
-    void flip(bool flip = true);
-
-    void addShader(std::string name);
+    void addShader(std::string ID);
 
     void update();
 
 private:
+    Texture2D updateCurrentTexture();
+
     Vec2* pos;
-    int width, height;
+    Vec2* size;
     double rotation = 0;
     bool flipped = false;
     std::unordered_map<std::string, Animation> animations;
     std::unordered_map<std::string, Image> sprites;
     std::unordered_map<std::string, CppShader> shaders;
-    std::string currentAnimation;
-    std::string currentSprite;
+    std::string currentTextureID;
+    Texture2D currentTexture;
+
+    std::string newTextureID;
+    bool newFlipped = false;
 };

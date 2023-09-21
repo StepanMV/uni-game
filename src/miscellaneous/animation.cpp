@@ -3,16 +3,19 @@
 #include <vector>
 #include <string>
 #include "raylib.h"
+#include "vec2.h"
 
-Animation::Animation(std::string filepath, double fps) : fps(fps) {
+Animation::Animation(std::string filepath, double fps, Vec2 size) : fps(fps) {
     this->lastChangeTimestamp = GetTime();
     auto list = LoadDirectoryFiles(filepath.c_str());
     for (int i = 0; i < list.count; i++) {
-        sprites.push_back(LoadImage(list.paths[i]));
+        Image image = LoadImage(list.paths[i]);
+        ImageResize(&image, size.x, size.y);
+        sprites.push_back(image);
     }
 }
 
-Image Animation::getCurrentFrame() {
+Image& Animation::getCurrentFrame() {
     double now = GetTime();
     if (now - lastChangeTimestamp > 1.0 / fps) {
         lastChangeTimestamp = now;

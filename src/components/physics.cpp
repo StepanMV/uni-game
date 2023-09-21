@@ -1,36 +1,17 @@
 #include "physics.h"
 #include "cmath"
 
-Physics::Physics(Vec2* _pos, double _maxMoveSpeed, double _maxFallSpeed, double _maxFlySpeed,  double _friction, double _gravity): 
-pos(_pos), 
-friction(_friction), 
-gravity(_gravity), 
-maxMoveSpeed(_maxMoveSpeed), 
-maxFallSpeed(_maxFallSpeed), 
-maxFlySpeed(_maxFlySpeed) {}
+Physics::Physics(Vec2* _pos): pos(_pos) {}
 
-void Physics::setSpeed(Vec2& _speed) {
-    speed = _speed;
+void Physics::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
+    this->maxMoveSpeed = maxMoveSpeed;
+    this->maxFallSpeed = maxFallSpeed;
+    this->maxFlySpeed = maxFlySpeed;
 }
 
-void Physics::addSpeed(Vec2& _speed) {
-    speed += _speed;
-}
-
-void Physics::setAccel(Vec2& _accel) {
-    accel = _accel;
-}
-
-void Physics::addAccel(Vec2& _accel) {
-    accel += _accel;
-}
-
-void Physics::setFriction(double _friction) {
-    friction = _friction;
-}
-
-void Physics::setGravity(double _gravity) {
-    gravity = _gravity;
+void Physics::setForces(double gravity, double friction) {
+    this->gravity = gravity;
+    this->friction = friction;
 }
 
 int sign(double a) {
@@ -45,24 +26,26 @@ int sign(double a) {
     }
 }
 
-void Physics::apply() {
+Vec2 Physics::frictionVec() const {
+    double fricX = -sign(speed.x) * friction;
+    fricX = abs(fricX) > abs(speed.x) ? -speed.x : fricX;
+    double fricY = -sign(speed.y) * friction;
+    fricY = abs(fricY) > abs(speed.y) ? -speed.y : fricY;
+    return Vec2(fricX, fricY);
+}
+
+void Physics::applyAccel() {
     speed += accel;
+    speed += frictionVec();
+    speed += Vec2(0, gravity);
+
     if(abs(speed.x) >= maxMoveSpeed) {
         speed.x = sign(speed.x) * maxMoveSpeed;
     }
-    if(speed.y >= maxFallSpeed) {
+    if(speed.y > maxFallSpeed) {
         speed.y = maxFallSpeed;
     }
-    if(speed.y <= maxFlySpeed) {
-        speed.y = maxFlySpeed;
-    }
-    *pos += speed;
-    if(gravity > 0) {
-        accel.y += gravity;
-    }
-    if(friction > 0) {
-        if(speed.x != 0) {
-            accel.x += (-friction * sign(speed.x));
-        }
+    if(speed.y < -maxFlySpeed) {
+        speed.y = -maxFlySpeed;
     }
 }

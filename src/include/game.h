@@ -4,6 +4,8 @@
 
 #include "raylib.h"
 #include "level.h"
+#include "player.h"
+#include "tile.h"
 
 class Game {
 public:
@@ -19,12 +21,20 @@ public:
 
 	void tick();
 
+	void loadLevel();
+
 private:
+
 	void update();
 
 	void draw();
 
-    Level level;
-    Camera2D camera = {0};
+	void checkCollisions();
+
+    //Level level;
+    Camera2D camera;
+	Player player;
+	Texture2D background;
+	Tile tile;
 
 };
