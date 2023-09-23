@@ -4,11 +4,10 @@
 #include "vec2.h"
 #include "physics.h"
 
-class Entity: public Object, public ICollidable {
+class Entity: public Object {
     public:
         Entity() = default;
-
-        virtual Entity& spawn(Vec2 pos, Vec2 size) override;
+        Entity(Vec2 _pos, Vec2 _size);
 
         Entity& setMaxSpeeds(double move, double fall, double fly);
 
@@ -17,7 +16,6 @@ class Entity: public Object, public ICollidable {
         virtual void update() = 0;
         virtual void onCollision(Tile* other) = 0;
         virtual void onCollision(Entity* other) = 0;
-        virtual bool checkCollision(const Object& other) const override;
 
         void move();
         
@@ -31,7 +29,6 @@ class Entity: public Object, public ICollidable {
         */
 
     protected:
-        Physics physics;
         const unsigned max_health = 100;
         unsigned health = max_health;
 };

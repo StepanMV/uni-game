@@ -8,8 +8,9 @@
 #include <iostream>
 
 
-Game::Game(int width, int height, int fps, std::string title)
+Game::Game(int width, int height, int fps, std::string title): player(Vec2(1000, 1000), Vec2(180, 240)), tile(Vec2(700, 500), Vec2(128, 128))
 {	
+
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
 }
@@ -20,10 +21,10 @@ void Game::loadLevel() {
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
-	player.spawn(Vec2(0, -50), Vec2(180, 240))
-		.setMaxSpeeds(40, 10, 20)
-		.setForces(0.75, 0.5);
-	tile.spawn(Vec2(0, 0), Vec2(128, 128));
+	player.spawn()
+		.setMaxSpeeds(50, 50, 20)
+		.setForces(1, 0.5);
+	tile.spawn();
 }
 
 Game::~Game() noexcept
@@ -42,10 +43,10 @@ void Game::tick() {
 }
 
 void Game::update() {
-	player.update();
-	camera.target = player.getPos().toRaylib();
-	this->checkCollisions();
 	player.move();
+	camera.target = player.getPos().toRaylib();
+	player.update();
+	this->checkCollisions();
 }
 
 void Game::draw() {

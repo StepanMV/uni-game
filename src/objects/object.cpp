@@ -1,10 +1,11 @@
 #include "object.h"
 #include "renderer.h"
 
-Object& Object::spawn(Vec2 pos, Vec2 size) {
-    this->pos = pos;
-    this->size = size;
+Object::Object(Vec2 _pos, Vec2 _size): ICollidable(_pos, _size) {}
+
+Object& Object::spawn() {
     this->renderer = Renderer(&this->pos, &this->size);
+    this->physics = Physics(&pos);
     return *this;
 }
 

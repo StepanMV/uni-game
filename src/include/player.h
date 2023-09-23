@@ -4,8 +4,9 @@
 class Player: public Entity {
     public:
         Player() = default;
+        Player(Vec2 _pos, Vec2 _size);
 
-        virtual Player& spawn(Vec2 pos, Vec2 size) override;
+        virtual Player& spawn() override;
 
         virtual void update() override;
         virtual void onCollision(Tile* other) override;
@@ -21,4 +22,5 @@ class Player: public Entity {
         */
     private:
         //
+        double startY = pos.y; // Не уверен что это здесь должно быть и должно ли вообще быть
 };
