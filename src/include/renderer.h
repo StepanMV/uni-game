@@ -18,8 +18,6 @@ enum class RendererType {
 };
 
 
-static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;
-static std::unordered_map<std::string, Image> texturesRAM;
 
 class Renderer {
 public:
@@ -63,6 +61,10 @@ private:
     std::unordered_map<std::string, Animation> animations;
     std::unordered_map<std::string, TextureAtlas> textureAtlases;
     std::unordered_map<std::string, std::shared_ptr<Texture2D>> textures;
+
+    static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;
+    static std::unordered_map<std::string, Image> texturesRAM;
+
     //static std::unordered_map<std::string, Shader> shadersRAM;
     //static std::unordered_map<std::string, std::weak_ptr<CppShader>> shaders;
 };

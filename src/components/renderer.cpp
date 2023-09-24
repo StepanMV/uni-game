@@ -1,5 +1,8 @@
 #include "renderer.h"
 
+std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
+std::unordered_map<std::string, Image> Renderer::texturesRAM;
+
 Renderer::Renderer(Vec2* pos, Vec2* size) : pos(pos), size(size) { }
 
 void Renderer::loadTextures(std::string folder) {
