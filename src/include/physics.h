@@ -5,7 +5,6 @@
 class Physics {
     public:
         Physics() = default;
-        Physics(Vec2* _pos);
 
         void setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
         void setForces(double gravity, double friction);
@@ -13,9 +12,9 @@ class Physics {
         //void target(int& x, int& y);
         void applyAccel();
 
-        Vec2* pos;
-        Vec2 speed;
-        Vec2 accel;
+        bool checkCollision(const Physics& other) const;
+
+        Vec2 speed, accel;
 
     private:
         Vec2 frictionVec() const;

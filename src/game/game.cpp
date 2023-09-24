@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "player.h"
 #include "tile.h"
+#include "renderer.h"
 
 #include <vector>
 #include <iostream>
@@ -15,7 +16,8 @@ Game::Game(int width, int height, int fps, std::string title)
 }
 
 void Game::loadLevel() {
-	background = LoadTexture("resources/images/background.png");
+	Renderer::loadTextures("resources/textures");
+	background = LoadTexture("resources/textures/Background_53.png");
     camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;

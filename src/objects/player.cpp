@@ -2,7 +2,9 @@
 
 Player& Player::spawn(Vec2 pos, Vec2 size) {
     Entity::spawn(pos, size);
-    renderer.saveSprite("idle", "resources/sprites/player.png");
+    renderer.loadAnimation("idle", "resources/textures/NPC_188.png", 6, Vec2(34, 48));
+    renderer.loadAnimation("idle_flip", "resources/textures/NPC_188.png", 6, Vec2(34, 48), true);
+    renderer.setMain("idle", RendererType::ANIMATION);
     return *this;
 }
 
@@ -12,12 +14,12 @@ void Player::update() {
         physics.accel += Vec2(0, -1.5);
     }
     if (IsKeyDown(KEY_A)) {
-        renderer.setState("idle", true);
         physics.accel += Vec2(-1, 0);
+        renderer.setMain("idle", RendererType::ANIMATION);
     }
     if (IsKeyDown(KEY_D)) {
-        renderer.setState("idle");
         physics.accel += Vec2(1, 0);
+        renderer.setMain("idle_flip", RendererType::ANIMATION);
     }
 
     physics.applyAccel();

@@ -1,34 +1,28 @@
 #include "animation.h"
 
-#include <vector>
-#include <string>
 #include "raylib.h"
 #include "vec2.h"
 
-Animation::Animation(std::string filepath, double fps, Vec2 size) : fps(fps) {
-    this->lastChangeTimestamp = GetTime();
-    auto list = LoadDirectoryFiles(filepath.c_str());
-    for (int i = 0; i < list.count; i++) {
-        Image image = LoadImage(list.paths[i]);
-        ImageResize(&image, size.x, size.y);
-        sprites.push_back(image);
-    }
+Animation::Animation(std::shared_ptr<Texture2D> texture, double fps, Vec2 frameSize)
+    :
+    texture(texture),
+    fps(fps),
+    frameSize(frameSize),
+    startTime(GetTime()),
+    size(Vec2((int) (texture->width / frameSize.x), (int) (texture->height / frameSize.y)))
+    { }
+
+void Animation::restart() {
+    startTime = GetTime();
 }
 
-Image& Animation::getCurrentFrame() {
-    double now = GetTime();
-    if (now - lastChangeTimestamp > 1.0 / fps) {
-        lastChangeTimestamp = now;
-        currentFrame++;
-        if (currentFrame >= sprites.size()) {
-            currentFrame = 0;
-        }
-    }
-    return sprites[currentFrame];
-}
-
-Animation::~Animation() {
-    for (auto sprite : sprites) {
-        UnloadImage(sprite);
-    }
+Rectangle Animation::getCurrentRect() {
+    double time = GetTime();
+    int frame = (int) ((time - startTime) * fps) % (int) (size.x * size.y);
+    return Rectangle {
+        (float) ((frame % (int) size.x) * (float) frameSize.x),
+        (float) ((frame / (int) size.x) * (float) frameSize.y),
+        (float) frameSize.x,
+        (float) frameSize.y
+    };
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include <vector>
-#include <string>
+
+#include <memory>
+
 #include "raylib.h"
 #include "vec2.h"
 
@@ -8,14 +9,17 @@ class Animation {
     public:
         Animation() = default;
 
-        Animation(std::string filepath, double fps, Vec2 size);
+        Animation(std::shared_ptr<Texture2D> texture, double fps, Vec2 frameSize);
 
-        Image& getCurrentFrame();
+        Rectangle getCurrentRect();
 
-        ~Animation();
+        void restart();
+        
+        std::shared_ptr<Texture2D> texture;
+
     private:
-        std::vector<Image> sprites;
-        double lastChangeTimestamp;
-        const double fps = 1;
-        int currentFrame = 0;
-};
+        Vec2 frameSize;
+        double fps = 1;
+        double startTime = 0;
+        Vec2 size;
+    };

@@ -1,7 +1,7 @@
 #include "physics.h"
-#include "cmath"
 
-Physics::Physics(Vec2* _pos): pos(_pos) {}
+#include "cmath"
+#include "vec2.h"
 
 void Physics::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
     this->maxMoveSpeed = maxMoveSpeed;
