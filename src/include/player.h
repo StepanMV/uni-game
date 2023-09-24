@@ -1,12 +1,13 @@
 #pragma once
+
 #include "entity.h"
 
 class Player: public Entity {
     public:
         Player() = default;
-        Player(Vec2 _pos, Vec2 _size);
+        Player(Vec2 pos, Vec2 size);
 
-        virtual Player& spawn() override;
+        virtual Player& spawn(Vec2 pos, Vec2 size) override;
 
         virtual void update() override;
         virtual void onCollision(Tile* other) override;

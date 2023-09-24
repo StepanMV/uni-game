@@ -1,6 +1,8 @@
 #include "player.h"
 #include "tile.h"
 
+Player::Player(Vec2 pos, Vec2 size): Entity(pos, size) { }
+
 Player& Player::spawn(Vec2 pos, Vec2 size) {
     Entity::spawn(pos, size);
     renderer.loadAnimation("move_left", "resources/textures/NPC_188.png", 6, Vec2(34, 48));
