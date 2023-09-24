@@ -14,17 +14,3 @@ bool ICollidable::checkCollision(const Object& other) const {
     DrawRectangleRec(otherHitbox, GREEN);
     return CheckCollisionRecs(thisHitbox, otherHitbox);
 }
-
-
-
-Rectangle ICollidable::recCollision(const Object& other) const {    
-    Rectangle thisHitbox = recToHitbox(pos, size);
-    Rectangle otherHitbox = recToHitbox(other.getPos(), other.getSize());
-    return GetCollisionRec(thisHitbox, otherHitbox);
-}
-
-Rectangle ICollidable::recCollision(const Vec2& otherPos, const Vec2& otherSize) const {
-    Rectangle thisHitbox = recToHitbox(pos, size);
-    Rectangle otherHitbox = recToHitbox(otherPos, otherSize);
-    return GetCollisionRec(thisHitbox, otherHitbox);
-}

@@ -8,9 +8,8 @@
 #include <iostream>
 
 
-Game::Game(int width, int height, int fps, std::string title): player(Vec2(1000, 1000), Vec2(180, 240)), tile(Vec2(700, 500), Vec2(128, 128))
+Game::Game(int width, int height, int fps, std::string title): player(Vec2(1000, 1000), Vec2(128, 217)), tile(Vec2(700, 500), Vec2(64, 64)), tile1(Vec2(636, 536), Vec2(64, 64))
 {	
-
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
 }
@@ -22,9 +21,10 @@ void Game::loadLevel() {
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
 	player.spawn()
-		.setMaxSpeeds(50, 50, 20)
-		.setForces(1, 0.5);
+		.setMaxSpeeds(50, 30, 20)
+		.setForces(0.75, 0.5);
 	tile.spawn();
+	tile1.spawn();
 }
 
 Game::~Game() noexcept
@@ -60,6 +60,7 @@ void Game::draw() {
 			player.render();
 
 			tile.render();
+			tile1.render();
 
         EndMode2D();
 
@@ -69,7 +70,11 @@ void Game::draw() {
 }
 
 void Game::checkCollisions() {
+		if (player.checkCollision(tile1)) {
+		player.onCollision(&tile1);
+	}
 	if (player.checkCollision(tile)) {
 		player.onCollision(&tile);
 	}
+
 }

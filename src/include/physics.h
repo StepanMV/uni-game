@@ -17,11 +17,10 @@ class Physics {
         Vec2 speed;
         Vec2 accel;
         bool onGround = false;
+        bool fly = false;
 
     private:
         Vec2 frictionVec() const;
         double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
         double friction, gravity;
-
-        //bool onGround = false;
 };
