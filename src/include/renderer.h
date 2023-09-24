@@ -24,6 +24,8 @@ public:
     Renderer() = default;
     Renderer(Vec2* pos, Vec2* size);
 
+    void changeObject(Vec2* pos, Vec2* size);
+
     static void loadTextures(std::string folder);
     static void unloadTextures();
 
@@ -59,7 +61,7 @@ private:
     std::vector<Vec2> extraTextureAtlasPoses;
 
     std::unordered_map<std::string, Animation> animations;
-    std::unordered_map<std::string, TextureAtlas> textureAtlases;
+    std::unordered_map<std::string, TextureAtlas> textureAtlases; // Sprite sheets
     std::unordered_map<std::string, std::shared_ptr<Texture2D>> textures;
 
     static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;

@@ -35,6 +35,5 @@ private:
     Camera2D camera;
 	Player player;
 	Texture2D background;
-	Tile tile;
-	Tile tile1;
+	std::vector<Tile> tiles;
 };

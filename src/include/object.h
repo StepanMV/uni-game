@@ -9,6 +9,12 @@ class Object {
         Object() = default;
         Object(Vec2 pos, Vec2 size);
 
+        Object(const Object& other);
+        Object& operator=(const Object& other);
+
+        Object(Object&& other);
+        Object& operator=(Object&& other);
+
         virtual Object& spawn(Vec2 pos, Vec2 size);
         Object& setMaxSpeeds(double move, double fall, double fly);
         Object& setForces(double gravity, double friction);

@@ -10,5 +10,4 @@ Tile& Tile::spawn(Vec2 pos, Vec2 size) {
 }
 
 void Tile::update() {
-
 }

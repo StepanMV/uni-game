@@ -3,6 +3,27 @@
 
 Object::Object(Vec2 pos, Vec2 size) : pos(pos), size(size), renderer(&this->pos, &this->size) { }
 
+Object::Object(const Object& other) : pos(other.pos), size(other.size)
+    {
+        this->renderer = other.renderer;
+        this->renderer.changeObject(&this->pos, &this->size);
+    }
+
+Object& Object::operator=(const Object& other) {
+    pos = other.pos;
+    size = other.size;
+    renderer = other.renderer;
+    renderer.changeObject(&this->pos, &this->size);
+    return *this;
+}
+
+Object::Object(Object&& other) : pos(other.pos), size(other.size), renderer(&this->pos, &this->size) {
+    this->renderer = other.renderer;
+    other.pos = Vec2();
+    other.size = Vec2();
+    other.renderer = Renderer();
+}
+
 Object& Object::spawn(Vec2 pos, Vec2 size) {
     this->pos = pos;
     this->size = size;

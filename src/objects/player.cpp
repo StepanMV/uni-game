@@ -12,6 +12,7 @@ Player& Player::spawn(Vec2 pos, Vec2 size) {
     renderer.loadAnimation("idk_anum_flipped", "resources/textures/Item_521.png", 6, Vec2(22, 28), true);
     renderer.loadAnimation("move_right", "resources/textures/NPC_188.png", 6, Vec2(34, 48), true);
     renderer.setMain("idle", RendererType::TEXTURE);
+    renderer.setMain("idk_atlas", RendererType::TEXTURE_ATLAS, Vec2(0, 0));
     return *this;
 }
 

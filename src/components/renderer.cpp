@@ -1,9 +1,16 @@
 #include "renderer.h"
 
+#include <iostream>
+
 std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
 std::unordered_map<std::string, Image> Renderer::texturesRAM;
 
 Renderer::Renderer(Vec2* pos, Vec2* size) : pos(pos), size(size) { }
+
+void Renderer::changeObject(Vec2* pos, Vec2* size) {
+    this->pos = pos;
+    this->size = size;
+}
 
 void Renderer::loadTextures(std::string folder) {
     auto list = LoadDirectoryFiles(folder.c_str());
@@ -23,8 +30,10 @@ std::shared_ptr<Texture2D> Renderer::getFromVRAM(std::string filename, bool flip
         auto texturePtr = std::shared_ptr<Texture2D>(new Texture2D(LoadTextureFromImage(texturesRAM[filename])), [](Texture2D* texture) { UnloadTexture(*texture); });
         if (flipped) ImageFlipHorizontal(&texturesRAM[filename]);
         texturesVRAM.emplace(textureName, std::weak_ptr<Texture2D>(texturePtr));
+        std::cout << "Loaded texture " << filename << "Usages: " << texturePtr.use_count() << std::endl;
         return texturePtr;
     } else {
+        std::cout << "Using loaded texture " << filename << " with " << texturesVRAM[textureName].use_count() << " usages, expired" << texturesVRAM[textureName].expired() << std::endl;
         return texturesVRAM[textureName].lock();
     }
 }
@@ -103,6 +112,7 @@ void Renderer::draw(std::string ID, RendererType type, Vec2 atlasPos) {
     
     dest = Rectangle {(float) pos->x, (float) pos->y, (float) size->x, (float) size->y};
     Vector2 origin = {dest.width / 2, dest.height / 2};
+
 
     DrawTexturePro(texture, source, dest, origin, rotation, WHITE);
 }
