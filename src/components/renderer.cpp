@@ -46,7 +46,7 @@ void Renderer::loadAnimation(std::string ID, std::string filename, double fps, V
 
 void Renderer::setMain(std::string ID, RendererType type, Vec2 pos) {
     mainTextureID = ID;
-    mainTextureType = RendererType::ANIMATION;
+    mainTextureType = type;
     mainTextureAtlasPos = pos;
 }
 

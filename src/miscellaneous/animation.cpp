@@ -18,6 +18,7 @@ void Animation::restart() {
 
 Rectangle Animation::getCurrentRect() {
     double time = GetTime();
+    if ((time - startTime) * fps >= size.x * size.y) startTime = time;
     int frame = (int) ((time - startTime) * fps) % (int) (size.x * size.y);
     return Rectangle {
         (float) ((frame % (int) size.x) * (float) frameSize.x),

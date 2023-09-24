@@ -22,7 +22,7 @@ void Game::loadLevel() {
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
-	player.spawn(Vec2(0, -50), Vec2(180, 240))
+	player.spawn(Vec2(0, -50), Vec2(120, 180))
 		.setMaxSpeeds(40, 10, 20)
 		.setForces(0.75, 0.5);
 	tile.spawn(Vec2(0, 0), Vec2(128, 128));
