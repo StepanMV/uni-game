@@ -9,7 +9,7 @@
 #include <iostream>
 
 
-Game::Game(int width, int height, int fps, std::string title)
+Game::Game(int width, int height, int fps, std::string title): player(Vec2(1000, 1000), Vec2(128, 217)), tile(Vec2(700, 500), Vec2(64, 64)), tile1(Vec2(636, 536), Vec2(64, 64))
 {	
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
@@ -23,9 +23,10 @@ void Game::loadLevel() {
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
 	player.spawn(Vec2(0, -50), Vec2(120, 180))
-		.setMaxSpeeds(40, 10, 20)
+		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
-	tile.spawn(Vec2(0, 0), Vec2(128, 128));
+	tile.spawn();
+	tile1.spawn();
 }
 
 Game::~Game() noexcept
@@ -44,10 +45,10 @@ void Game::tick() {
 }
 
 void Game::update() {
-	player.update();
-	camera.target = player.getPos().toRaylib();
-	this->checkCollisions();
 	player.move();
+	camera.target = player.getPos().toRaylib();
+	player.update();
+	this->checkCollisions();
 }
 
 void Game::draw() {
@@ -61,6 +62,7 @@ void Game::draw() {
 			player.render();
 
 			tile.render();
+			tile1.render();
 
         EndMode2D();
 
@@ -70,7 +72,11 @@ void Game::draw() {
 }
 
 void Game::checkCollisions() {
+		if (player.checkCollision(tile1)) {
+		player.onCollision(&tile1);
+	}
 	if (player.checkCollision(tile)) {
 		player.onCollision(&tile);
 	}
+
 }

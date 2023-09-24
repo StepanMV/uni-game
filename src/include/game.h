@@ -36,5 +36,5 @@ private:
 	Player player;
 	Texture2D background;
 	Tile tile;
-
+	Tile tile1;
 };

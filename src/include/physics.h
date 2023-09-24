@@ -12,14 +12,11 @@ class Physics {
         //void target(int& x, int& y);
         void applyAccel();
 
-        bool checkCollision(const Physics& other) const;
-
         Vec2 speed, accel;
+        bool onGround, fly;
 
     private:
         Vec2 frictionVec() const;
         double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
         double friction, gravity;
-
-        bool onGround = false;
 };

@@ -1,4 +1,5 @@
 #include "player.h"
+#include "tile.h"
 
 Player& Player::spawn(Vec2 pos, Vec2 size) {
     Entity::spawn(pos, size);
@@ -16,26 +17,65 @@ void Player::update() {
     physics.accel = Vec2(0, 0);
     renderer.setMain("idle", RendererType::TEXTURE);
     if (IsKeyDown(KEY_SPACE)) {
-        physics.accel += Vec2(0, -1.5);
-        //renderer.setMain("idk_atlas", RendererType::TEXTURE_ATLAS, Vec2(0, 3));
+        if(physics.onGround) {
+            startY = pos.y;
+            physics.speed.y = -20;
+            physics.onGround = false;
+            physics.fly = true;
+        }
+        if((startY - pos.y <= 400) && (physics.fly)) {
+            physics.accel += Vec2(0, -2.5);
+        }
+        else {
+            physics.fly = false;
+        }
+    }
+    else if(IsKeyReleased(KEY_SPACE)) {
+        physics.fly = false;
     }
     if (IsKeyDown(KEY_A)) {
-        physics.accel += Vec2(-1, 0);
         renderer.setMain("move_left", RendererType::ANIMATION);
+        physics.accel += Vec2(-1, 0);
     }
     if (IsKeyDown(KEY_D)) {
-        physics.accel += Vec2(1, 0);
         renderer.setMain("move_right", RendererType::ANIMATION);
+        physics.accel += Vec2(1, 0);
     }
-
-    if (IsKeyPressed(KEY_SPACE)) renderer.addExtra("idk_anum", RendererType::ANIMATION);
-    if (IsKeyReleased(KEY_SPACE)) renderer.removeExtra("idk_anum");
-
+    if(IsKeyDown(KEY_W)) {
+        physics.accel += Vec2(0, -2.5);
+    }
     physics.applyAccel();
+    physics.onGround = false;
 }
 
 void Player::onCollision(Tile* other) {
-    physics.speed.y = 0;
+    if((physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {
+        physics.speed.y = 0;
+        physics.onGround = true;
+        pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+    }
+    else if((physics.speed.y < 0) && (pos.y - size.y / 2 > other->getPos().y)){
+        physics.speed.y = 0;
+        pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2;
+    }
+    else if((physics.speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x)) {
+        if(pos.y + size.y / 6 < other->getPos().y - other->getSize().y / 2) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+        }
+        else {
+            physics.speed.x = 0;
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2;
+        }
+    }
+    else if((physics.speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x)) {
+        if(pos.y + size.y / 6 < other->getPos().y - other->getSize().y / 2) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+        }
+        else {
+            physics.speed.x = 0;
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2;
+        }
+    }
 }
 
 void Player::onCollision(Entity* other) {
