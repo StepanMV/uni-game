@@ -47,8 +47,20 @@ void Player::update() {
     if(IsKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
+        level->placeTile(tile);
+    }
+    if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
+        level->breakTile(tile);
+    }
     physics.applyAccel();
     physics.onGround = false;
+}
+
+void Player::setLevel(Level* level) {
+    this->level = level;
 }
 
 void Player::onCollision(Tile* other) {

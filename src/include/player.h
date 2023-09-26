@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity.h"
+#include "level.h"
 
 class Player: public Entity {
     public:
@@ -8,6 +9,8 @@ class Player: public Entity {
         Player(Vec2 pos, Vec2 size);
 
         virtual Player& spawn(Vec2 pos, Vec2 size) override;
+        //void placeTile();
+        void setLevel(Level* level);
 
         virtual void update() override;
         virtual void onCollision(Tile* other) override;
@@ -23,5 +26,6 @@ class Player: public Entity {
         */
     private:
         //
+        Level* level;
         double startY = pos.y; // Не уверен что это здесь должно быть и должно ли вообще быть
 };
