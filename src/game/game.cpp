@@ -24,24 +24,16 @@ void Game::loadLevel() {
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
-
 	player.spawn(Vec2(0, -200), Vec2(128, 40))
 		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
-	level.loadLevel("resources/levels/level1.txt");
+	level.loadLevel("../../saves/level.txt");
 	player.setLevel(&level);
-	/*for (int i = 0; i < 30; i++) {
-		tiles.push_back(Tile().spawn(Vec2(-256 + i * 64, 0), Vec2(64, 64)));
-	}
-	for (int i = 0; i < 10; i++) {
-		Tile tile;
-		tile.spawn(Vec2(0, -i * 64), Vec2(64, 64));
-		tiles.push_back(tile);
-	}*/
 }
 
 Game::~Game() noexcept
 {
+	level.saveLevel("../../saves/level.txt");
 	Renderer::unloadTextures();
 	CloseWindow();
 }
@@ -86,9 +78,5 @@ void Game::draw() {
 }
 
 void Game::checkCollisions() {
-	for (auto& tile : tiles) {
-		if (player.checkCollision(tile)) {
-			player.onCollision(&tile);
-		}
-	}
+	level.checkCollision(player);
 }

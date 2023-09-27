@@ -3,6 +3,8 @@
 #include <vector>
 #include "tile.h"
 
+class Player;
+
 static const unsigned tileSize = 64;
 static const unsigned levelSizeX = 2000;
 static const unsigned levelSizeY = 1000;
@@ -21,6 +23,8 @@ class Level {
         void calcCords();
 
         void render();
+
+        void checkCollision(Player& pl);
 
         ~Level();
 

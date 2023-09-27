@@ -1,5 +1,6 @@
 #include "player.h"
 #include "tile.h"
+#include "level.h"
 
 Player::Player(Vec2 pos, Vec2 size): Entity(pos, size) { }
 
@@ -19,7 +20,7 @@ Player& Player::spawn(Vec2 pos, Vec2 size) {
 void Player::update() {
     physics.accel = Vec2(0, 0);
     renderer.setMain("idle", RendererType::TEXTURE);
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyDown(KEY_SPACE)) {// починить
         if(physics.onGround) {
             startY = pos.y;
             physics.speed.y = -20;
@@ -64,7 +65,10 @@ void Player::setLevel(Level* level) {
 }
 
 void Player::onCollision(Tile* other) {
-    if((physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {
+    if(other->getId() == 0) {
+        return;
+    }
+    if((physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {// gjxbybnm
         physics.speed.y = 0;
         physics.onGround = true;
         pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;

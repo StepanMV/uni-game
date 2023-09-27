@@ -1,8 +1,8 @@
 #include "level.h"
+#include "player.h"
 #include <fstream>
 
 //posX, posY, sizeX, sizeY, id, form
-#include <iostream>
 Level::Level(): startRenderX(0), endRenderX(0), startRenderY(0), endRenderY(0) {
     tiles.resize(levelSizeY);
     for(int i = 0; i < levelSizeY; i++) {
@@ -23,11 +23,11 @@ void Level::loadLevel(std::string filename) {
         //error
         return;
     }
-    int posX, posY, sizeX, sizeY, id, form;
+    double posX, posY, sizeX, sizeY, id, form;
     while(inf) {
         inf >> posX >> posY >> sizeX >> sizeY >> id >> form;
         tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(sizeX, sizeY)).setId(id).setForm(form);
-        tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
+        tiles[(int)posY / tileSize][(int)posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
     }
     inf.close();
 }
@@ -57,7 +57,7 @@ bool Level::isTile(const Tile& tile) const {
     return tiles[tile.getPos().y / tileSize][tile.getPos().x / tileSize].getId() != 0;
 }
 
-void Level::placeTile(const Tile& tile) {//&?
+void Level::placeTile(const Tile& tile) {
     if(isTile(tile)) {
         return;
     }
@@ -79,10 +79,10 @@ void Level::breakTile(const Tile& tile) {
 }
 
 void Level::calcCords() {
-    startRenderY = (camera->target.y - 2 * camera->offset.y) / tileSize;
-    endRenderY = (camera->target.y + 2 * camera->offset.y) / tileSize;
-    startRenderX = (camera->target.x - 2 * camera->offset.x) / tileSize;
-    endRenderX = (camera->target.x + 2 * camera->offset.x) / tileSize;
+    startRenderY = (camera->target.y - camera->offset.y / camera->zoom) / tileSize;
+    endRenderY = (camera->target.y + camera->offset.y / camera->zoom) / tileSize;
+    startRenderX = (camera->target.x - camera->offset.x / camera->zoom) / tileSize;
+    endRenderX = (camera->target.x + camera->offset.x / camera->zoom) / tileSize;
 }
 
 void Level::render() {
@@ -107,6 +107,16 @@ void Level::render() {
     }
 }
 
+void Level::checkCollision(Player& pl) {
+    for(int i = startRenderY; i < endRenderY; i++) {
+        for(int j = startRenderX; j < endRenderX; j++) {
+            if(pl.checkCollision(tiles[i][j])) {
+                pl.onCollision(&tiles[i][j]);
+            }
+        }
+    }
+}
+
 Level::~Level() {
-    //saveLevel("resources/levels/level.txt");
+    //saveLevel("a.txt");
 }

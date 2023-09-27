@@ -9,7 +9,7 @@ class Player: public Entity {
         Player(Vec2 pos, Vec2 size);
 
         virtual Player& spawn(Vec2 pos, Vec2 size) override;
-        //void placeTile();
+
         void setLevel(Level* level);
 
         virtual void update() override;
