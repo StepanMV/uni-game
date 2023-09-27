@@ -18,6 +18,7 @@ void Level::setCamera(const Camera2D* camera) {
 }
 
 void Level::loadLevel(std::string filename) {
+    this->filename = filename;
     std::ifstream inf(filename);
     if(!inf) {
         //error
@@ -27,7 +28,7 @@ void Level::loadLevel(std::string filename) {
     while(inf) {
         inf >> posX >> posY >> sizeX >> sizeY >> id >> form;
         tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(sizeX, sizeY)).setId(id).setForm(form);
-        tiles[(int)posY / tileSize][(int)posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
+        tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
     }
     inf.close();
 }
@@ -53,29 +54,31 @@ void Level::saveLevel(std::string filename) {
     outf.close();
 }
 
-bool Level::isTile(const Tile& tile) const {
-    return tiles[tile.getPos().y / tileSize][tile.getPos().x / tileSize].getId() != 0;
+bool Level::isTile(Vector2 pos) const {
+    return tiles[pos.y / tileSize][pos.x / tileSize].getId() != 0;
 }
 
 void Level::placeTile(const Tile& tile) {
-    if(isTile(tile)) {
-        return;
-    }
     Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), *camera);
     if(pos.x < 0 || pos.y < 0 || pos.x > levelSizeX * tileSize || pos.y > levelSizeY * tileSize) {
         return;
     }
+    if(isTile(pos)) {
+        return;
+    }
     tiles[pos.y / tileSize][pos.x / tileSize] = tile;
-    tiles[pos.y / tileSize][pos.x / tileSize].setId(1).spawn(Vec2(pos.x - (int)pos.x % tileSize, pos.y - (int)pos.y % tileSize), tile.getSize());
+    tiles[pos.y / tileSize][pos.x / tileSize].setId(1).spawn(Vec2((int)pos.x - (int)pos.x % tileSize + tileSize / 2, (int)pos.y - (int)pos.y % tileSize + tileSize / 2), tile.getSize());
 }
 
 void Level::breakTile(const Tile& tile) {
-    if(!isTile(tile)) {
+    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), *camera);
+    if(pos.x < 0 || pos.y < 0 || pos.x > levelSizeX * tileSize || pos.y > levelSizeY * tileSize) {
         return;
     }
-    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), *camera);
-    tiles[pos.y / tileSize][pos.x / tileSize] = Tile(Vec2(tile.getPos().x, tile.getPos().y), Vec2(tileSize, tileSize)).setId(0).setForm(0);
-    //tiles[tile.getPos().x / tileSize][tile.getPos().y / tileSize] = Tile(Vec2(tile.getPos().x, tile.getPos().y), Vec2(tileSize, tileSize)).setId(0).setForm(0);
+    if(!isTile(pos)) {
+        return;
+    }
+    tiles[pos.y / tileSize][pos.x / tileSize].setId(0).setForm(0);
 }
 
 void Level::calcCords() {
@@ -118,5 +121,5 @@ void Level::checkCollision(Player& pl) {
 }
 
 Level::~Level() {
-    //saveLevel("a.txt");
+    saveLevel(filename);
 }

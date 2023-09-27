@@ -16,7 +16,7 @@ class Level {
         void loadLevel(std::string filename);
         void saveLevel(std::string filename);
 
-        bool isTile(const Tile& tile) const;
+        bool isTile(Vector2 localPos) const;
         void placeTile(const Tile& tile);
         void breakTile(const Tile& tile);
 
@@ -29,6 +29,7 @@ class Level {
         ~Level();
 
     private:
+        std::string filename;
         unsigned long startRenderX, endRenderX, startRenderY, endRenderY;
         const Camera2D* camera;
         std::vector<std::vector<Tile>> tiles;

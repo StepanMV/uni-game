@@ -20,7 +20,7 @@ Player& Player::spawn(Vec2 pos, Vec2 size) {
 void Player::update() {
     physics.accel = Vec2(0, 0);
     renderer.setMain("idle", RendererType::TEXTURE);
-    if (IsKeyDown(KEY_SPACE)) {// починить
+    if (IsKeyDown(KEY_SPACE)) {
         if(physics.onGround) {
             startY = pos.y;
             physics.speed.y = -20;
@@ -75,6 +75,7 @@ void Player::onCollision(Tile* other) {
     }
     else if((physics.speed.y < 0) && (pos.y - size.y / 2 > other->getPos().y)){
         physics.speed.y = 0;
+        physics.fly = false;
         pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2;
     }
     else if((physics.speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x)) {

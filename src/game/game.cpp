@@ -33,7 +33,6 @@ void Game::loadLevel() {
 
 Game::~Game() noexcept
 {
-	level.saveLevel("../../saves/level.txt");
 	Renderer::unloadTextures();
 	CloseWindow();
 }
