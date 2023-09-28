@@ -1,6 +1,11 @@
 #include "tile.h"
 
-Tile::Tile(Vec2 pos, Vec2 size) : Object(pos, size) { }
+Tile::Tile(Vec2 pos, Vec2 size, bool _isUp, bool _isDown , bool _isLeft, bool _isRight) : 
+Object(pos, size), 
+isUp(_isUp), 
+isDown(_isDown),
+isLeft(_isLeft),
+isRight(_isRight) { }
 
 Tile& Tile::spawn(Vec2 pos, Vec2 size) {
     if(id == 0) {

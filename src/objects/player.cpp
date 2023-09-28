@@ -20,22 +20,24 @@ Player& Player::spawn(Vec2 pos, Vec2 size) {
 void Player::update() {
     physics.accel = Vec2(0, 0);
     renderer.setMain("idle", RendererType::TEXTURE);
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE)) {
         if(physics.onGround) {
             startY = pos.y;
             physics.speed.y = -20;
             physics.onGround = false;
-            physics.fly = true;
+            physics.jump = true;
         }
-        if((startY - pos.y <= 400) && (physics.fly)) {
+    }
+    if(IsKeyDown(KEY_SPACE)) {
+        if((startY - pos.y <= 400) && (physics.jump)) {
             physics.accel += Vec2(0, -2.5);
         }
         else {
-            physics.fly = false;
+            physics.jump = false;
         }
     }
     else if(IsKeyReleased(KEY_SPACE)) {
-        physics.fly = false;
+        physics.jump = false;
     }
     if (IsKeyDown(KEY_A)) {
         renderer.setMain("move_left", RendererType::ANIMATION);
@@ -48,12 +50,12 @@ void Player::update() {
     if(IsKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(tileSize, tileSize));
         level->placeTile(tile);
     }
-    if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
+    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(tileSize, tileSize));
         level->breakTile(tile);
     }
     physics.applyAccel();
@@ -68,32 +70,32 @@ void Player::onCollision(Tile* other) {
     if(other->getId() == 0) {
         return;
     }
-    if((physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {// gjxbybnm
+    if((!other->isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {
         physics.speed.y = 0;
         physics.onGround = true;
         pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
     }
-    else if((physics.speed.y < 0) && (pos.y - size.y / 2 > other->getPos().y)){
+    else if((!other->isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other->getPos().y)){
         physics.speed.y = 0;
-        physics.fly = false;
-        pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2;
+        physics.jump = false;
+        pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
     }
-    else if((physics.speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x)) {
-        if(pos.y + size.y / 6 < other->getPos().y - other->getSize().y / 2) {
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+    else if((!other->isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x)) {
+        if(pos.y <= other->getPos().y - other->getSize().y / 2) {
+             pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2;
         }
         else {
             physics.speed.x = 0;
-            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2;
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    else if((physics.speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x)) {
-        if(pos.y + size.y / 6 < other->getPos().y - other->getSize().y / 2) {
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+    else if((!other->isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x)) {
+        if(pos.y <= other->getPos().y - other->getSize().y / 2) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2;
         }
         else {
             physics.speed.x = 0;
-            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2;
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
     }
 }

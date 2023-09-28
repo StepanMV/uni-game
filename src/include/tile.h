@@ -5,7 +5,7 @@
 class Tile: public Object {
     public:
         Tile() = default;
-        Tile(Vec2 pos, Vec2 size);
+        Tile(Vec2 pos, Vec2 size, bool _isUp = false, bool _isDown = false, bool _isRight = false, bool _isLeft = false);
         virtual Tile& spawn(Vec2 pos, Vec2 size) override;
         Tile& setId(unsigned long _id);
         Tile& setForm(unsigned _form);
@@ -14,6 +14,7 @@ class Tile: public Object {
         unsigned getForm() const;
 
         virtual void update() override;
+        bool isUp = false, isDown = false, isLeft = false, isRight = false;
     private:
         unsigned long id = 1;
         unsigned form = 1;

@@ -24,7 +24,7 @@ void Game::loadLevel() {
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 0.5f;
-	player.spawn(Vec2(0, -200), Vec2(128, 40))
+	player.spawn(Vec2(0, -200), Vec2(128, 192))
 		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
 	level.loadLevel("../../saves/level.txt");

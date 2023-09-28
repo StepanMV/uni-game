@@ -13,7 +13,7 @@ class Physics {
         void applyAccel();
 
         Vec2 speed, accel;
-        bool onGround, fly;
+        bool onGround, jump;
 
     private:
         Vec2 frictionVec() const;
