@@ -2,8 +2,13 @@
 #include "player.h"
 #include <fstream>
 
+
+const unsigned Level::tileSize = 16;
+const unsigned Level::levelSizeX = 2000;
+const unsigned Level::levelSizeY = 1000;
+
 //posX, posY, sizeX, sizeY, id, form, isUp, isDown, isLeft, isRight
-Level::Level(): startRenderX(0), endRenderX(0), startRenderY(0), endRenderY(0) {
+Level::Level() {
     tiles.resize(levelSizeY);
     for(int i = 0; i < levelSizeY; i++) {
         tiles[i].resize(levelSizeX);
@@ -11,10 +16,6 @@ Level::Level(): startRenderX(0), endRenderX(0), startRenderY(0), endRenderY(0) {
             tiles[i][j] = Tile(Vec2(i * tileSize, j * tileSize), Vec2(tileSize, tileSize)).setId(0).setForm(0);
         }
     }
-}
-
-void Level::setCamera(const Camera2D* camera) {
-    this->camera = camera;
 }
 
 void Level::loadLevel(std::string filename) {
@@ -33,6 +34,15 @@ void Level::loadLevel(std::string filename) {
         tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
     }
     inf.close();
+    
+    camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+    camera.target = Vector2{0, 0};
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+
+	player.spawn(Vec2(0, -200), Vec2(32, 48))
+		.setMaxSpeeds(50, 30, 20)
+		.setForces(0.75, 0.5);
 }
 
 void Level::saveLevel(std::string filename) {
@@ -84,7 +94,7 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
 }
 
 void Level::placeTile(const Tile& tile) {
-    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), *camera);
+    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
     if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
         return;
     }
@@ -99,7 +109,7 @@ void Level::placeTile(const Tile& tile) {
 }
 
 void Level::breakTile(const Tile& tile) {
-    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), *camera);
+    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
     if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
         return;
     }
@@ -113,13 +123,18 @@ void Level::breakTile(const Tile& tile) {
 }
 
 void Level::calcCords() {
-    startRenderY = (camera->target.y - camera->offset.y / camera->zoom) / tileSize - 5;
-    endRenderY = (camera->target.y + camera->offset.y / camera->zoom) / tileSize + 5;
-    startRenderX = (camera->target.x - camera->offset.x / camera->zoom) / tileSize - 5;
-    endRenderX = (camera->target.x + camera->offset.x / camera->zoom) / tileSize + 5;
+    startRenderY = (camera.target.y - camera.offset.y / camera.zoom) / tileSize - 5;
+    endRenderY = (camera.target.y + camera.offset.y / camera.zoom) / tileSize + 5;
+    startRenderX = (camera.target.x - camera.offset.x / camera.zoom) / tileSize - 5;
+    endRenderX = (camera.target.x + camera.offset.x / camera.zoom) / tileSize + 5;
 }
 
 void Level::render() {
+    BeginMode2D(camera);
+    
+    this->calcCords();
+    player.render();
+
     if(startRenderX < 0) {
         startRenderX = 0;
     }
@@ -139,6 +154,15 @@ void Level::render() {
             }
         }
     }
+
+    EndMode2D();
+}
+
+void Level::update() {
+	player.move();
+    camera.target = player.getPos().toRaylib();
+    player.update();
+    this->checkCollision(player);
 }
 
 void Level::checkCollision(Player& pl) {

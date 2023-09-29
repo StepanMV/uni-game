@@ -31,9 +31,5 @@ private:
 
 	void checkCollisions();
 
-    Camera2D camera;
-	Level level = Level();
-	Player player;
-	Texture2D background;
-	std::vector<Tile> tiles;
+	Level level;
 };

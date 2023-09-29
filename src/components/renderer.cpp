@@ -1,7 +1,5 @@
 #include "renderer.h"
 
-#include <iostream>
-
 std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
 std::unordered_map<std::string, Image> Renderer::texturesRAM;
 
@@ -30,10 +28,8 @@ std::shared_ptr<Texture2D> Renderer::getFromVRAM(std::string filename, bool flip
         auto texturePtr = std::shared_ptr<Texture2D>(new Texture2D(LoadTextureFromImage(texturesRAM[filename])), [](Texture2D* texture) { UnloadTexture(*texture); });
         if (flipped) ImageFlipHorizontal(&texturesRAM[filename]);
         texturesVRAM.emplace(textureName, std::weak_ptr<Texture2D>(texturePtr));
-        std::cout << "Loaded texture " << filename << "Usages: " << texturePtr.use_count() << std::endl;
         return texturePtr;
     } else {
-        std::cout << "Using loaded texture " << filename << " with " << texturesVRAM[textureName].use_count() << " usages, expired" << texturesVRAM[textureName].expired() << std::endl;
         return texturesVRAM[textureName].lock();
     }
 }
