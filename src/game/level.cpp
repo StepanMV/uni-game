@@ -2,12 +2,15 @@
 #include "player.h"
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
-const unsigned Level::tileSize = 64;
+const unsigned Level::tileSize = 16;
 const unsigned Level::levelSizeX = 2000;
 const unsigned Level::levelSizeY = 1000;
+//функция преобразования координат
+//проверка выхода за пределы карты
 
-//posX, posY, sizeX, sizeY, id, form, isUp, isDown, isLeft, isRight
+//posX, posY, id, form, isUp, isDown, isLeft, isRight
 Level::Level() {
     tiles.resize(levelSizeY);
     for(int i = 0; i < levelSizeY; i++) {
@@ -18,48 +21,46 @@ Level::Level() {
     }
 }
 
-void Level::load(std::string filename) {
-    // Нужно убрать в отдельный метод
-    // ==============================
+void Level::loadLevelFile(std::string filename) {
     this->filename = filename;
     std::ifstream inf(filename);
     if(inf) {
         unsigned idY, idX;
-        unsigned posX, posY, sizeX, sizeY, id, form;
+        unsigned posX, posY, id, form;
         bool isUp, isDown, isLeft, isRight;
         while(inf) {
-            inf >> posX >> posY >> sizeX >> sizeY >> id >> form >> isUp >> isDown >> isLeft >> isRight;
-            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(sizeX, sizeY), isUp, isDown, isLeft, isRight).setId(id).setForm(form);
-            tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
+            inf >> posX >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight;
+            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(tileSize, tileSize), isUp, isDown, isLeft, isRight).setId(id).setForm(form);
+            tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(tileSize, tileSize));
         }
         inf.close();
     }
-    // ==============================
-    
+}
+
+void Level::load(std::string filename) {
+    loadLevelFile(filename);
     camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
-    camera.zoom = 0.25f;
+    camera.zoom = 1.f;
 
 	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
 		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
 }
 
-void Level::save(std::string filename) {
-    // тут должен быть код для создания папки и файла, если их нет
-    std::ofstream outf(filename);
+void Level::save(std::string filepath) {
+    std::string dirpath = filepath.substr(0, filepath.rfind('/'));
+    std::filesystem::create_directories(dirpath);
+    std::ofstream outf(filepath);
     if(!outf) {
-        // лучше кидать exception, будет сразу понятно что что-то не так
-        return;
+        throw std::runtime_error("Open file error");
     }
     for (int i = 0; i < levelSizeY; i++) {
         for (int j = 0; j < levelSizeX; j++) {
             if (tiles[i][j].getId() != 0) {
                 outf << tiles[i][j].getPos().x << " " 
                 << tiles[i][j].getPos().y << " " 
-                << tiles[i][j].getSize().x << " " // зочем?
-                << tiles[i][j].getSize().y << " "  // зочем?
                 << tiles[i][j].getId() << " " 
                 << tiles[i][j].getForm() << " "
                 << tiles[i][j].isUp << " " 
@@ -132,15 +133,6 @@ void Level::calcCords() {
     endRenderY = (camera.target.y + camera.offset.y / camera.zoom) / tileSize + 5;
     startRenderX = (camera.target.x - camera.offset.x / camera.zoom) / tileSize - 5;
     endRenderX = (camera.target.x + camera.offset.x / camera.zoom) / tileSize + 5;
-}
-
-void Level::render() {
-    BeginMode2D(camera);
-    
-    this->calcCords();
-    player.render();
-    // Можно перенести в Level::calcCords()
-    // ==============================
     if(startRenderX < 0) {
         startRenderX = 0;
     }
@@ -153,7 +145,13 @@ void Level::render() {
     if(endRenderY > levelSizeY) {
         endRenderY = levelSizeY;
     }
-    // ==============================
+}
+
+void Level::render() {
+    BeginMode2D(camera);
+    
+    this->calcCords();
+    player.render();
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
             if(tiles[i][j].getId() != 0) {

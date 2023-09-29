@@ -58,17 +58,17 @@ void Player::onCollision(Tile& other) {
     if(other.getId() == 0) {
         return;
     }
-    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y)) {
+    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
         physics.speed.y = 0;
         physics.onGround = true;
         pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
     }
-    else if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y)){
+    if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
         physics.speed.y = 0;
         physics.jump = false;
         pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
     }
-    else if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x)) {
+    if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
         if(pos.y <= other.getPos().y - other.getSize().y / 2) {
              pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
@@ -77,7 +77,7 @@ void Player::onCollision(Tile& other) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    else if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x)) {
+    if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
         if(pos.y <= other.getPos().y - other.getSize().y / 2) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
