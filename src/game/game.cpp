@@ -19,7 +19,7 @@ Game::Game(int width, int height, int fps, std::string title)
 void Game::loadLevel() {
 	Renderer::loadTextures("resources/textures");
 	Renderer::loadTextures("resources/sprites");
-	level.loadLevel("../../saves/level.txt");
+	level.load("../../saves/level.txt");
 }
 
 Game::~Game() noexcept
@@ -43,11 +43,11 @@ void Game::update() {
 	level.update();
 	
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(16, 16));
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
         level.placeTile(tile);
     }
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(16, 16));
+        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
         level.breakTile(tile);
     }
 }

@@ -11,8 +11,8 @@ class Entity: public Object {
 
         Entity(Vec2 pos, Vec2 size);
 
-        virtual void onCollision(Tile* other) = 0;
-        virtual void onCollision(Entity* other) = 0;
+        virtual void onCollision(Tile& other) = 0;
+        virtual void onCollision(Entity& other) = 0;
         
         //virtual void update() override;
         /*

@@ -1,9 +1,9 @@
 #include "level.h"
 #include "player.h"
 #include <fstream>
+#include <iostream>
 
-
-const unsigned Level::tileSize = 16;
+const unsigned Level::tileSize = 64;
 const unsigned Level::levelSizeX = 2000;
 const unsigned Level::levelSizeY = 1000;
 
@@ -18,37 +18,39 @@ Level::Level() {
     }
 }
 
-void Level::loadLevel(std::string filename) {
+void Level::load(std::string filename) {
+    // Нужно убрать в отдельный метод
+    // ==============================
     this->filename = filename;
     std::ifstream inf(filename);
-    if(!inf) {
-        //error
-        return;
+    if(inf) {
+        unsigned idY, idX;
+        unsigned posX, posY, sizeX, sizeY, id, form;
+        bool isUp, isDown, isLeft, isRight;
+        while(inf) {
+            inf >> posX >> posY >> sizeX >> sizeY >> id >> form >> isUp >> isDown >> isLeft >> isRight;
+            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(sizeX, sizeY), isUp, isDown, isLeft, isRight).setId(id).setForm(form);
+            tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
+        }
+        inf.close();
     }
-    unsigned idY, idX;
-    unsigned posX, posY, sizeX, sizeY, id, form;
-    bool isUp, isDown, isLeft, isRight;
-    while(inf) {
-        inf >> posX >> posY >> sizeX >> sizeY >> id >> form >> isUp >> isDown >> isLeft >> isRight;
-        tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(sizeX, sizeY), isUp, isDown, isLeft, isRight).setId(id).setForm(form);
-        tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(sizeX, sizeY));
-    }
-    inf.close();
+    // ==============================
     
     camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
+    camera.zoom = 0.25f;
 
-	player.spawn(Vec2(0, -200), Vec2(32, 48))
+	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
 		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
 }
 
-void Level::saveLevel(std::string filename) {
+void Level::save(std::string filename) {
+    // тут должен быть код для создания папки и файла, если их нет
     std::ofstream outf(filename);
     if(!outf) {
-        //error
+        // лучше кидать exception, будет сразу понятно что что-то не так
         return;
     }
     for (int i = 0; i < levelSizeY; i++) {
@@ -56,8 +58,8 @@ void Level::saveLevel(std::string filename) {
             if (tiles[i][j].getId() != 0) {
                 outf << tiles[i][j].getPos().x << " " 
                 << tiles[i][j].getPos().y << " " 
-                << tiles[i][j].getSize().x << " " 
-                << tiles[i][j].getSize().y << " " 
+                << tiles[i][j].getSize().x << " " // зочем?
+                << tiles[i][j].getSize().y << " "  // зочем?
                 << tiles[i][j].getId() << " " 
                 << tiles[i][j].getForm() << " "
                 << tiles[i][j].isUp << " " 
@@ -94,6 +96,8 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
 }
 
 void Level::placeTile(const Tile& tile) {
+    // Возможно проще будет преобразовать pos в позицию блока, а не в координаты
+    // Условие длинновато
     Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
     if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
         return;
@@ -109,6 +113,7 @@ void Level::placeTile(const Tile& tile) {
 }
 
 void Level::breakTile(const Tile& tile) {
+    // Тоже
     Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
     if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
         return;
@@ -134,7 +139,8 @@ void Level::render() {
     
     this->calcCords();
     player.render();
-
+    // Можно перенести в Level::calcCords()
+    // ==============================
     if(startRenderX < 0) {
         startRenderX = 0;
     }
@@ -147,6 +153,7 @@ void Level::render() {
     if(endRenderY > levelSizeY) {
         endRenderY = levelSizeY;
     }
+    // ==============================
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
             if(tiles[i][j].getId() != 0) {
@@ -162,19 +169,19 @@ void Level::update() {
 	player.move();
     camera.target = player.getPos().toRaylib();
     player.update();
-    this->checkCollision(player);
+    this->checkCollision();
 }
 
-void Level::checkCollision(Player& pl) {
+void Level::checkCollision() {
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
-            if(pl.checkCollision(tiles[i][j])) {
-                pl.onCollision(&tiles[i][j]);
+            if(player.checkCollision(tiles[i][j])) {
+                player.onCollision(tiles[i][j]);
             }
         }
     }
 }
 
 Level::~Level() {
-    saveLevel(filename);
+    save(filename);
 }

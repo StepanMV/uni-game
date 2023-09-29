@@ -14,8 +14,8 @@ class Level {
         Level(const Level& other) = delete;
         Level& operator=(const Level& other) = delete;
 
-        void loadLevel(std::string filename);
-        void saveLevel(std::string filename);
+        void load(std::string filename);
+        void save(std::string filename);
 
         bool isTile(Vector2 localPos) const;
         void placeTile(const Tile& tile);
@@ -26,7 +26,7 @@ class Level {
         void render();
         void update();
 
-        void checkCollision(Player& pl);
+        void checkCollision();
 
         ~Level();
 

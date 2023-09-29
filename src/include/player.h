@@ -10,8 +10,8 @@ class Player: public Entity {
         virtual Player& spawn(Vec2 pos, Vec2 size) override;
 
         virtual void update() override;
-        virtual void onCollision(Tile* other) override;
-        virtual void onCollision(Entity* other) override;
+        virtual void onCollision(Tile& other) override;
+        virtual void onCollision(Entity& other) override;
         /*
         virtual void move() override;
         void moveRight();

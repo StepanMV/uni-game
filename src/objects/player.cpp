@@ -54,40 +54,40 @@ void Player::update() {
     physics.onGround = false;
 }
 
-void Player::onCollision(Tile* other) {
-    if(other->getId() == 0) {
+void Player::onCollision(Tile& other) {
+    if(other.getId() == 0) {
         return;
     }
-    if((!other->isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y)) {
+    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y)) {
         physics.speed.y = 0;
         physics.onGround = true;
-        pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+        pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
     }
-    else if((!other->isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other->getPos().y)){
+    else if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y)){
         physics.speed.y = 0;
         physics.jump = false;
-        pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
+        pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
     }
-    else if((!other->isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x)) {
-        if(pos.y <= other->getPos().y - other->getSize().y / 2) {
-             pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2;
+    else if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x)) {
+        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
+             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
         else {
             physics.speed.x = 0;
-            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
+            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    else if((!other->isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x)) {
-        if(pos.y <= other->getPos().y - other->getSize().y / 2) {
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2;
+    else if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x)) {
+        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
+            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
         else {
             physics.speed.x = 0;
-            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
+            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
     }
 }
 
-void Player::onCollision(Entity* other) {
+void Player::onCollision(Entity& other) {
     
 }
