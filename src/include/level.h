@@ -28,11 +28,14 @@ class Level {
 
         void checkCollision();
 
+        void cameraOnBoard();
+
         ~Level();
 
         static const unsigned tileSize;
         static const unsigned levelSizeX;
         static const unsigned levelSizeY;
+        static const unsigned levelOffset;
 
     private:
         Player player;

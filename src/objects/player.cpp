@@ -29,7 +29,7 @@ void Player::update() {
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
-        if((startY - pos.y <= 400) && (physics.jump)) {
+        if((startY - pos.y <= 100) && (physics.jump)) {
             physics.accel += Vec2(0, -2.5);
         }
         else {
@@ -41,17 +41,39 @@ void Player::update() {
     }
     if (IsKeyDown(KEY_A)) {
         renderer.setMain("move_left", RendererType::ANIMATION);
-        physics.accel += Vec2(-1, 0);
+        physics.accel += Vec2(-0.3, 0);
     }
     if (IsKeyDown(KEY_D)) {
         renderer.setMain("move_right", RendererType::ANIMATION);
-        physics.accel += Vec2(1, 0);
+        physics.accel += Vec2(0.3, 0);
     }
     if(IsKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
     physics.applyAccel();
     physics.onGround = false;
+}
+
+void Player::onBoard() {
+    if(pos.x - size.x / 2 < Level::levelOffset * Level::tileSize) {
+        physics.speed.x = 0;
+        pos.x = Level::levelOffset * Level::tileSize + size.x / 2;
+    }
+    if(pos.y - size.y / 2 < Level::levelOffset * Level::tileSize) {
+        physics.speed.y = 0;
+        pos.y = Level::levelOffset * Level::tileSize + size.y / 2;
+        physics.jump = false;
+    }
+    if(pos.x + size.x / 2 > (Level::levelSizeX - Level::levelOffset) * Level::tileSize) {
+        physics.speed.x = 0;
+        pos.x = (Level::levelSizeX - Level::levelOffset) * Level::tileSize - size.x / 2;
+    }
+    if(pos.y + size.y / 2 > (Level::levelSizeY - Level::levelOffset) * Level::tileSize)
+    {
+        physics.speed.y = 0;
+        pos.y = (Level::levelSizeY - Level::levelOffset) * Level::tileSize - size.y / 2;
+        physics.onGround = true;
+    }
 }
 
 void Player::onCollision(Tile& other) {
@@ -69,8 +91,8 @@ void Player::onCollision(Tile& other) {
         pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
     }
     if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
-        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
-             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
+        if((!other.isUp) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
+            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
         else {
             physics.speed.x = 0;
@@ -78,7 +100,7 @@ void Player::onCollision(Tile& other) {
         }
     }
     if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
-        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
+        if((!other.isUp) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
         }
         else {

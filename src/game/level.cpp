@@ -7,8 +7,7 @@
 const unsigned Level::tileSize = 16;
 const unsigned Level::levelSizeX = 2000;
 const unsigned Level::levelSizeY = 1000;
-//функция преобразования координат
-//проверка выхода за пределы карты
+const unsigned Level::levelOffset = 50;
 
 //posX, posY, id, form, isUp, isDown, isLeft, isRight
 Level::Level() {
@@ -45,8 +44,8 @@ void Level::load(std::string filename) {
     camera.zoom = 1.f;
 
 	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
-		.setMaxSpeeds(50, 30, 20)
-		.setForces(0.75, 0.5);
+		.setMaxSpeeds(15, 10, 8)
+		.setForces(0.75, 0.1);
 }
 
 void Level::save(std::string filepath) {
@@ -96,34 +95,49 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
     }
 }
 
+void Level::cameraOnBoard() {
+    if(camera.target.x - camera.offset.x < tileSize * levelOffset) {
+        camera.target.x = tileSize * levelOffset + camera.offset.x;
+    }
+    if(camera.target.y - camera.offset.y < tileSize * levelOffset) {
+        camera.target.y = tileSize * levelOffset + camera.offset.y;
+    }
+    if(camera.target.x + camera.offset.x > (levelSizeX - levelOffset) * tileSize) {
+        camera.target.x = (levelSizeX - levelOffset) * tileSize - camera.offset.x;
+    }
+    if(camera.target.y + camera.offset.y > (levelSizeY - levelOffset) * tileSize) {
+        camera.target.y = (levelSizeY - levelOffset) * tileSize - camera.offset.y;
+    }
+}
+
 void Level::placeTile(const Tile& tile) {
-    // Возможно проще будет преобразовать pos в позицию блока, а не в координаты
-    // Условие длинновато
     Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
-    if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
+    unsigned idX = pos.x / tileSize;
+    unsigned idY = pos.y / tileSize;
+    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) {
         return;
     }
     if(isTile(pos)) {
         return;
     }
-    unsigned idX = pos.x / tileSize;
-    unsigned idY = pos.y / tileSize;
+    if(player.checkCollision(Tile(Vec2(pos.x, pos.y), Vec2(tileSize, tileSize)))) {
+        return;
+    }
     tiles[idY][idX] = tile;
     setLocalPos(tiles, idY, idX, true);
     tiles[idY][idX].setId(1).spawn(Vec2((int)pos.x - (int)pos.x % tileSize + tileSize / 2, (int)pos.y - (int)pos.y % tileSize + tileSize / 2), tile.getSize());
 }
 
 void Level::breakTile(const Tile& tile) {
-    // Тоже
     Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
-    if(pos.x < tileSize || pos.y < tileSize || pos.x > (levelSizeX - 1) * tileSize || pos.y > (levelSizeY - 1) * tileSize) {
+    unsigned idX = pos.x / tileSize;
+    unsigned idY = pos.y / tileSize;
+    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) {
         return;
     }
     if(!isTile(pos)) {
         return;
     }
-    unsigned idX = pos.x / tileSize;
-    unsigned idY = pos.y / tileSize;
     setLocalPos(tiles, idY, idX, false);
     tiles[idY][idX].setId(0).setForm(0);
 }
@@ -166,6 +180,8 @@ void Level::render() {
 void Level::update() {
 	player.move();
     camera.target = player.getPos().toRaylib();
+    cameraOnBoard();
+    player.onBoard();
     player.update();
     this->checkCollision();
 }

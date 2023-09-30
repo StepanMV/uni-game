@@ -12,6 +12,7 @@ class Player: public Entity {
         virtual void update() override;
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;
+        void onBoard();
         /*
         virtual void move() override;
         void moveRight();
@@ -22,5 +23,5 @@ class Player: public Entity {
         virtual void takeDamage() override;
         */
     private:
-        double startY = pos.y; // Не уверен что это здесь должно быть и должно ли вообще быть
+        double startY = pos.y;
 };
