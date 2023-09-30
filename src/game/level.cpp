@@ -1,7 +1,6 @@
 #include "level.h"
 #include "player.h"
 #include <fstream>
-#include <iostream>
 #include <filesystem>
 
 const unsigned Level::tileSize = 16;
@@ -45,7 +44,7 @@ void Level::load(std::string filename) {
 
 	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
 		.setMaxSpeeds(15, 10, 8)
-		.setForces(0.75, 0.1);
+		.setForces(0.75, 0.5);
 }
 
 void Level::save(std::string filepath) {
