@@ -6,20 +6,36 @@ Player::Player(Vec2 pos, Vec2 size): Entity(pos, size) { }
 
 Player& Player::spawn(Vec2 pos, Vec2 size) {
     Entity::spawn(pos, size);
-    renderer.loadAnimation("move_left", "resources/textures/NPC_188.png", 6, Vec2(34, 48));
-    renderer.loadTexture("idle", "resources/textures/Gore_16.png");
-    renderer.loadTextureAtlas("idk_atlas", "resources/textures/Item_521.png", Vec2(22, 28));
-    renderer.loadAnimation("idk_anum", "resources/textures/Item_521.png", 6, Vec2(22, 28));
-    renderer.loadAnimation("idk_anum_flipped", "resources/textures/Item_521.png", 6, Vec2(22, 28), true);
-    renderer.loadAnimation("move_right", "resources/textures/NPC_188.png", 6, Vec2(34, 48), true);
-    renderer.setMain("idle", RendererType::TEXTURE);
-    renderer.setMain("idk_atlas", RendererType::TEXTURE_ATLAS, Vec2(0, 0));
+    renderer.loadTexture("legs", "resources/textures/Armor_Legs_3.png");
+    renderer.loadTexture("head", "resources/textures/Armor_Head_3.png");
+    renderer.loadTexture("other", "resources/textures/Armor_3.png");
+
+    renderer.addToState("idle", "head").spriteSheet({1, 20}, {0, 0}); // голова
+    renderer.addToState("idle", "legs").spriteSheet({1, 20}, {0, 0}); // ноги
+    renderer.addToState("idle", "other").spriteSheet({9, 4}, {8, 0}); // задняя рука
+    renderer.addToState("idle", "other").spriteSheet({9, 4}, {0, 0}); // тело
+    renderer.addToState("idle", "other").spriteSheet({9, 4}, {7, 0}); // передняя рука
+    renderer.addToState("idle", "other").spriteSheet({9, 4}, {0, 1}); // плечо
+
+    renderer.addToState("move", "head").spriteSheet({1, 20}, {0, 0});
+    renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 28);
+    renderer.addToState("move", "other").animation({9, 4}, {3, 3}, {6, 3}, 8);
+    renderer.addToState("move", "other").spriteSheet({9, 4}, {0, 0});
+    renderer.addToState("move", "other").animation({9, 4}, {3, 1}, {6, 1}, 8);
+    renderer.addToState("move", "other").spriteSheet({9, 4}, {0, 1});
+
+    renderer.addToState("jump", "legs").spriteSheet({1, 20}, {0, 5}); // ноги
+    renderer.addToState("jump", "other").spriteSheet({9, 4}, {2, 3}); // задняя рука
+    renderer.addToState("jump", "other").spriteSheet({9, 4}, {1, 0}); // тело
+    renderer.addToState("jump", "head").spriteSheet({1, 20}, {0, 0}); // голова
+    renderer.addToState("jump", "other").spriteSheet({9, 4}, {2, 1}); // передняя рука
+
     return *this;
 }
 
 void Player::update() {
+    renderer.setState("idle");
     physics.accel = Vec2(0, 0);
-    renderer.setMain("idle", RendererType::TEXTURE);
     if (IsKeyPressed(KEY_SPACE)) {
         if(physics.onGround) {
             startY = pos.y;
@@ -29,6 +45,7 @@ void Player::update() {
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
+        renderer.setState("jump");
         if((startY - pos.y <= 400) && (physics.jump)) {
             physics.accel += Vec2(0, -2.5);
         }
@@ -40,11 +57,10 @@ void Player::update() {
         physics.jump = false;
     }
     if (IsKeyDown(KEY_A)) {
-        renderer.setMain("move_left", RendererType::ANIMATION);
         physics.accel += Vec2(-1, 0);
+        
     }
     if (IsKeyDown(KEY_D)) {
-        renderer.setMain("move_right", RendererType::ANIMATION);
         physics.accel += Vec2(1, 0);
     }
     if(IsKeyDown(KEY_W)) {
@@ -52,6 +68,11 @@ void Player::update() {
     }
     physics.applyAccel();
     physics.onGround = false;
+    if (physics.speed.x > 0) {
+        renderer.setState("move", false, physics.speed.x / 10);  
+    } else if (physics.speed.x < 0) {
+        renderer.setState("move", true, -physics.speed.x / 10);  
+    }
 }
 
 void Player::onCollision(Tile& other) {

@@ -13,13 +13,13 @@ Game::Game(int width, int height, int fps, std::string title)
 {	
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
-	ToggleFullscreen();
+	//ToggleFullscreen();
 }
 
 void Game::loadLevel() {
 	Renderer::loadTextures("resources/textures");
 	Renderer::loadTextures("resources/sprites");
-	level.load("../../saves/level.txt");
+	level.load("saves/level.txt");
 }
 
 Game::~Game() noexcept

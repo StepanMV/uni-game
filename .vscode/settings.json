@@ -54,6 +54,18 @@
         "map": "cpp",
         "fstream": "cpp",
         "sstream": "cpp",
-        "*.m": "cpp"
+        "*.m": "cpp",
+        "condition_variable": "cpp",
+        "ctime": "cpp",
+        "format": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "thread": "cpp",
+        "variant": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp"
     }
 }

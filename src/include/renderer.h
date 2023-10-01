@@ -6,18 +6,9 @@
 #include <vector>
 
 #include "cppshader.h"
-#include "animation.h"
-#include "texture_atlas.h"
+#include "texture_state.h"
 #include "raylib.h"
 #include "vec2.h"
-
-enum class RendererType {
-    TEXTURE,
-    ANIMATION,
-    TEXTURE_ATLAS
-};
-
-
 
 class Renderer {
 public:
@@ -29,15 +20,11 @@ public:
     static void loadTextures(std::string folder);
     static void unloadTextures();
 
-    void loadTexture(std::string ID, std::string filename, bool alsoFlipped = false);
-    void loadTextureAtlas(std::string ID, std::string filename, Vec2 frameSize, bool alsoFlipped = false);
-    void loadAnimation(std::string ID, std::string filename, double fps, Vec2 frameSize, bool alsoFlipped = false);
+    // Для инициализации
+    void loadTexture(std::string ID, std::string filename);
+    TextureState& addToState(std::string stateID, std::string textureID);
 
-    void setMain(std::string ID, RendererType type, Vec2 pos = Vec2(0, 0));
-    void addExtra(std::string ID, RendererType type, Vec2 pos = Vec2(0, 0));
-    void removeExtra(std::string ID);
-    void clearExtra();
-
+    void setState(std::string ID, bool flipped = false, float speed = 1);
     void setRotation(double rotation);
     void setScale(double scale);
 
@@ -45,24 +32,19 @@ public:
 
 private:
     std::shared_ptr<Texture2D> getFromVRAM(std::string filename, bool flipped = false);
-    void draw(std::string ID, RendererType type, Vec2 atlasPos);
 
     Vec2* pos;
     Vec2* size;
     double rotation = 0;
     double scale = 1;
 
-    std::string mainTextureID;
-    RendererType mainTextureType;
-    Vec2 mainTextureAtlasPos;
+    std::string currentStateID = "";
+    bool currentStateFlipped = false;
+    float animationSpeed = 0;
 
-    std::vector<std::string> extraTextureIDs;
-    std::vector<RendererType> extraTextureTypes;
-    std::vector<Vec2> extraTextureAtlasPoses;
-
-    std::unordered_map<std::string, Animation> animations;
-    std::unordered_map<std::string, TextureAtlas> textureAtlases; // Sprite sheets
+    std::unordered_map<std::string, std::vector<TextureState>> objectStates;
     std::unordered_map<std::string, std::shared_ptr<Texture2D>> textures;
+    std::unordered_map<std::string, std::shared_ptr<Texture2D>> flippedTextures;
 
     static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;
     static std::unordered_map<std::string, Image> texturesRAM;

@@ -13,7 +13,8 @@ Tile& Tile::spawn(Vec2 pos, Vec2 size) {
     }
     Object::spawn(pos, size);
     renderer.loadTexture("testTile", "resources/sprites/block.png");
-    renderer.setMain("testTile", RendererType::TEXTURE);
+    renderer.addToState("main", "testTile");
+    renderer.setState("main");
     return *this;
 }
 

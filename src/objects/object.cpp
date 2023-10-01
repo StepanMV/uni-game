@@ -3,8 +3,7 @@
 
 Object::Object(Vec2 pos, Vec2 size) : pos(pos), size(size), renderer(&this->pos, &this->size) { }
 
-Object::Object(const Object& other) : pos(other.pos), size(other.size)
-    {
+Object::Object(const Object& other) : pos(other.pos), size(other.size) {
         this->renderer = other.renderer;
         this->renderer.changeObject(&this->pos, &this->size);
     }

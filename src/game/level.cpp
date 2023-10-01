@@ -41,7 +41,7 @@ void Level::load(std::string filename) {
     camera.rotation = 0.0f;
     camera.zoom = 0.25f;
 
-	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
+	player.spawn(Vec2(500 * tileSize, 500 * tileSize), Vec2(tileSize * 2, tileSize * 3))
 		.setMaxSpeeds(50, 30, 20)
 		.setForces(0.75, 0.5);
 }
@@ -163,6 +163,8 @@ void Level::render() {
     }
 
     EndMode2D();
+    DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
+    DrawText(std::to_string(player.getPos().y / tileSize).c_str(), 10, 70, 20, RED);
 }
 
 void Level::update() {
