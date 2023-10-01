@@ -4,8 +4,8 @@
 #include <filesystem>
 
 const unsigned Level::tileSize = 16;
-const unsigned Level::levelSizeX = 2000;
-const unsigned Level::levelSizeY = 1000;
+const unsigned Level::levelSizeX = 2100;
+const unsigned Level::levelSizeY = 1100;
 const unsigned Level::levelOffset = 50;
 
 //posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
@@ -27,7 +27,11 @@ void Level::loadLevelFile(std::string filename) {
         unsigned posX, posY, id, form;
         bool isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight;
         while(inf) {
-            inf >> posX >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
+            inf >> posX;
+            if(!inf) {
+                return;
+            }
+            inf >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
             tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(tileSize, tileSize), isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight).setId(id).setForm(form);
             tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(tileSize, tileSize));
         }
@@ -79,8 +83,8 @@ bool Level::isTile(Vector2 pos) const {
 
 void setClimb(std::vector<std::vector<Tile>>& tiles, unsigned idY, unsigned idX) {
     if(idY >= 3) {
-        tiles[idY][idX].canClimbLeft = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX - 1].getId() == 0);
-        tiles[idY][idX].canClimbRight = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX + 1].getId() == 0);
+        tiles[idY][idX].canClimbLeft = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX - 1].getId() == 0 && idY > Level::levelOffset + 2);
+        tiles[idY][idX].canClimbRight = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX + 1].getId() == 0 && idY > Level::levelOffset + 2);
     }
 }
 
