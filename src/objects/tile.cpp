@@ -1,11 +1,13 @@
 #include "tile.h"
 
-Tile::Tile(Vec2 pos, Vec2 size, bool _isUp, bool _isDown , bool _isLeft, bool _isRight) : 
+Tile::Tile(Vec2 pos, Vec2 size, bool _isUp, bool _isDown , bool _isLeft, bool _isRight, bool _canClimbLeft, bool _canClimbRight) : 
 Object(pos, size), 
 isUp(_isUp), 
 isDown(_isDown),
 isLeft(_isLeft),
-isRight(_isRight) { }
+isRight(_isRight),
+canClimbLeft(_canClimbLeft),
+canClimbRight(_canClimbRight) { }
 
 Tile& Tile::spawn(Vec2 pos, Vec2 size) {
     if(id == 0) {

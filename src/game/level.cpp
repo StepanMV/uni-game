@@ -8,7 +8,7 @@ const unsigned Level::levelSizeX = 2000;
 const unsigned Level::levelSizeY = 1000;
 const unsigned Level::levelOffset = 50;
 
-//posX, posY, id, form, isUp, isDown, isLeft, isRight
+//posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
 Level::Level() {
     tiles.resize(levelSizeY);
     for(int i = 0; i < levelSizeY; i++) {
@@ -25,10 +25,10 @@ void Level::loadLevelFile(std::string filename) {
     if(inf) {
         unsigned idY, idX;
         unsigned posX, posY, id, form;
-        bool isUp, isDown, isLeft, isRight;
+        bool isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight;
         while(inf) {
-            inf >> posX >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight;
-            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(tileSize, tileSize), isUp, isDown, isLeft, isRight).setId(id).setForm(form);
+            inf >> posX >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
+            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(tileSize, tileSize), isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight).setId(id).setForm(form);
             tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(tileSize, tileSize));
         }
         inf.close();
@@ -43,7 +43,7 @@ void Level::load(std::string filename) {
     camera.zoom = 1.f;
 
 	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
-		.setMaxSpeeds(15, 10, 8)
+		.setMaxSpeeds(10, 10, 8)
 		.setForces(0.75, 0.5);
 }
 
@@ -64,7 +64,9 @@ void Level::save(std::string filepath) {
                 << tiles[i][j].isUp << " " 
                 << tiles[i][j].isDown << " " 
                 << tiles[i][j].isLeft << " " 
-                << tiles[i][j].isRight << " " << std::endl;
+                << tiles[i][j].isRight << " " 
+                << tiles[i][j].canClimbLeft << " "
+                << tiles[i][j].canClimbRight << std::endl;
             }
         }
     }
@@ -73,6 +75,13 @@ void Level::save(std::string filepath) {
 
 bool Level::isTile(Vector2 pos) const {
     return tiles[pos.y / tileSize][pos.x / tileSize].getId() != 0;
+}
+
+void setClimb(std::vector<std::vector<Tile>>& tiles, unsigned idY, unsigned idX) {
+    if(idY >= 3) {
+        tiles[idY][idX].canClimbLeft = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX - 1].getId() == 0);
+        tiles[idY][idX].canClimbRight = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX + 1].getId() == 0);
+    }
 }
 
 void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned& idX, bool isAdded) {
@@ -92,6 +101,14 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
         tiles[idY][idX + 1].isLeft = isAdded;
         tiles[idY][idX].isRight = isAdded;
     }
+    if(isAdded) {
+        setClimb(tiles, idY, idX);
+    }
+    setClimb(tiles, idY + 1, idX);
+    setClimb(tiles, idY + 2, idX);
+    setClimb(tiles, idY + 3, idX);
+    setClimb(tiles, idY + 3, idX - 1);
+    setClimb(tiles, idY + 3, idX + 1);
 }
 
 void Level::cameraOnBoard() {
@@ -123,8 +140,8 @@ void Level::placeTile(const Tile& tile) {
         return;
     }
     tiles[idY][idX] = tile;
-    setLocalPos(tiles, idY, idX, true);
     tiles[idY][idX].setId(1).spawn(Vec2((int)pos.x - (int)pos.x % tileSize + tileSize / 2, (int)pos.y - (int)pos.y % tileSize + tileSize / 2), tile.getSize());
+    setLocalPos(tiles, idY, idX, true);
 }
 
 void Level::breakTile(const Tile& tile) {
@@ -137,8 +154,8 @@ void Level::breakTile(const Tile& tile) {
     if(!isTile(pos)) {
         return;
     }
-    setLocalPos(tiles, idY, idX, false);
     tiles[idY][idX].setId(0).setForm(0);
+    setLocalPos(tiles, idY, idX, false);
 }
 
 void Level::calcCords() {
