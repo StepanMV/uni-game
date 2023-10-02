@@ -41,15 +41,6 @@ void Game::tick() {
 void Game::update() {
 	
 	level.update();
-	
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
-        level.placeTile(tile);
-    }
-    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(64, 64));
-        level.breakTile(tile);
-    }
 }
 
 void Game::draw() {

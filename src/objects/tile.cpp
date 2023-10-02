@@ -1,34 +1,6 @@
 #include "tile.h"
 
-Tile::Tile(Vec2 pos, Vec2 size, bool _isUp, bool _isDown , bool _isLeft, bool _isRight) : 
-Object(pos, size), 
-isUp(_isUp), 
-isDown(_isDown),
-isLeft(_isLeft),
-isRight(_isRight) { }
-
-Tile& Tile::spawn(Vec2 pos, Vec2 size) {
-    if(id == 0) {
-        return *this;
-    }
-    Object::spawn(pos, size);
-    renderer.loadTexture("testTile", "resources/sprites/block.png");
-    renderer.addToState("main", "testTile");
-    renderer.setState("main");
-    return *this;
-}
-
-Tile& Tile::setId(unsigned long id) {
-    this->id = id;
-    return *this;
-}
-
-Tile& Tile::setForm(unsigned form) {
-    this->form = form;
-    return *this;
-}
-
-unsigned long Tile::getId() const {
+unsigned Tile::getId() const {
     return id;
 }
 
@@ -36,5 +8,53 @@ unsigned Tile::getForm() const {
     return form;
 }
 
-void Tile::update() {
+void Tile::update() { }
+
+void Tile::render() {
+    renderer.update(pos, size);
+    renderer.render();
+}
+
+TileBuilder TileBuilder::spawn(Vec2 pos, Vec2 size) {
+    TileBuilder builder;
+    builder.pos = pos;
+    builder.size = size;
+    return builder;
+}
+
+TileBuilder &TileBuilder::setNeighbors(bool up, bool down, bool left, bool right) {
+    this->up = up;
+    this->down = down;
+    this->left = left;
+    this->right = right;
+    return *this;
+}
+
+TileBuilder &TileBuilder::setID(unsigned id) {
+    this->id = id;
+    return *this;
+}
+
+TileBuilder &TileBuilder::setForm(unsigned form) {
+    this->form = form;
+    return *this;
+}
+
+Tile TileBuilder::build() const {
+    if (id == 0) return Tile();
+    Tile tile;
+    tile.pos = std::move(pos);
+    tile.size = std::move(size);
+
+    tile.id = id;
+    tile.form = form;
+    tile.isUp = up;
+    tile.isDown = down;
+    tile.isLeft = left;
+    tile.isRight = right;
+
+    tile.renderer.loadTexture("testTile", "resources/textures/Tiles_" + std::to_string(id) + ".png");
+    tile.renderer.addToState("main", "testTile").spriteSheet({16, 15}, {0, 0});
+    tile.renderer.setState("main");
+    return tile;
 }

@@ -13,9 +13,6 @@
 class Renderer {
 public:
     Renderer() = default;
-    Renderer(Vec2* pos, Vec2* size);
-
-    void changeObject(Vec2* pos, Vec2* size);
 
     static void loadTextures(std::string folder);
     static void unloadTextures();
@@ -28,13 +25,13 @@ public:
     void setRotation(double rotation);
     void setScale(double scale);
 
-    void update();
+    void update(const Vec2& pos, const Vec2& size);
+    void render();
 
 private:
     std::shared_ptr<Texture2D> getFromVRAM(std::string filename, bool flipped = false);
 
-    Vec2* pos;
-    Vec2* size;
+    Vec2 pos, size;
     double rotation = 0;
     double scale = 1;
 

@@ -3,17 +3,6 @@
 #include "cmath"
 #include "vec2.h"
 
-void Physics::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
-    this->maxMoveSpeed = maxMoveSpeed;
-    this->maxFallSpeed = maxFallSpeed;
-    this->maxFlySpeed = maxFlySpeed;
-}
-
-void Physics::setForces(double gravity, double friction) {
-    this->gravity = gravity;
-    this->friction = friction;
-}
-
 int sign(double a) {
     if(a > 0) {
         return 1;
@@ -34,7 +23,7 @@ Vec2 Physics::frictionVec() const {
     return Vec2(fricX, fricY);
 }
 
-void Physics::applyAccel() {
+Vec2& Physics::applyAccel() {
     speed += accel;
     speed += frictionVec();
     speed += Vec2(0, gravity);
@@ -48,4 +37,5 @@ void Physics::applyAccel() {
     if(speed.y < -maxFlySpeed) {
         speed.y = -maxFlySpeed;
     }
+    return speed;
 }

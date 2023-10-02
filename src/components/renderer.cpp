@@ -3,13 +3,6 @@
 std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
 std::unordered_map<std::string, Image> Renderer::texturesRAM;
 
-Renderer::Renderer(Vec2* pos, Vec2* size) : pos(pos), size(size) { }
-
-void Renderer::changeObject(Vec2* pos, Vec2* size) {
-    this->pos = pos;
-    this->size = size;
-}
-
 void Renderer::loadTextures(std::string folder) {
     auto list = LoadDirectoryFiles(folder.c_str());
     for (int i = 0; i < list.count; i++) texturesRAM.emplace(list.paths[i], LoadImage(list.paths[i]));
@@ -59,13 +52,18 @@ void Renderer::setScale(double scale) {
     this->scale = scale;
 }
 
-void Renderer::update() {
+void Renderer::update(const Vec2& pos, const Vec2& size) {
+    this->pos = pos;
+    this->size = size;
+}
+
+void Renderer::render() {
     if (currentStateID.empty()) return;
     for (auto& element : objectStates[currentStateID]) {
         std::string textureID = element.getTextureID();
         auto texture = currentStateFlipped ? flippedTextures[textureID] : textures[textureID];
         Rectangle source = element.getRect(currentStateFlipped);
-        Rectangle dest = Rectangle {(float) pos->x, (float) pos->y, (float) size->x, (float) size->y};
+        Rectangle dest = Rectangle {(float) pos.x, (float) pos.y, (float) size.x, (float) size.y};
         Vector2 origin = {dest.width / 2, dest.height / 2};
         DrawTexturePro(*texture, source, dest, origin, rotation, WHITE);
     }

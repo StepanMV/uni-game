@@ -1,7 +1,6 @@
 #include "texture_state.h"
 
 #include <stdexcept>
-#include <iostream>
 
 TextureState::TextureState(std::string textureID, Vec2 textureSize) {
     this->textureID = textureID;
@@ -49,7 +48,6 @@ Rectangle TextureState::getRect(bool flipped) {
                 frameSize.y
             };
         } else {
-            std::cout << frame << " " << fps << " " << startSpritePos.x << " " << endSpritePos.x << " " << textureID << std::endl;
             return Rectangle {
                 (startSpritePos.x + (flipped ? -frame : frame)) * frameSize.x,
                 startSpritePos.y * frameSize.y,

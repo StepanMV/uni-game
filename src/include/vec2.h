@@ -6,7 +6,7 @@ class Vec2 {
         Vec2() = default;
         Vec2(float _x, float _y);
 
-        Vector2 toRaylib();
+        Vector2 toRaylib() const;
 
         Vec2& operator+=(const Vec2& v);
         Vec2& operator-=(const Vec2& v);
