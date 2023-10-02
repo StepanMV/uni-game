@@ -101,7 +101,7 @@ void Player::onCollision(Tile& other) {
         }
         else {
             physics.speed.y = 0;
-            physics.jump = false;
+            physics.jumping = false;
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
     }

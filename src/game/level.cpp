@@ -32,7 +32,7 @@ void Level::loadLevelFile(std::string filename) {
                 return;
             }
             inf >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
-            tiles[posY / tileSize][posX / tileSize] = std::move(TileBuilder::spawn({posX, posY}, {tileSize, tileSize})
+            tiles[posY / tileSize][posX / tileSize] = std::move(TileBuilder::spawn({(float) posX, (float) posY}, {tileSize, tileSize})
                 .setID(id)
                 .setForm(form)
                 .setNeighbors(isUp, isDown, isLeft, isRight)
