@@ -14,7 +14,7 @@ void Player::update() {
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
-        if((startY - pos.y <= 400) && (physics.jumping)) {
+        if((startY - pos.y <= 100) && (physics.jumping)) {
             physics.accel += Vec2(0, -2.5);
         }
         else {
@@ -25,11 +25,11 @@ void Player::update() {
         physics.jumping = false;
     }
     if (IsKeyDown(KEY_A)) {
-        physics.accel += Vec2(-1, 0);
+        physics.accel += Vec2(-1.5, 0);
         
     }
     if (IsKeyDown(KEY_D)) {
-        physics.accel += Vec2(1, 0);
+        physics.accel += Vec2(1.5, 0);
     }
     if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
@@ -53,32 +53,76 @@ void Player::render() {
     renderer.render();
 }
 
+void Player::onBoard() {
+    if(pos.x - size.x / 2 < Level::levelOffset * Level::tileSize) {
+        physics.speed.x = 0;
+        pos.x = Level::levelOffset * Level::tileSize + size.x / 2;
+    }
+    if(pos.y - size.y / 2 < Level::levelOffset * Level::tileSize) {
+        physics.speed.y = 0;
+        pos.y = Level::levelOffset * Level::tileSize + size.y / 2;
+        physics.jumping = false;
+    }
+    if(pos.x + size.x / 2 > (Level::levelSizeX - Level::levelOffset) * Level::tileSize) {
+        physics.speed.x = 0;
+        pos.x = (Level::levelSizeX - Level::levelOffset) * Level::tileSize - size.x / 2;
+    }
+    if(pos.y + size.y / 2 > (Level::levelSizeY - Level::levelOffset) * Level::tileSize)
+    {
+        physics.speed.y = 0;
+        pos.y = (Level::levelSizeY - Level::levelOffset) * Level::tileSize - size.y / 2;
+        physics.onGround = true;
+    }
+}
+
 void Player::onCollision(Tile& other) {
     if(other.getId() == 0) {
         return;
     }
-    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y)) {
-        physics.speed.y = 0;
-        physics.onGround = true;
-        pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
+        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
+            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+        }
+        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
+            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        }
+        else {
+            physics.speed.y = 0;
+            physics.onGround = true;
+            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+        }
     }
-    else if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y)){
-        physics.speed.y = 0;
-        physics.jumping = false;
-        pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+    if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
+        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
+            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+        }
+        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
+            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        }
+        else {
+            physics.speed.y = 0;
+            physics.jump = false;
+            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        }
     }
-    else if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x)) {
-        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
-             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
+    if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
+        if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
+            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+        }
+        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
+            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics.speed.x = 0;
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    else if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x)) {
-        if(pos.y <= other.getPos().y - other.getSize().y / 2) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2;
+    if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
+        if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
+            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+        }
+        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
+            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics.speed.x = 0;

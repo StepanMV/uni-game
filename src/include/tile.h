@@ -12,6 +12,7 @@ public:
     virtual void render() override;
 
     bool isUp = false, isDown = false, isLeft = false, isRight = false;
+    bool canClimbLeft = true, canClimbRight = true;
 private:
     friend class TileBuilder;
 
