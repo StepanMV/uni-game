@@ -14,7 +14,7 @@ Level::Level() {
     for(int i = 0; i < levelSizeY; i++) {
         tiles[i].resize(levelSizeX);
         for(int j = 0; j < levelSizeX; j++) {
-            tiles[i][j] = Tile(Vec2(i * tileSize, j * tileSize), Vec2(tileSize, tileSize)).setId(0).setForm(0);
+            tiles[i][j] = Tile();
         }
     }
 }
@@ -32,8 +32,12 @@ void Level::loadLevelFile(std::string filename) {
                 return;
             }
             inf >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
-            tiles[posY / tileSize][posX / tileSize] = Tile(Vec2(posX, posY), Vec2(tileSize, tileSize), isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight).setId(id).setForm(form);
-            tiles[posY / tileSize][posX / tileSize].spawn(Vec2(posX, posY), Vec2(tileSize, tileSize));
+            tiles[posY / tileSize][posX / tileSize] = std::move(TileBuilder::spawn({(float) posX, (float) posY}, {tileSize, tileSize})
+                .setID(id)
+                .setForm(form)
+                .setNeighbors(isUp, isDown, isLeft, isRight)
+                .setClimb(canClimbLeft, canClimbRight)
+                .build());
         }
         inf.close();
     }
@@ -46,9 +50,13 @@ void Level::load(std::string filename) {
     camera.rotation = 0.0f;
     camera.zoom = 1.f;
 
-	player.spawn(Vec2(500, 500), Vec2(tileSize * 2, tileSize * 3))
-		.setMaxSpeeds(10, 10, 8)
-		.setForces(0.75, 0.5);
+    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, 500 * tileSize), Vec2(tileSize * 2, tileSize * 3))
+        .setMaxSpeeds(10, 10, 8)
+        .setForces(0.5, 0.75)
+        .setHeadTexture("resources/textures/Armor_Head_3.png")
+        .setBodyTexture("resources/textures/Armor_3.png")
+        .setLegsTexture("resources/textures/Armor_Legs_3.png")
+        .build());
 }
 
 void Level::save(std::string filepath) {
@@ -130,36 +138,30 @@ void Level::cameraOnBoard() {
     }
 }
 
-void Level::placeTile(const Tile& tile) {
-    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
-    unsigned idX = pos.x / tileSize;
-    unsigned idY = pos.y / tileSize;
-    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) {
-        return;
-    }
-    if(isTile(pos)) {
-        return;
-    }
-    if(player.checkCollision(Tile(Vec2(pos.x, pos.y), Vec2(tileSize, tileSize)))) {
-        return;
-    }
-    tiles[idY][idX] = tile;
-    tiles[idY][idX].setId(1).spawn(Vec2((int)pos.x - (int)pos.x % tileSize + tileSize / 2, (int)pos.y - (int)pos.y % tileSize + tileSize / 2), tile.getSize());
+void Level::placeTile(const Vec2 tilePos) {
+    unsigned idX = tilePos.x / tileSize;
+    unsigned idY = tilePos.y / tileSize;
+
+    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
+    if(isTile(tilePos.toRaylib())) return;
+
+    Tile tile = std::move(TileBuilder::spawn({(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).setID(1).build());
+
+    if(player.checkCollision(tile)) return;
+
+    tiles[idY][idX] = std::move(tile);
     setLocalPos(tiles, idY, idX, true);
 }
 
-void Level::breakTile(const Tile& tile) {
-    Vector2 pos = GetScreenToWorld2D(tile.getPos().toRaylib(), camera);
-    unsigned idX = pos.x / tileSize;
-    unsigned idY = pos.y / tileSize;
-    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) {
-        return;
-    }
-    if(!isTile(pos)) {
-        return;
-    }
-    tiles[idY][idX].setId(0).setForm(0);
+void Level::breakTile(const Vec2 tilePos) {
+    unsigned idX = tilePos.x / tileSize;
+    unsigned idY = tilePos.y / tileSize;
+
+    if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
+    if(!isTile(tilePos.toRaylib())) return;
+
     setLocalPos(tiles, idY, idX, false);
+    tiles[idY][idX] = std::move(Tile());
 }
 
 void Level::calcCords() {
@@ -195,6 +197,8 @@ void Level::render() {
     }
 
     EndMode2D();
+    DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
+    DrawText(std::to_string(player.getPos().y / tileSize).c_str(), 10, 70, 20, RED);
 }
 
 void Level::update() {
@@ -204,6 +208,15 @@ void Level::update() {
     player.onBoard();
     player.update();
     this->checkCollision();
+
+    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
+    Vec2 mp = {mousePos.x, mousePos.y};
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        placeTile(mp);
+    }
+    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+        breakTile(mp);
+    }
 }
 
 void Level::checkCollision() {

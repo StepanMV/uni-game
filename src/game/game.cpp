@@ -4,6 +4,7 @@
 #include "player.h"
 #include "tile.h"
 #include "renderer.h"
+#include "keyboard.h"
 
 #include <vector>
 #include <iostream>
@@ -13,7 +14,8 @@ Game::Game(int width, int height, int fps, std::string title)
 {	
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
-	ToggleFullscreen();
+	//ToggleFullscreen();
+	Keyboard::init();
 }
 
 void Game::loadLevel() {
@@ -39,17 +41,9 @@ void Game::tick() {
 }
 
 void Game::update() {
-	
+	Keyboard::update();
 	level.update();
-	
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(Level::tileSize, Level::tileSize));
-        level.placeTile(tile);
-    }
-    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-        Tile tile(Vec2(GetMouseX(), GetMouseY()), Vec2(Level::tileSize, Level::tileSize));
-        level.breakTile(tile);
-    }
+	if (Keyboard::isDoublePressed(KEY_F)) std::cout << "F" << std::endl;
 }
 
 void Game::draw() {

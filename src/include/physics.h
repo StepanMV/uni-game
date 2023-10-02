@@ -6,17 +6,14 @@ class Physics {
     public:
         Physics() = default;
 
-        void setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
-        void setForces(double gravity, double friction);
-
         //void target(int& x, int& y);
-        void applyAccel();
+        Vec2& calcSpeed();
 
         Vec2 speed, accel;
-        bool onGround, jump;
+        bool onGround, jumping;
+        double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
+        double friction, gravity;
 
     private:
         Vec2 frictionVec() const;
-        double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
-        double friction, gravity;
 };

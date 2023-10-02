@@ -18,8 +18,8 @@ class Level {
         void save(std::string filepath);
 
         bool isTile(Vector2 localPos) const;
-        void placeTile(const Tile& tile);
-        void breakTile(const Tile& tile);
+        void placeTile(const Vec2 tilePos);
+        void breakTile(const Vec2 tilePos);
 
         void calcCords();
 

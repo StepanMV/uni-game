@@ -1,57 +1,56 @@
 #include "player.h"
 #include "tile.h"
 #include "level.h"
-
-Player::Player(Vec2 pos, Vec2 size): Entity(pos, size) { }
-
-Player& Player::spawn(Vec2 pos, Vec2 size) {
-    Entity::spawn(pos, size);
-    renderer.loadAnimation("move_left", "resources/textures/NPC_188.png", 6, Vec2(34, 48));
-    renderer.loadTexture("idle", "resources/textures/Gore_16.png");
-    renderer.loadTextureAtlas("idk_atlas", "resources/textures/Item_521.png", Vec2(22, 28));
-    renderer.loadAnimation("idk_anum", "resources/textures/Item_521.png", 6, Vec2(22, 28));
-    renderer.loadAnimation("idk_anum_flipped", "resources/textures/Item_521.png", 6, Vec2(22, 28), true);
-    renderer.loadAnimation("move_right", "resources/textures/NPC_188.png", 6, Vec2(34, 48), true);
-    renderer.setMain("idle", RendererType::TEXTURE);
-    renderer.setMain("idk_atlas", RendererType::TEXTURE_ATLAS, Vec2(0, 0));
-    return *this;
-}
+#include "keyboard.h"
 
 void Player::update() {
     physics.accel = Vec2(0, 0);
-    renderer.setMain("idle", RendererType::TEXTURE);
     if (IsKeyPressed(KEY_SPACE)) {
         if(physics.onGround) {
             startY = pos.y;
             physics.speed.y = -20;
             physics.onGround = false;
-            physics.jump = true;
+            physics.jumping = true;
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
-        if((startY - pos.y <= 100) && (physics.jump)) {
+        if((startY - pos.y <= 100) && (physics.jumping)) {
             physics.accel += Vec2(0, -2.5);
         }
         else {
-            physics.jump = false;
+            physics.jumping = false;
         }
     }
     else if(IsKeyReleased(KEY_SPACE)) {
-        physics.jump = false;
+        physics.jumping = false;
     }
     if (IsKeyDown(KEY_A)) {
-        renderer.setMain("move_left", RendererType::ANIMATION);
         physics.accel += Vec2(-1.5, 0);
+        
     }
     if (IsKeyDown(KEY_D)) {
-        renderer.setMain("move_right", RendererType::ANIMATION);
         physics.accel += Vec2(1.5, 0);
     }
-    if(IsKeyDown(KEY_W)) {
+    if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
-    physics.applyAccel();
     physics.onGround = false;
+}
+
+void Player::render() {
+    renderer.update(pos, size);
+    renderer.setState("idle");
+
+    if (physics.speed.x > 0) {
+        renderer.setState("move", false, physics.speed.x / 10);  
+    } else if (physics.speed.x < 0) {
+        renderer.setState("move", true, -physics.speed.x / 10);
+    }
+
+    if (physics.jumping) {
+        renderer.setState("jump");
+    }
+    renderer.render();
 }
 
 void Player::onBoard() {
@@ -62,7 +61,7 @@ void Player::onBoard() {
     if(pos.y - size.y / 2 < Level::levelOffset * Level::tileSize) {
         physics.speed.y = 0;
         pos.y = Level::levelOffset * Level::tileSize + size.y / 2;
-        physics.jump = false;
+        physics.jumping = false;
     }
     if(pos.x + size.x / 2 > (Level::levelSizeX - Level::levelOffset) * Level::tileSize) {
         physics.speed.x = 0;
@@ -102,7 +101,7 @@ void Player::onCollision(Tile& other) {
         }
         else {
             physics.speed.y = 0;
-            physics.jump = false;
+            physics.jumping = false;
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
     }
@@ -134,4 +133,79 @@ void Player::onCollision(Tile& other) {
 
 void Player::onCollision(Entity& other) {
     
+}
+
+PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
+    PlayerBuilder builder;
+    builder.pos = pos;
+    builder.size = size;
+    return builder;
+}
+
+PlayerBuilder &PlayerBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
+    this->maxFallSpeed = maxFallSpeed;
+    this->maxFlySpeed = maxFlySpeed;
+    this->maxMoveSpeed = maxMoveSpeed;
+    return *this;
+}
+
+PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
+    this->friction = friction;
+    this->gravity = gravity;
+    return *this;
+}
+
+PlayerBuilder &PlayerBuilder::setHeadTexture(const std::string &texturePath) {
+    headTexturePath = texturePath;
+    return *this;
+}
+
+PlayerBuilder &PlayerBuilder::setLegsTexture(const std::string &texturePath) {
+    legsTexturePath = texturePath;
+    return *this;
+}
+
+PlayerBuilder &PlayerBuilder::setBodyTexture(const std::string &texturePath) {
+    bodyTexturePath = texturePath;
+    return *this;
+}
+
+Player PlayerBuilder::build() const
+{
+    Player player;
+
+    player.pos = std::move(pos);
+    player.size = std::move(size);
+
+    player.physics.maxMoveSpeed = maxMoveSpeed;
+    player.physics.maxFallSpeed = maxFallSpeed;
+    player.physics.maxFlySpeed = maxFlySpeed;
+    player.physics.friction = friction;
+    player.physics.gravity = gravity;
+
+    player.renderer.loadTexture("legs", legsTexturePath);
+    player.renderer.loadTexture("head", headTexturePath);
+    player.renderer.loadTexture("body", bodyTexturePath);
+
+    player.renderer.addToState("idle", "head").spriteSheet({1, 20}, {0, 0}); // голова
+    player.renderer.addToState("idle", "legs").spriteSheet({1, 20}, {0, 0}); // ноги
+    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {8, 0}); // задняя рука
+    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 0}); // тело
+    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {7, 0}); // передняя рука
+    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 1}); // плечо
+
+    player.renderer.addToState("move", "head").spriteSheet({1, 20}, {0, 0});
+    player.renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 28);
+    player.renderer.addToState("move", "body").animation({9, 4}, {3, 3}, {6, 3}, 8);
+    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 0});
+    player.renderer.addToState("move", "body").animation({9, 4}, {3, 1}, {6, 1}, 8);
+    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 1});
+
+    player.renderer.addToState("jump", "legs").spriteSheet({1, 20}, {0, 5}); // ноги
+    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 3}); // задняя рука
+    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {1, 0}); // тело
+    player.renderer.addToState("jump", "head").spriteSheet({1, 20}, {0, 0}); // голова
+    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 1}); // передняя рука
+
+    return player;
 }

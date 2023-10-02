@@ -7,14 +7,9 @@ class Tile;
 
 class Entity: public Object {
     public:
-        Entity() = default;
-
-        Entity(Vec2 pos, Vec2 size);
-
         virtual void onCollision(Tile& other) = 0;
         virtual void onCollision(Entity& other) = 0;
         
-        //virtual void update() override;
         /*
         virtual void move();
         virtual void jump();
@@ -24,6 +19,6 @@ class Entity: public Object {
         */
 
     protected:
-        const unsigned max_health = 100;
+        unsigned max_health = 100;
         unsigned health = max_health;
 };

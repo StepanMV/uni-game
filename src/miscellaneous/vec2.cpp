@@ -2,7 +2,7 @@
 
 Vec2::Vec2(float _x, float _y): x(_x), y(_y) {}
 
-Vector2 Vec2::toRaylib() {
+Vector2 Vec2::toRaylib() const {
     return {x, y};
 }
 
