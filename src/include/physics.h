@@ -7,10 +7,7 @@ class Physics {
         Physics() = default;
 
         //void target(int& x, int& y);
-        Vec2& applyAccel();
-
-        void move(double accel);
-        void jump(double accel);
+        Vec2& calcSpeed();
 
         Vec2 speed, accel;
         bool onGround, jumping;

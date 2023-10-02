@@ -17,25 +17,26 @@ int sign(double a) {
 
 Vec2 Physics::frictionVec() const {
     double fricX = -sign(speed.x) * friction;
-    fricX = abs(fricX) > abs(speed.x) ? -speed.x : fricX;
+    if (abs(fricX) > abs(speed.x)) {
+        fricX = -speed.x;
+    } else if (abs(speed.x) > maxMoveSpeed) {
+        fricX = abs(speed.x) - maxMoveSpeed > abs(fricX) * 10 ? fricX * 10 : -sign(speed.x) * (abs(speed.x) - maxMoveSpeed);
+    }
     double fricY = -sign(speed.y) * friction;
-    fricY = abs(fricY) > abs(speed.y) ? -speed.y : fricY;
+    if (abs(fricY) > abs(speed.y)) {
+        fricY = -speed.y;
+    } else if (speed.y > maxFallSpeed) {
+        fricY = speed.y - maxFallSpeed > abs(fricY) * 10 ? fricY * 10 : -(speed.y - maxFallSpeed);
+    } else if (speed.y < -maxFlySpeed) {
+        fricY = abs(speed.y) - maxFlySpeed > abs(fricY) * 10 ? fricY * 10 : -(speed.y + maxFlySpeed);
+    }
+    
     return Vec2(fricX, fricY);
 }
 
-Vec2& Physics::applyAccel() {
+Vec2& Physics::calcSpeed() {
     speed += accel;
+    speed.y += gravity;
     speed += frictionVec();
-    speed += Vec2(0, gravity);
-
-    if(abs(speed.x) >= maxMoveSpeed) {
-        speed.x = sign(speed.x) * maxMoveSpeed;
-    }
-    if(speed.y > maxFallSpeed) {
-        speed.y = maxFallSpeed;
-    }
-    if(speed.y < -maxFlySpeed) {
-        speed.y = -maxFlySpeed;
-    }
     return speed;
 }

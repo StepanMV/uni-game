@@ -4,6 +4,7 @@
 #include "player.h"
 #include "tile.h"
 #include "renderer.h"
+#include "keyboard.h"
 
 #include <vector>
 #include <iostream>
@@ -14,6 +15,7 @@ Game::Game(int width, int height, int fps, std::string title)
 	SetTargetFPS(fps);
 	InitWindow(width, height, title.c_str());
 	//ToggleFullscreen();
+	Keyboard::init();
 }
 
 void Game::loadLevel() {
@@ -39,8 +41,9 @@ void Game::tick() {
 }
 
 void Game::update() {
-	
+	Keyboard::update();
 	level.update();
+	if (Keyboard::isDoublePressed(KEY_F)) std::cout << "F" << std::endl;
 }
 
 void Game::draw() {

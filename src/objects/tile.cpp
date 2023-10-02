@@ -54,7 +54,7 @@ Tile TileBuilder::build() const {
     tile.isRight = right;
 
     tile.renderer.loadTexture("testTile", "resources/textures/Tiles_" + std::to_string(id) + ".png");
-    tile.renderer.addToState("main", "testTile").spriteSheet({16, 15}, {0, 0});
+    tile.renderer.addToState("main", "testTile").spriteSheet({16, 15}, {1, 1});
     tile.renderer.setState("main");
     return tile;
 }

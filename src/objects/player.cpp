@@ -1,6 +1,7 @@
 #include "player.h"
 #include "tile.h"
 #include "level.h"
+#include "keyboard.h"
 
 void Player::update() {
     physics.accel = Vec2(0, 0);
@@ -30,7 +31,7 @@ void Player::update() {
     if (IsKeyDown(KEY_D)) {
         physics.accel += Vec2(1, 0);
     }
-    if(IsKeyDown(KEY_W)) {
+    if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
     physics.onGround = false;

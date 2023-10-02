@@ -9,7 +9,7 @@ Vec2 Object::getSize() const {
     return size;
 }
 void Object::move() {
-    pos += physics.applyAccel();
+    pos += physics.calcSpeed();
 }
 
 bool Object::checkCollision(const Object& other) const {
