@@ -30,6 +30,12 @@ TileBuilder &TileBuilder::setNeighbors(bool up, bool down, bool left, bool right
     return *this;
 }
 
+TileBuilder &TileBuilder::setClimb(bool left, bool right) {
+    this->canClimbLeft = left;
+    this->canClimbRight = right;
+    return *this;
+}
+
 TileBuilder &TileBuilder::setID(unsigned id) {
     this->id = id;
     return *this;
@@ -52,6 +58,8 @@ Tile TileBuilder::build() const {
     tile.isDown = down;
     tile.isLeft = left;
     tile.isRight = right;
+    tile.canClimbLeft = canClimbLeft;
+    tile.canClimbRight = canClimbRight;
 
     tile.renderer.loadTexture("testTile", "resources/textures/Tiles_" + std::to_string(id) + ".png");
     tile.renderer.addToState("main", "testTile").spriteSheet({16, 15}, {1, 1});

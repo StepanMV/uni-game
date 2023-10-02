@@ -24,6 +24,7 @@ class TileBuilder {
 public:
     static TileBuilder spawn(Vec2 pos, Vec2 size);
     TileBuilder& setNeighbors(bool up, bool down, bool left, bool right);
+    TileBuilder& setClimb(bool left, bool right);
     TileBuilder& setID(unsigned id);
     TileBuilder& setForm(unsigned form);
 
@@ -32,5 +33,6 @@ public:
 private:
     Vec2 pos, size;
     bool up = false, down = false, left = false, right = false;
+    bool canClimbLeft = true, canClimbRight = true;
     unsigned id = 0, form = 0;
 };
