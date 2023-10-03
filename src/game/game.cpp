@@ -42,6 +42,7 @@ void Game::tick() {
 
 void Game::update() {
 	Keyboard::update();
+	Timer::updateAll();
 	level.update();
 	if (Keyboard::isDoublePressed(KEY_F)) std::cout << "F" << std::endl;
 }

@@ -48,7 +48,7 @@ void Level::load(std::string filename) {
     camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
-    camera.zoom = 1.f;
+    camera.zoom = 3.f;
 
     player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, 500 * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)

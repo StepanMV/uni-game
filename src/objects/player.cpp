@@ -42,9 +42,9 @@ void Player::render() {
     renderer.setState("idle");
 
     if (physics.speed.x > 0) {
-        renderer.setState("move", false, physics.speed.x / 10);  
+        renderer.setState("move", false, physics.speed.x / 25);  
     } else if (physics.speed.x < 0) {
-        renderer.setState("move", true, -physics.speed.x / 10);
+        renderer.setState("move", true, -physics.speed.x / 25);
     }
 
     if (physics.jumping) {
@@ -195,10 +195,10 @@ Player PlayerBuilder::build() const
     player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 1}); // плечо
 
     player.renderer.addToState("move", "head").spriteSheet({1, 20}, {0, 0});
-    player.renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 28);
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 3}, {6, 3}, 8);
+    player.renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 14);
+    player.renderer.addToState("move", "body").animation({9, 4}, {3, 3}, {6, 3}, 4);
     player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 0});
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 1}, {6, 1}, 8);
+    player.renderer.addToState("move", "body").animation({9, 4}, {3, 1}, {6, 1}, 4);
     player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 1});
 
     player.renderer.addToState("jump", "legs").spriteSheet({1, 20}, {0, 5}); // ноги

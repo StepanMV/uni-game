@@ -35,7 +35,8 @@ class TextureState {
         Vec2 size, frameSize;
         Vec2 startSpritePos, endSpritePos;
 
+        double startTime = 0;
+        int frame = 0, animSize = 0;
         float fps = 0;
-        float speed = 1;
-        float startTime = 0;
+        float speedMultiplier = 1;
     };
