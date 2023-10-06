@@ -12,7 +12,27 @@ void Object::move() {
     pos += physics.calcSpeed();
 }
 
-bool Object::checkCollision(const Object& other) const {
+Object::Object() : pos(Vec2{0, 0}), size(Vec2{0, 0}), renderer(Renderer(&pos)), physics(Physics()) { }
+
+Object::Object(const Object &other) : pos(other.pos),
+                                      size(other.size),
+                                      renderer(other.renderer),
+                                      physics(other.physics)
+{
+    renderer.changeObject(&pos);
+}
+
+Object &Object::operator=(const Object &other) {
+    pos = other.pos;
+    size = other.size;
+    renderer = other.renderer;
+    physics = other.physics;
+    renderer.changeObject(&pos);
+    return *this;
+}
+
+bool Object::checkCollision(const Object &other) const
+{
     Rectangle thisHitbox = Rectangle{(float) (pos.x - size.x / 2), (float) (pos.y - size.y / 2), (float) size.x, (float) size.y};
     Vec2 otherPos = other.getPos();
     Vec2 otherSize = other.getSize();

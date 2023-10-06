@@ -8,6 +8,8 @@ public:
     unsigned getId() const;
     unsigned getForm() const;
 
+    void updateState();
+
     virtual void update() override;
     virtual void render() override;
 
@@ -28,11 +30,8 @@ public:
     TileBuilder& setID(unsigned id);
     TileBuilder& setForm(unsigned form);
 
-    Tile build() const;
+    Tile build();
 
 private:
-    Vec2 pos, size;
-    bool up = false, down = false, left = false, right = false;
-    bool canClimbLeft = true, canClimbRight = true;
-    unsigned id = 0, form = 0;
+    Tile tile;
 };

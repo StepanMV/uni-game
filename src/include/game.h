@@ -6,6 +6,7 @@
 #include "level.h"
 #include "player.h"
 #include "tile.h"
+#include "ui.h"
 
 class Game {
 public:
@@ -21,7 +22,7 @@ public:
 
 	void tick();
 
-	void loadLevel();
+	void load();
 
 private:
 
@@ -29,7 +30,6 @@ private:
 
 	void draw();
 
-	void checkCollisions();
-
 	Level level;
+	UI ui;
 };

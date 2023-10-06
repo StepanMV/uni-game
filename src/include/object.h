@@ -6,6 +6,10 @@
 
 class Object {
 public:
+    Object();
+    Object(const Object& other);
+    Object& operator=(const Object& other);
+
     bool checkCollision(const Object& other) const;
     Rectangle getCollisionBox(const Object& other) const;
 

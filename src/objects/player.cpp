@@ -34,22 +34,30 @@ void Player::update() {
     if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
+    if (Keyboard::isKeyDown(KEY_S)) {
+        physics.accel += Vec2(0, 2.5);
+    }
+
     physics.onGround = false;
 }
 
 void Player::render() {
-    renderer.update(pos, size);
     renderer.setState("idle");
 
     if (physics.speed.x > 0) {
-        renderer.setState("move", false, physics.speed.x / 25);  
+        facingLeft = false;
+        renderer.setState("move");
+        renderer.setAnimationSpeed(10 * physics.speed.x / physics.maxMoveSpeed);
     } else if (physics.speed.x < 0) {
-        renderer.setState("move", true, -physics.speed.x / 25);
+        facingLeft = true;
+        renderer.setState("move");
+        renderer.setAnimationSpeed(10 * -physics.speed.x / physics.maxMoveSpeed);
     }
 
-    if (physics.jumping) {
+    if (!physics.onGround) {
         renderer.setState("jump");
     }
+    renderer.setFlipped(facingLeft);
     renderer.render();
 }
 
@@ -137,21 +145,21 @@ void Player::onCollision(Entity& other) {
 
 PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
     PlayerBuilder builder;
-    builder.pos = pos;
-    builder.size = size;
+    builder.player.pos = pos;
+    builder.player.size = size;
     return builder;
 }
 
 PlayerBuilder &PlayerBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
-    this->maxFallSpeed = maxFallSpeed;
-    this->maxFlySpeed = maxFlySpeed;
-    this->maxMoveSpeed = maxMoveSpeed;
+    player.physics.maxMoveSpeed = maxMoveSpeed;
+    player.physics.maxFallSpeed = maxFallSpeed;
+    player.physics.maxFlySpeed = maxFlySpeed;
     return *this;
 }
 
 PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
-    this->friction = friction;
-    this->gravity = gravity;
+    player.physics.friction = friction;
+    player.physics.gravity = gravity;
     return *this;
 }
 
@@ -170,42 +178,54 @@ PlayerBuilder &PlayerBuilder::setBodyTexture(const std::string &texturePath) {
     return *this;
 }
 
-Player PlayerBuilder::build() const
+Player PlayerBuilder::build()
 {
-    Player player;
-
-    player.pos = std::move(pos);
-    player.size = std::move(size);
-
-    player.physics.maxMoveSpeed = maxMoveSpeed;
-    player.physics.maxFallSpeed = maxFallSpeed;
-    player.physics.maxFlySpeed = maxFlySpeed;
-    player.physics.friction = friction;
-    player.physics.gravity = gravity;
+    if (headTexturePath.empty() || legsTexturePath.empty() || bodyTexturePath.empty()) return player;
 
     player.renderer.loadTexture("legs", legsTexturePath);
     player.renderer.loadTexture("head", headTexturePath);
     player.renderer.loadTexture("body", bodyTexturePath);
 
-    player.renderer.addToState("idle", "head").spriteSheet({1, 20}, {0, 0}); // голова
-    player.renderer.addToState("idle", "legs").spriteSheet({1, 20}, {0, 0}); // ноги
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {8, 0}); // задняя рука
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 0}); // тело
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {7, 0}); // передняя рука
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 1}); // плечо
+    Vec2 headSize = player.renderer.getTextureSize("head");
+    Vec2 legsSize = player.renderer.getTextureSize("legs");
+    Vec2 bodySize = player.renderer.getTextureSize("body");
 
-    player.renderer.addToState("move", "head").spriteSheet({1, 20}, {0, 0});
-    player.renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 14);
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 3}, {6, 3}, 4);
-    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 0});
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 1}, {6, 1}, 4);
-    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 1});
+    player.renderer.addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    player.renderer.addToState("idle", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    player.renderer.addToState("idle", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {8, 0}).build());
+    player.renderer.addToState("idle", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 0}).build());
+    player.renderer.addToState("idle", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {7, 0}).build());
+    player.renderer.addToState("idle", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
 
-    player.renderer.addToState("jump", "legs").spriteSheet({1, 20}, {0, 5}); // ноги
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 3}); // задняя рука
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {1, 0}); // тело
-    player.renderer.addToState("jump", "head").spriteSheet({1, 20}, {0, 0}); // голова
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 1}); // передняя рука
+    player.renderer.addToState("move", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    player.renderer.addToState("move", "legs", TextureDataBuilder::init(TextureType::ANIMATION, "legs", legsSize)
+        .animation({1, 20}, {0, 6}, {0, 19}, 14).build());
+    player.renderer.addToState("move", "armBehind", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+        .animation({9, 4}, {3, 3}, {6, 3}, 4).build());
+    player.renderer.addToState("move", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 0}).build());
+    player.renderer.addToState("move", "armFront", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+        .animation({9, 4}, {3, 1}, {6, 1}, 4).build());
+    player.renderer.addToState("move", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
+    
+    player.renderer.addToState("jump", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 5}).build());
+    player.renderer.addToState("jump", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {2, 3}).build());
+    player.renderer.addToState("jump", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {1, 0}).build());
+    player.renderer.addToState("jump", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    player.renderer.addToState("jump", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {2, 1}).build());
 
     return player;
 }
