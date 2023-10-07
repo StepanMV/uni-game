@@ -7,6 +7,7 @@
 class Object {
 public:
     bool checkCollision(const Object& other) const;
+    bool MyCheckCollision(const Object& other) const;
     Rectangle getCollisionBox(const Object& other) const;
 
 
@@ -22,4 +23,9 @@ protected:
 
     Renderer renderer;
     Physics physics;
+};
+
+struct Circle {
+    Vec2 pos;
+    float radius;
 };

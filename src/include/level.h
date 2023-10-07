@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "tile.h"
+#include "projectile.h"
 #include "player.h"
 
 
@@ -40,6 +41,8 @@ class Level {
     private:
         Player player;
         Camera2D camera;
+
+        std::vector<Projectile> projectiles;
 
         std::string filename;
         unsigned long startRenderX, endRenderX, startRenderY, endRenderY;

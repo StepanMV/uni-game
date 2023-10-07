@@ -8,6 +8,9 @@ class Vec2 {
 
         Vector2 toRaylib() const;
 
+        float dot(const Vec2& v) const;
+        void normalize();
+
         Vec2& operator+=(const Vec2& v);
         Vec2& operator-=(const Vec2& v);
         Vec2& operator*=(const float& k);
@@ -20,3 +23,4 @@ Vec2 operator+(const Vec2& v1, const Vec2& v2);
 Vec2 operator-(const Vec2& v1, const Vec2& v2);
 Vec2 operator*(const Vec2& v, const float& k);
 Vec2 operator*(const float& k, const Vec2& v);
+Vec2 operator-(const Vec2& v);

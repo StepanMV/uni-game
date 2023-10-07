@@ -1,5 +1,6 @@
 #include "level.h"
 #include "player.h"
+#include "projectile.h"
 #include <fstream>
 #include <filesystem>
 
@@ -160,8 +161,8 @@ void Level::breakTile(const Vec2 tilePos) {
     if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
     if(!isTile(tilePos.toRaylib())) return;
 
-    setLocalPos(tiles, idY, idX, false);
     tiles[idY][idX] = std::move(Tile());
+    setLocalPos(tiles, idY, idX, false);
 }
 
 void Level::calcCords() {
@@ -220,8 +221,8 @@ void Level::update() {
 }
 
 void Level::checkCollision() {
-    for(int i = startRenderY; i < endRenderY; i++) {
-        for(int j = startRenderX; j < endRenderX; j++) {
+    for(int i = player.getPos().y / tileSize - 5; i < player.getPos().y / tileSize + 5; i++) {
+        for(int j = player.getPos().x / tileSize - 5; j < player.getPos().x / tileSize + 5; j++) {
             if(player.checkCollision(tiles[i][j])) {
                 player.onCollision(tiles[i][j]);
             }
