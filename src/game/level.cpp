@@ -249,44 +249,37 @@ void Level::render() {
 
 void Level::update() {
 	Vec2 playerSpeed = player.move();
-	player.move();
-    for(auto it = projectiles.begin(); it != projectiles.end(); it++) {
-        if(it->getId() != 0) {
-            it->move();
-            it->update();
-        }
-        if(it->getPos().x < levelOffset * tileSize || 
-        it->getPos().y < levelOffset * tileSize || 
-        it->getPos().x > (levelSizeX - levelOffset) * tileSize ||
-        it->getPos().y > (levelSizeY - levelOffset) * tileSize) {
-            it->breakProjectile();
-        }
-    }
-    projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
+    
     camera.target = player.getPos().toRaylib();
     cameraOnBoard();
     player.update();
     this->checkCollision();
     background->setSpeed(0.2 * playerSpeed);
-    /*
-    if (player.isAttacking()) {
-        Projectile p = player.getProjectile();
-        p.configure();
-    }
-
-    */
-
-    //for (auto& p : projectiles) p.update();
 
     if (editor) updateEditor();
 
-    Projectile projectile = std::move(player.getProjectile());
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
-    Vec2 mp = {mousePos.x, mousePos.y};
-    if(projectile.getId() != 0) {
-        projectile.spawn(player.getPos(), Vec2(20, 5), 10);
-        projectile.setDirection(mp);
-        projectiles.push_back(projectile);
+    if (!editor){
+        for(auto it = projectiles.begin(); it != projectiles.end(); it++) {
+            if(it->getId() != 0) {
+                it->move();
+                it->update();
+            }
+            if(it->getPos().x < levelOffset * tileSize || 
+            it->getPos().y < levelOffset * tileSize || 
+            it->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+            it->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+                it->breakProjectile();
+            }
+        }
+        projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
+        Projectile projectile = player.getProjectile();
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
+        Vec2 mp = {mousePos.x, mousePos.y};
+        if(projectile.getId() != 0) {
+            projectile.spawn(player.getPos(), Vec2(22, 24), 10);
+            projectile.setDirection(mp);
+            projectiles.push_back(projectile);
+        }
     }
 }
 
@@ -294,7 +287,7 @@ void Level::updateEditor() {
 
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
     Vec2 mp = {mousePos.x, mousePos.y};
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp);
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     if (IsKeyPressed(KEY_Q)) placedBlockId++;
     if (IsKeyPressed(KEY_E)) placedBlockId--;
@@ -305,6 +298,15 @@ void Level::checkCollision() {
         for(int j = player.getPos().x / tileSize - 5; j < player.getPos().x / tileSize + 5; j++) {
             if(!editor && player.checkCollision(tiles[i][j])) {
                 player.onCollision(tiles[i][j]);
+            }
+        }
+    }
+    for (auto& projectile : projectiles) {
+        for(int i = projectile.getPos().y / tileSize - 1; i < projectile.getPos().y / tileSize + 1; i++) {
+            for(int j = projectile.getPos().x / tileSize - 1; j < projectile.getPos().x / tileSize + 1; j++) {
+                if(projectile.MyCheckCollision(tiles[i][j])) {
+                    projectile.onCollision(tiles[i][j]);
+                }
             }
         }
     }

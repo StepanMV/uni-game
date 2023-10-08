@@ -18,6 +18,8 @@ Tile::Tile(const Tile &other)
     isRight = other.isRight;
     canClimbLeft = other.canClimbLeft;
     canClimbRight = other.canClimbRight;
+    hitbox = other.hitbox;
+    angle = other.angle;
 }
 
 Tile &Tile::operator=(const Tile &other) {
@@ -33,6 +35,8 @@ Tile &Tile::operator=(const Tile &other) {
     isRight = other.isRight;
     canClimbLeft = other.canClimbLeft;
     canClimbRight = other.canClimbRight;
+    hitbox = other.hitbox;
+    angle = other.angle;
     return *this;
 }
 

@@ -27,7 +27,7 @@ class Player: public Entity {
 
     private:
         bool facingLeft = false;
-        Timer projTimer = Timer(0.1, [this](){isAttacking = true;});
+        std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1/*, [&](){isAttacking = true;}*/);
         double startY = pos.y;
         friend class PlayerBuilder;
 };

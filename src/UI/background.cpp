@@ -1,7 +1,6 @@
 #include "background.h"
 #include <memory>
 #include <stdexcept>
-#include <iostream>
 
 const std::map<int, BackgroundData> Background::bgData = {
     {1, {BLUE, LAYERED, 4}},
@@ -70,7 +69,6 @@ void AnimatedBackground::changeFrame() {
     currentFrame++;
     currentFrame %= bgData.at(id).spritesAmount;
     renderer.setState("main " + std::to_string(currentFrame));
-    std::cout << "Frame change!\n";
     timer->reset();
 }
 

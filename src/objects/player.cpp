@@ -44,9 +44,9 @@ void Player::update() {
 
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if(isAttacking) {
-            projTimer.reset();
+            projTimer->reset();
         }
-        if(projTimer.isDone()) {
+        if(projTimer->isDone()) {
             isAttacking = true;
         }
         else {
@@ -64,13 +64,6 @@ void Player::update() {
     }
 
     physics->onGround = false;
-}
-
-Projectile Player::getProjectile() const {
-    if(isAttacking) {
-        return Projectile(1, 1, true);
-    }
-    return Projectile(0, 1, true);
 }
 
 Projectile Player::getProjectile() const {

@@ -6,6 +6,9 @@ class Tile;
 
 class Projectile: public Object {
     public:
+        Projectile();
+        Projectile(const Projectile& other);
+        Projectile& operator=(const Projectile& other);
         Projectile(unsigned _id, unsigned _damage, const bool _fromPlayer);
 
         void setDirection(Vec2 direction);
@@ -27,7 +30,7 @@ class Projectile: public Object {
         void falling();
 
     private:
-        Timer timer;
+        std::shared_ptr<Timer> timer;
         unsigned damage;
         bool fromPlayer;
         unsigned id;
