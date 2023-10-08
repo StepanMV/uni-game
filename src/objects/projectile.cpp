@@ -8,7 +8,7 @@ id(_id) {
         renderer.loadTexture("star", "resources/textures/Gore_16.png");
         renderer.addToState("fly", "star").spriteSheet({1, 1}, {0, 0});
         physics.friction = 0;
-        physics.gravity = 0;
+        physics.gravity = 0.1;
     }
 }
 
@@ -29,8 +29,6 @@ void Projectile::spawn(Vec2 pos, Vec2 size, double lifetime) {
 
 void Projectile::setDirection(Vec2 target) {
     physics.speed = target - pos;
-    angle = atan(physics.speed.y / physics.speed.x) * 180 / M_PI;
-    renderer.setRotation(angle);
     calcHitbox();
     physics.speed.normalize();
     physics.speed *= 5;
@@ -47,6 +45,7 @@ unsigned Projectile::getId() const {
 }
 
 void Projectile::update() {
+    angle = atan2(physics.speed.y , physics.speed.x) * 180 / M_PI;
     calcHitbox();
     if(timer.isDone()) {
         breakProjectile();
@@ -55,6 +54,7 @@ void Projectile::update() {
 }
 
 void Projectile::render() {
+    renderer.setRotation(angle);
     renderer.update(pos, size);
     renderer.render();
 }

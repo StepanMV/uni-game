@@ -35,10 +35,22 @@ void Player::update() {
     if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
+    projTimer.update();
+    if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        if(isAttacking) {
+            projTimer.reset();
+        }
+        if(projTimer.isDone()) {
+            isAttacking = true;
+        }
+        else {
+            isAttacking = false;
+        }
+    }
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         isAttacking = true;
     }
-    else {
+    if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         isAttacking = false;
     }
     physics.onGround = false;
@@ -46,8 +58,7 @@ void Player::update() {
 
 Projectile Player::getProjectile() const {
     if(isAttacking) {
-        Projectile projectile(1, 1, true);
-        return projectile;
+        return Projectile(1, 1, true);
     }
     return Projectile(0, 1, true);
 }

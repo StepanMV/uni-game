@@ -55,7 +55,7 @@ Tile TileBuilder::build() const {
     Tile tile;
     tile.pos = std::move(pos);
     tile.size = std::move(size);
-
+    tile.calcHitbox();
     tile.id = id;
     tile.form = form;
     tile.isUp = up;

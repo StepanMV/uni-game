@@ -1,7 +1,7 @@
 #pragma once
 
 #include "entity.h"
-
+#include "timer.h"
 
 
 class Player: public Entity {
@@ -27,6 +27,7 @@ class Player: public Entity {
         */
 
     private:
+        Timer projTimer = Timer(0.1, [this](){isAttacking = true;});
         double startY = pos.y;
         friend class PlayerBuilder;
 };

@@ -132,9 +132,9 @@ bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
     }
 }
 
-bool Object::MyCheckCollision(const Object& other) {
+bool Object::MyCheckCollision(const Object& other) const {
     if(!other.isAlive()) {
         return false;
     }
-    return calculate(hitbox, getPointsOfRect(other.getPos(), other.getSize()));
+    return calculate(hitbox, other.hitbox);
 }
