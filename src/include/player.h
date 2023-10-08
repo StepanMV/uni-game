@@ -1,6 +1,8 @@
 #pragma once
 
 #include "entity.h"
+#include "timer.h"
+
 
 class Player: public Entity {
     public:
@@ -9,8 +11,7 @@ class Player: public Entity {
         virtual void update() override;
         virtual void render() override;
 
-        //bool isAttacking();
-        //Projectile getProjectile();
+        Projectile getProjectile() const override;
 
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;
@@ -26,6 +27,7 @@ class Player: public Entity {
 
     private:
         bool facingLeft = false;
+        Timer projTimer = Timer(0.1, [this](){isAttacking = true;});
         double startY = pos.y;
         friend class PlayerBuilder;
 };

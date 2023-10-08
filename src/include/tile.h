@@ -13,6 +13,8 @@ public:
 
     void updateState();
 
+    virtual bool isAlive() const override;
+
     virtual void update() override;
     virtual void render() override;
 

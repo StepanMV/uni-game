@@ -55,6 +55,10 @@ void Tile::updateState() {
     renderer->setSpritePos(state);
 }
 
+bool Tile::isAlive() const {
+    return id != 0;
+}
+
 void Tile::update() { }
 
 void Tile::render() {
@@ -99,5 +103,6 @@ Tile TileBuilder::build() {
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile.id) + ".png");
     tile.updateState();
+    tile.calcHitbox();
     return tile;
 }

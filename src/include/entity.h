@@ -4,6 +4,7 @@
 #include "vec2.h"
 
 class Tile;
+class Projectile;
 
 class Entity: public Object {
     public:
@@ -12,6 +13,11 @@ class Entity: public Object {
         Entity& operator=(const Entity& other);
         virtual void onCollision(Tile& other) = 0;
         virtual void onCollision(Entity& other) = 0;
+
+        virtual bool isAlive() const override;
+        
+        bool getAttacking() const;
+        virtual Projectile getProjectile() const = 0;
         
         /*
         virtual void move();
@@ -22,6 +28,7 @@ class Entity: public Object {
         */
 
     protected:
+        bool isAttacking = false;
         unsigned max_health = 100;
         unsigned health = max_health;
 };

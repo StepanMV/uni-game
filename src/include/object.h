@@ -9,7 +9,11 @@ class Object {
 public:
 
     bool checkCollision(const Object& other) const;
+    bool MyCheckCollision(const Object& other) const;
     Rectangle getCollisionBox(const Object& other) const;
+
+    void calcHitbox();
+    virtual bool isAlive() const = 0;
 
 
     virtual void update() = 0;
@@ -21,7 +25,14 @@ public:
 
 protected:
     Vec2 pos, size;
+    std::vector<Vec2> hitbox;
+    float angle = 0;
 
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<Physics> physics;
+};
+
+struct Circle {
+    Vec2 pos;
+    float radius;
 };

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "tile.h"
+#include "projectile.h"
 #include "player.h"
 #include "ui.h"
 
@@ -50,8 +51,7 @@ private:
     Camera2D camera;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Background> background;
-
-    //std::vector<Projectile> projectiles;
+    std::vector<Projectile> projectiles;
 
     std::string filepath;
     unsigned long startRenderX, endRenderX, startRenderY, endRenderY;

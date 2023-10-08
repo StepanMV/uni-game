@@ -1,5 +1,6 @@
 #include "level.h"
 #include "player.h"
+#include "projectile.h"
 #include <fstream>
 #include <filesystem>
 
@@ -234,6 +235,12 @@ void Level::render() {
         }
     }
 
+    for(auto& projectile: projectiles) {
+        if(projectile.getId() != 0) {
+            projectile.render();
+        }
+    }
+
     EndMode2D();
 
     DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
@@ -242,6 +249,20 @@ void Level::render() {
 
 void Level::update() {
 	Vec2 playerSpeed = player.move();
+	player.move();
+    for(auto it = projectiles.begin(); it != projectiles.end(); it++) {
+        if(it->getId() != 0) {
+            it->move();
+            it->update();
+        }
+        if(it->getPos().x < levelOffset * tileSize || 
+        it->getPos().y < levelOffset * tileSize || 
+        it->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+        it->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+            it->breakProjectile();
+        }
+    }
+    projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
     camera.target = player.getPos().toRaylib();
     cameraOnBoard();
     player.update();
@@ -258,20 +279,30 @@ void Level::update() {
     //for (auto& p : projectiles) p.update();
 
     if (editor) updateEditor();
+
+    Projectile projectile = std::move(player.getProjectile());
+    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
+    Vec2 mp = {mousePos.x, mousePos.y};
+    if(projectile.getId() != 0) {
+        projectile.spawn(player.getPos(), Vec2(20, 5), 10);
+        projectile.setDirection(mp);
+        projectiles.push_back(projectile);
+    }
 }
 
 void Level::updateEditor() {
+
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
     Vec2 mp = {mousePos.x, mousePos.y};
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp);
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     if (IsKeyPressed(KEY_Q)) placedBlockId++;
     if (IsKeyPressed(KEY_E)) placedBlockId--;
 }
 
 void Level::checkCollision() {
-    for(int i = startRenderY; i < endRenderY; i++) {
-        for(int j = startRenderX; j < endRenderX; j++) {
+    for(int i = player.getPos().y / tileSize - 5; i < player.getPos().y / tileSize + 5; i++) {
+        for(int j = player.getPos().x / tileSize - 5; j < player.getPos().x / tileSize + 5; j++) {
             if(!editor && player.checkCollision(tiles[i][j])) {
                 player.onCollision(tiles[i][j]);
             }

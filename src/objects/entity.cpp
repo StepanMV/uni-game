@@ -1,5 +1,13 @@
 #include "entity.h"
 
+bool Entity::getAttacking() const {
+    return isAttacking;
+}
+
+bool Entity::isAlive() const {
+    return health > 0;
+}
+
 Entity::Entity(const Entity &other) {
     pos = other.pos;
     size = other.size;

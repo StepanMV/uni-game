@@ -2,14 +2,14 @@
 #include "tile.h"
 #include "level.h"
 #include "keyboard.h"
+#include "projectile.h"
 
 Player::Player() {
     renderer = std::make_shared<CoolRenderer>();
     physics = std::make_shared<Physics>();
 }
 
-void Player::update()
-{
+void Player::update() {
     onBoard();
     physics->accel = Vec2(0, 0);
     if (IsKeyPressed(KEY_SPACE)) {
@@ -41,11 +41,43 @@ void Player::update()
     if(Keyboard::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -2.5);
     }
+
+    if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        if(isAttacking) {
+            projTimer.reset();
+        }
+        if(projTimer.isDone()) {
+            isAttacking = true;
+        }
+        else {
+            isAttacking = false;
+        }
+    }
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        isAttacking = true;
+    }
+    if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+        isAttacking = false;
+    }
     if (Keyboard::isKeyDown(KEY_S)) {
         physics->accel += Vec2(0, 2.5);
     }
 
     physics->onGround = false;
+}
+
+Projectile Player::getProjectile() const {
+    if(isAttacking) {
+        return Projectile(1, 1, true);
+    }
+    return Projectile(0, 1, true);
+}
+
+Projectile Player::getProjectile() const {
+    if(isAttacking) {
+        return Projectile(1, 1, true);
+    }
+    return Projectile(0, 1, true);
 }
 
 void Player::render() {
