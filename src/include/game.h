@@ -6,6 +6,7 @@
 #include "level.h"
 #include "player.h"
 #include "tile.h"
+#include "ui.h"
 
 class Game {
 public:
@@ -21,15 +22,18 @@ public:
 
 	void tick();
 
-	void loadLevel();
+	void load();
+
+	const std::map<std::string, std::shared_ptr<UI>> uis;
 
 private:
+	void createUIS();
 
 	void update();
-
+	void checkUI();
 	void draw();
 
-	void checkCollisions();
-
 	Level level;
+	std::shared_ptr<UI> ui;
+    std::shared_ptr<Background> background;
 };

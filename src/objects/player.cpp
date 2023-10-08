@@ -4,38 +4,44 @@
 #include "keyboard.h"
 #include "projectile.h"
 
+Player::Player() {
+    renderer = std::make_shared<CoolRenderer>();
+    physics = std::make_shared<Physics>();
+}
+
 void Player::update() {
-    physics.accel = Vec2(0, 0);
+    onBoard();
+    physics->accel = Vec2(0, 0);
     if (IsKeyPressed(KEY_SPACE)) {
-        if(physics.onGround) {
+        if(physics->onGround) {
             startY = pos.y;
-            physics.speed.y = -20;
-            physics.onGround = false;
-            physics.jumping = true;
+            physics->speed.y = -20;
+            physics->onGround = false;
+            physics->jumping = true;
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
-        if((startY - pos.y <= 100) && (physics.jumping)) {
-            physics.accel += Vec2(0, -2.5);
+        if((startY - pos.y <= 100) && (physics->jumping)) {
+            physics->accel += Vec2(0, -2.5);
         }
         else {
-            physics.jumping = false;
+            physics->jumping = false;
         }
     }
     else if(IsKeyReleased(KEY_SPACE)) {
-        physics.jumping = false;
+        physics->jumping = false;
     }
     if (IsKeyDown(KEY_A)) {
-        physics.accel += Vec2(-1.5, 0);
+        physics->accel += Vec2(-1.5, 0);
         
     }
     if (IsKeyDown(KEY_D)) {
-        physics.accel += Vec2(1.5, 0);
+        physics->accel += Vec2(1.5, 0);
     }
     if(Keyboard::isKeyDown(KEY_W)) {
-        physics.accel += Vec2(0, -2.5);
+        physics->accel += Vec2(0, -2.5);
     }
-    projTimer.update();
+
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if(isAttacking) {
             projTimer.reset();
@@ -53,7 +59,18 @@ void Player::update() {
     if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         isAttacking = false;
     }
-    physics.onGround = false;
+    if (Keyboard::isKeyDown(KEY_S)) {
+        physics->accel += Vec2(0, 2.5);
+    }
+
+    physics->onGround = false;
+}
+
+Projectile Player::getProjectile() const {
+    if(isAttacking) {
+        return Projectile(1, 1, true);
+    }
+    return Projectile(0, 1, true);
 }
 
 Projectile Player::getProjectile() const {
@@ -64,40 +81,45 @@ Projectile Player::getProjectile() const {
 }
 
 void Player::render() {
-    renderer.update(pos, size);
-    renderer.setState("idle");
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+    renderer->setState("idle");
 
-    if (physics.speed.x > 0) {
-        renderer.setState("move", false, physics.speed.x / 10);  
-    } else if (physics.speed.x < 0) {
-        renderer.setState("move", true, -physics.speed.x / 10);
+    if (physics->speed.x > 0) {
+        facingLeft = false;
+        renderer->setState("move");
+        renderer->setAnimationSpeed(10 * physics->speed.x / physics->maxMoveSpeed);
+    } else if (physics->speed.x < 0) {
+        facingLeft = true;
+        renderer->setState("move");
+        renderer->setAnimationSpeed(10 * -physics->speed.x / physics->maxMoveSpeed);
     }
 
-    if (physics.jumping) {
-        renderer.setState("jump");
+    if (!physics->onGround) {
+        renderer->setState("jump");
     }
-    renderer.render();
+    renderer->setFlipped(facingLeft);
+    renderer->render();
 }
 
 void Player::onBoard() {
     if(pos.x - size.x / 2 < Level::levelOffset * Level::tileSize) {
-        physics.speed.x = 0;
+        physics->speed.x = 0;
         pos.x = Level::levelOffset * Level::tileSize + size.x / 2;
     }
     if(pos.y - size.y / 2 < Level::levelOffset * Level::tileSize) {
-        physics.speed.y = 0;
+        physics->speed.y = 0;
         pos.y = Level::levelOffset * Level::tileSize + size.y / 2;
-        physics.jumping = false;
+        physics->jumping = false;
     }
     if(pos.x + size.x / 2 > (Level::levelSizeX - Level::levelOffset) * Level::tileSize) {
-        physics.speed.x = 0;
+        physics->speed.x = 0;
         pos.x = (Level::levelSizeX - Level::levelOffset) * Level::tileSize - size.x / 2;
     }
     if(pos.y + size.y / 2 > (Level::levelSizeY - Level::levelOffset) * Level::tileSize)
     {
-        physics.speed.y = 0;
+        physics->speed.y = 0;
         pos.y = (Level::levelSizeY - Level::levelOffset) * Level::tileSize - size.y / 2;
-        physics.onGround = true;
+        physics->onGround = true;
     }
 }
 
@@ -105,7 +127,7 @@ void Player::onCollision(Tile& other) {
     if(other.getId() == 0) {
         return;
     }
-    if((!other.isUp) && (physics.speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
+    if((!other.isUp) && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
         if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
@@ -113,12 +135,12 @@ void Player::onCollision(Tile& other) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
-            physics.speed.y = 0;
-            physics.onGround = true;
+            physics->speed.y = 0;
+            physics->onGround = true;
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
     }
-    if((!other.isDown) && (physics.speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
+    if((!other.isDown) && (physics->speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
         if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
@@ -126,12 +148,12 @@ void Player::onCollision(Tile& other) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
-            physics.speed.y = 0;
-            physics.jumping = false;
+            physics->speed.y = 0;
+            physics->jumping = false;
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
     }
-    if((!other.isLeft) && (physics.speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
+    if((!other.isLeft) && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
         if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
@@ -139,11 +161,11 @@ void Player::onCollision(Tile& other) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
-            physics.speed.x = 0;
+            physics->speed.x = 0;
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    if((!other.isRight) && (physics.speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
+    if((!other.isRight) && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
         if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
@@ -151,7 +173,7 @@ void Player::onCollision(Tile& other) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
-            physics.speed.x = 0;
+            physics->speed.x = 0;
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
     }
@@ -163,21 +185,23 @@ void Player::onCollision(Entity& other) {
 
 PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
     PlayerBuilder builder;
-    builder.pos = pos;
-    builder.size = size;
+    builder.player.pos = pos;
+    builder.player.size = size;
+    builder.player.renderer = std::make_shared<CoolRenderer>(&builder.player.pos);
+    builder.player.physics = std::make_shared<Physics>();
     return builder;
 }
 
 PlayerBuilder &PlayerBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
-    this->maxFallSpeed = maxFallSpeed;
-    this->maxFlySpeed = maxFlySpeed;
-    this->maxMoveSpeed = maxMoveSpeed;
+    player.physics->maxMoveSpeed = maxMoveSpeed;
+    player.physics->maxFallSpeed = maxFallSpeed;
+    player.physics->maxFlySpeed = maxFlySpeed;
     return *this;
 }
 
 PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
-    this->friction = friction;
-    this->gravity = gravity;
+    player.physics->friction = friction;
+    player.physics->gravity = gravity;
     return *this;
 }
 
@@ -196,42 +220,56 @@ PlayerBuilder &PlayerBuilder::setBodyTexture(const std::string &texturePath) {
     return *this;
 }
 
-Player PlayerBuilder::build() const
+Player PlayerBuilder::build()
 {
-    Player player;
+    if (headTexturePath.empty() || legsTexturePath.empty() || bodyTexturePath.empty()) return player;
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player.renderer);
 
-    player.pos = std::move(pos);
-    player.size = std::move(size);
+    renderer->loadTexture("legs", legsTexturePath);
+    renderer->loadTexture("head", headTexturePath);
+    renderer->loadTexture("body", bodyTexturePath);
 
-    player.physics.maxMoveSpeed = maxMoveSpeed;
-    player.physics.maxFallSpeed = maxFallSpeed;
-    player.physics.maxFlySpeed = maxFlySpeed;
-    player.physics.friction = friction;
-    player.physics.gravity = gravity;
+    Vec2 headSize = renderer->getTextureSize("head");
+    Vec2 legsSize = renderer->getTextureSize("legs");
+    Vec2 bodySize = renderer->getTextureSize("body");
 
-    player.renderer.loadTexture("legs", legsTexturePath);
-    player.renderer.loadTexture("head", headTexturePath);
-    player.renderer.loadTexture("body", bodyTexturePath);
 
-    player.renderer.addToState("idle", "head").spriteSheet({1, 20}, {0, 0}); // голова
-    player.renderer.addToState("idle", "legs").spriteSheet({1, 20}, {0, 0}); // ноги
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {8, 0}); // задняя рука
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 0}); // тело
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {7, 0}); // передняя рука
-    player.renderer.addToState("idle", "body").spriteSheet({9, 4}, {0, 1}); // плечо
+    renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("idle", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("idle", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {8, 0}).build());
+    renderer->addToState("idle", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 0}).build());
+    renderer->addToState("idle", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {7, 0}).build());
+    renderer->addToState("idle", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
 
-    player.renderer.addToState("move", "head").spriteSheet({1, 20}, {0, 0});
-    player.renderer.addToState("move", "legs").animation({1, 20}, {0, 6}, {0, 19}, 28);
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 3}, {6, 3}, 8);
-    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 0});
-    player.renderer.addToState("move", "body").animation({9, 4}, {3, 1}, {6, 1}, 8);
-    player.renderer.addToState("move", "body").spriteSheet({9, 4}, {0, 1});
-
-    player.renderer.addToState("jump", "legs").spriteSheet({1, 20}, {0, 5}); // ноги
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 3}); // задняя рука
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {1, 0}); // тело
-    player.renderer.addToState("jump", "head").spriteSheet({1, 20}, {0, 0}); // голова
-    player.renderer.addToState("jump", "body").spriteSheet({9, 4}, {2, 1}); // передняя рука
+    renderer->addToState("move", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("move", "legs", TextureDataBuilder::init(TextureType::ANIMATION, "legs", legsSize)
+        .animation({1, 20}, {0, 6}, {0, 19}, 14).build());
+    renderer->addToState("move", "armBehind", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+        .animation({9, 4}, {3, 3}, {6, 3}, 4).build());
+    renderer->addToState("move", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 0}).build());
+    renderer->addToState("move", "armFront", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+        .animation({9, 4}, {3, 1}, {6, 1}, 4).build());
+    renderer->addToState("move", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
+    
+    renderer->addToState("jump", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 5}).build());
+    renderer->addToState("jump", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {2, 3}).build());
+    renderer->addToState("jump", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {1, 0}).build());
+    renderer->addToState("jump", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("jump", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {2, 1}).build());
 
     return player;
 }

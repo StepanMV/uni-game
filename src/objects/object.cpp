@@ -9,11 +9,16 @@ Vec2 Object::getPos() const {
 Vec2 Object::getSize() const {
     return size;
 }
-void Object::move() {
-    pos += physics.calcSpeed();
+
+Vec2 Object::move()
+{
+    Vec2 speed = physics->calcSpeed();
+    pos += speed;
+    return speed;
 }
 
-bool Object::checkCollision(const Object& other) const {
+bool Object::checkCollision(const Object &other) const
+{
     Rectangle thisHitbox = Rectangle{(float) (pos.x - size.x / 2), (float) (pos.y - size.y / 2), (float) size.x, (float) size.y};
     Vec2 otherPos = other.getPos();
     Vec2 otherSize = other.getSize();
