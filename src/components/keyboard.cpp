@@ -4,14 +4,14 @@
 
 std::bitset<348> Keyboard::keyStatesDouble;
 std::bitset<348> Keyboard::keyStatesDelayed;
-std::array<Timer, 348> Keyboard::keyTimers;
+std::array<std::shared_ptr<Timer>, 348> Keyboard::keyTimers;
 std::array<double, 348> Keyboard::keyTimes;
 
 void Keyboard::init() {
     for (int i = 0; i < 348; i++) {
         keyStatesDouble[i] = false;
         keyStatesDelayed[i] = false;
-        keyTimers[i] = std::move(Timer(0.2, std::bind(&Keyboard::resetDelayed, i)));
+        keyTimers[i] = Timer::getInstance(0.2, std::bind(&Keyboard::resetDelayed, i));
         keyTimes[i] = 0;
     }
 }
@@ -19,7 +19,6 @@ void Keyboard::init() {
 void Keyboard::update()
 {
     for (int i = 0; i < 348; i++) {
-        keyTimers[i].update();
         if (keyStatesDouble[i]) {
             keyStatesDouble[i] = false;
             keyStatesDelayed[i] = false;
@@ -52,6 +51,10 @@ bool Keyboard::isKeyUp(int key) {
 
 bool Keyboard::isDoublePressed(int key) {
     return keyStatesDouble[key];
+}
+
+double Keyboard::getTimePressed(int key) {
+    return keyTimes[key];
 }
 
 void Keyboard::resetDelayed(int key) {

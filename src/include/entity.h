@@ -7,6 +7,9 @@ class Tile;
 
 class Entity: public Object {
     public:
+        Entity() = default;
+        Entity(const Entity& other);
+        Entity& operator=(const Entity& other);
         virtual void onCollision(Tile& other) = 0;
         virtual void onCollision(Entity& other) = 0;
         

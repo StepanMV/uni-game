@@ -19,9 +19,13 @@ Level::Level() {
     }
 }
 
-void Level::loadLevelFile(std::string filename) {
-    this->filename = filename;
-    std::ifstream inf(filename);
+Level::~Level() {
+    if (loaded) save();
+}
+
+void Level::loadFile(std::string filepath) {
+    this->filepath = filepath;
+    std::ifstream inf(filepath);
     if(inf) {
         unsigned idY, idX;
         unsigned posX, posY, id, form;
@@ -43,23 +47,46 @@ void Level::loadLevelFile(std::string filename) {
     }
 }
 
-void Level::load(std::string filename) {
-    loadLevelFile(filename);
+void Level::linkUI(std::shared_ptr<UI> ui, std::shared_ptr<Background> bg) {
+    this->ui = ui;
+    this->background = bg;
+}
+
+void Level::loadGame(std::string filename)
+{
+    loadFile(filename);
     camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 1.f;
-
-    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, 500 * tileSize), Vec2(tileSize * 2, tileSize * 3))
+    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0.75)
         .setHeadTexture("resources/textures/Armor_Head_3.png")
         .setBodyTexture("resources/textures/Armor_3.png")
         .setLegsTexture("resources/textures/Armor_Legs_3.png")
         .build());
+
+    loaded = true;
 }
 
-void Level::save(std::string filepath) {
+void Level::loadEditor(std::string filename) {
+    loadFile(filename);
+    camera.offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+    camera.target = Vector2{0, 0};
+    camera.rotation = 0.0f;
+    camera.zoom = 1.f;
+
+    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
+        .setMaxSpeeds(10, 10, 8)
+        .setForces(0.5, 0)
+        .build());
+
+    loaded = true;
+    this->editor = true;
+}
+
+void Level::save() {
     std::string dirpath = filepath.substr(0, filepath.rfind('/'));
     std::filesystem::create_directories(dirpath);
     std::ofstream outf(filepath);
@@ -100,22 +127,30 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
     if(tiles[idY - 1][idX].getId() != 0) {
         tiles[idY - 1][idX].isDown = isAdded;
         tiles[idY][idX].isUp = isAdded;
+        tiles[idY - 1][idX].updateState();
     }
     if(tiles[idY + 1][idX].getId() != 0) {
         tiles[idY + 1][idX].isUp = isAdded;
         tiles[idY][idX].isDown = isAdded;
+        tiles[idY + 1][idX].updateState();
     }
     if(tiles[idY][idX - 1].getId() != 0) {
         tiles[idY][idX - 1].isRight = isAdded;
         tiles[idY][idX].isLeft = isAdded;
+        tiles[idY][idX - 1].updateState();
     }
     if(tiles[idY][idX + 1].getId() != 0) {
         tiles[idY][idX + 1].isLeft = isAdded;
         tiles[idY][idX].isRight = isAdded;
+        tiles[idY][idX + 1].updateState();
     }
+
+    tiles[idY][idX].updateState();
+
     if(isAdded) {
         setClimb(tiles, idY, idX);
     }
+
     setClimb(tiles, idY + 1, idX);
     setClimb(tiles, idY + 2, idX);
     setClimb(tiles, idY + 3, idX);
@@ -138,16 +173,18 @@ void Level::cameraOnBoard() {
     }
 }
 
-void Level::placeTile(const Vec2 tilePos) {
+bool Level::isLoaded() const {
+    return loaded;
+}
+
+void Level::placeTile(const Vec2 tilePos, int id) {
     unsigned idX = tilePos.x / tileSize;
     unsigned idY = tilePos.y / tileSize;
 
     if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
     if(isTile(tilePos.toRaylib())) return;
 
-    Tile tile = std::move(TileBuilder::spawn({(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).setID(1).build());
-
-    if(player.checkCollision(tile)) return;
+    Tile tile = std::move(TileBuilder::spawn({(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).setID(id).build());
 
     tiles[idY][idX] = std::move(tile);
     setLocalPos(tiles, idY, idX, true);
@@ -160,8 +197,8 @@ void Level::breakTile(const Vec2 tilePos) {
     if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
     if(!isTile(tilePos.toRaylib())) return;
 
-    setLocalPos(tiles, idY, idX, false);
     tiles[idY][idX] = std::move(Tile());
+    setLocalPos(tiles, idY, idX, false);
 }
 
 void Level::calcCords() {
@@ -188,6 +225,7 @@ void Level::render() {
     
     this->calcCords();
     player.render();
+
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
             if(tiles[i][j].getId() != 0) {
@@ -197,38 +235,46 @@ void Level::render() {
     }
 
     EndMode2D();
+
     DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
     DrawText(std::to_string(player.getPos().y / tileSize).c_str(), 10, 70, 20, RED);
 }
 
 void Level::update() {
-	player.move();
+	Vec2 playerSpeed = player.move();
     camera.target = player.getPos().toRaylib();
     cameraOnBoard();
-    player.onBoard();
     player.update();
     this->checkCollision();
+    background->setSpeed(0.2 * playerSpeed);
+    /*
+    if (player.isAttacking()) {
+        Projectile p = player.getProjectile();
+        p.configure();
+    }
 
+    */
+
+    //for (auto& p : projectiles) p.update();
+
+    if (editor) updateEditor();
+}
+
+void Level::updateEditor() {
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
     Vec2 mp = {mousePos.x, mousePos.y};
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        placeTile(mp);
-    }
-    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-        breakTile(mp);
-    }
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
+    if (IsKeyPressed(KEY_Q)) placedBlockId++;
+    if (IsKeyPressed(KEY_E)) placedBlockId--;
 }
 
 void Level::checkCollision() {
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
-            if(player.checkCollision(tiles[i][j])) {
+            if(!editor && player.checkCollision(tiles[i][j])) {
                 player.onCollision(tiles[i][j]);
             }
         }
     }
-}
-
-Level::~Level() {
-    save(filename);
 }

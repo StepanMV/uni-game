@@ -4,11 +4,13 @@
 
 class Player: public Entity {
     public:
-        Player() = default;
-        Player(Vec2 pos, Vec2 size);
+        Player();
 
         virtual void update() override;
         virtual void render() override;
+
+        //bool isAttacking();
+        //Projectile getProjectile();
 
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;
@@ -23,6 +25,7 @@ class Player: public Entity {
         */
 
     private:
+        bool facingLeft = false;
         double startY = pos.y;
         friend class PlayerBuilder;
 };
@@ -36,12 +39,9 @@ public:
     PlayerBuilder& setLegsTexture(const std::string& texturePath);
     PlayerBuilder& setBodyTexture(const std::string& texturePath);
 
-    Player build() const;
+    Player build();
 
 private:
-    Vec2 pos, size;
     std::string headTexturePath, legsTexturePath, bodyTexturePath;
-    double maxMoveSpeed = 10, maxFallSpeed = 10, maxFlySpeed = 10;
-    double friction = 0.5, gravity = 0.5;
-    unsigned maxHealth = 100;
+    Player player;
 };

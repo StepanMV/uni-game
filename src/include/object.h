@@ -3,16 +3,18 @@
 #include "renderer.h"
 #include "physics.h"
 #include "vec2.h"
+#include <memory>
 
 class Object {
 public:
+
     bool checkCollision(const Object& other) const;
     Rectangle getCollisionBox(const Object& other) const;
 
 
     virtual void update() = 0;
     virtual void render() = 0;
-    void move();
+    Vec2 move();
 
     Vec2 getPos() const;
     Vec2 getSize() const;
@@ -20,6 +22,6 @@ public:
 protected:
     Vec2 pos, size;
 
-    Renderer renderer;
-    Physics physics;
+    std::shared_ptr<Renderer> renderer;
+    std::shared_ptr<Physics> physics;
 };
