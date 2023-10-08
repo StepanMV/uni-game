@@ -7,8 +7,11 @@
 class Object {
 public:
     bool checkCollision(const Object& other) const;
-    bool MyCheckCollision(const Object& other) const;
+    bool MyCheckCollision(const Object& other);
     Rectangle getCollisionBox(const Object& other) const;
+
+    void calcHitbox();
+    virtual bool isAlive() const = 0;
 
 
     virtual void update() = 0;
@@ -20,6 +23,11 @@ public:
 
 protected:
     Vec2 pos, size;
+    std::vector<Vec2> hitbox = {Vec2(pos.x + size.x / 2, pos.y + size.y / 2),
+                                Vec2(pos.x + size.x / 2, pos.y - size.y / 2),
+                                Vec2(pos.x - size.x / 2, pos.y + size.y / 2),
+                                Vec2(pos.x - size.x / 2, pos.y - size.y / 2)};
+    float angle = 0;
 
     Renderer renderer;
     Physics physics;

@@ -8,6 +8,10 @@ unsigned Tile::getForm() const {
     return form;
 }
 
+bool Tile::isAlive() const {
+    return id != 0;
+}
+
 void Tile::update() { }
 
 void Tile::render() {

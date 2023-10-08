@@ -4,6 +4,7 @@
 Timer::Timer(double duration, std::function<void()> callback) {
     this->duration = duration;
     this->callback = callback;
+    reset();
 }
 
 void Timer::update() {

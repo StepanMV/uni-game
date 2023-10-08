@@ -17,6 +17,14 @@ void Vec2::normalize() {
     y /= length;
 }
 
+void Vec2::rotate(float angle) {
+    float rad = angle * M_PI / 180;
+    float _x = x * cos(rad) - y * sin(rad);
+    float _y = x * sin(rad) + y * cos(rad);
+    x = _x;
+    y = _y;
+}
+
 Vec2& Vec2::operator+=(const Vec2& v) {
     x += v.x;
     y += v.y;

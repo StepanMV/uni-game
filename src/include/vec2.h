@@ -10,6 +10,7 @@ class Vec2 {
 
         float dot(const Vec2& v) const;
         void normalize();
+        void rotate(float angle);
 
         Vec2& operator+=(const Vec2& v);
         Vec2& operator-=(const Vec2& v);

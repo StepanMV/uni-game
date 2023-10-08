@@ -38,6 +38,19 @@ std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
     return points;
 }
 
+void Object::calcHitbox() {
+    hitbox.clear();
+    hitbox.push_back(Vec2(+size.x / 2, +size.y / 2));
+    hitbox.push_back(Vec2(+size.x / 2, -size.y / 2));
+    hitbox.push_back(Vec2(-size.x / 2, -size.y / 2));
+    hitbox.push_back(Vec2(-size.x / 2, +size.y / 2));
+    for(auto& point : hitbox) {
+        point.rotate(angle);
+        point += pos;
+    }
+}
+
+
 //Collision GJK algorithm
 
 Vec2 farthestPointInDirection(std::vector<Vec2> shape, Vec2 direction) {
@@ -119,6 +132,9 @@ bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
     }
 }
 
-bool Object::MyCheckCollision(const Object& other) const {
-    return calculate(getPointsOfRect(pos, size), getPointsOfRect(other.getPos(), other.getSize()));
+bool Object::MyCheckCollision(const Object& other) {
+    if(!other.isAlive()) {
+        return false;
+    }
+    return calculate(hitbox, getPointsOfRect(other.getPos(), other.getSize()));
 }

@@ -8,6 +8,8 @@ public:
     unsigned getId() const;
     unsigned getForm() const;
 
+    virtual bool isAlive() const override;
+
     virtual void update() override;
     virtual void render() override;
 

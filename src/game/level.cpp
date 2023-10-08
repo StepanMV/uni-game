@@ -197,6 +197,12 @@ void Level::render() {
         }
     }
 
+    for(auto& projectile: projectiles) {
+        if(projectile.getId() != 0) {
+            projectile.render();
+        }
+    }
+
     EndMode2D();
     DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
     DrawText(std::to_string(player.getPos().y / tileSize).c_str(), 10, 70, 20, RED);
@@ -204,16 +210,38 @@ void Level::render() {
 
 void Level::update() {
 	player.move();
+    for(auto it = projectiles.begin(); it != projectiles.end(); it++) {
+        if(it->getId() != 0) {
+            it->move();
+            it->update();
+        }
+        if(it->getPos().x < levelOffset * tileSize || 
+        it->getPos().y < levelOffset * tileSize || 
+        it->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+        it->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+            it->breakProjectile();
+        }
+    }
+    projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
     camera.target = player.getPos().toRaylib();
     cameraOnBoard();
     player.onBoard();
     player.update();
     this->checkCollision();
 
+    Projectile projectile = std::move(player.getProjectile());
+
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
     Vec2 mp = {mousePos.x, mousePos.y};
+
+    if(projectile.getId() != 0) {
+        projectile.spawn(player.getPos(), Vec2(20, 5), 10);
+        projectile.setDirection(mp);
+        projectiles.push_back(projectile);
+    }
+
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        placeTile(mp);
+        //placeTile(mp);
     }
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         breakTile(mp);
@@ -225,6 +253,15 @@ void Level::checkCollision() {
         for(int j = player.getPos().x / tileSize - 5; j < player.getPos().x / tileSize + 5; j++) {
             if(player.checkCollision(tiles[i][j])) {
                 player.onCollision(tiles[i][j]);
+            }
+        }
+    }
+    for(auto& projectile : projectiles) {
+        for(int i = projectile.getPos().y / tileSize - 1; i < projectile.getPos().y / tileSize + 1; i++) {
+            for(int j = projectile.getPos().x / tileSize - 1; j < projectile.getPos().x / tileSize + 1; j++) {
+                if(projectile.MyCheckCollision(tiles[i][j])) {
+                    projectile.onCollision(tiles[i][j]);
+                }
             }
         }
     }

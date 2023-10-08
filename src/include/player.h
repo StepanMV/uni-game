@@ -2,6 +2,8 @@
 
 #include "entity.h"
 
+
+
 class Player: public Entity {
     public:
         Player() = default;
@@ -9,6 +11,8 @@ class Player: public Entity {
 
         virtual void update() override;
         virtual void render() override;
+
+        Projectile getProjectile() const override;
 
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;

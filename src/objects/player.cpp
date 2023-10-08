@@ -2,6 +2,7 @@
 #include "tile.h"
 #include "level.h"
 #include "keyboard.h"
+#include "projectile.h"
 
 void Player::update() {
     physics.accel = Vec2(0, 0);
@@ -34,7 +35,21 @@ void Player::update() {
     if(Keyboard::isKeyDown(KEY_W)) {
         physics.accel += Vec2(0, -2.5);
     }
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        isAttacking = true;
+    }
+    else {
+        isAttacking = false;
+    }
     physics.onGround = false;
+}
+
+Projectile Player::getProjectile() const {
+    if(isAttacking) {
+        Projectile projectile(1, 1, true);
+        return projectile;
+    }
+    return Projectile(0, 1, true);
 }
 
 void Player::render() {
