@@ -4,11 +4,13 @@
 
 class Player: public Entity {
     public:
-        Player() = default;
-        Player(Vec2 pos, Vec2 size);
+        Player();
 
         virtual void update() override;
         virtual void render() override;
+
+        //bool isAttacking();
+        //Projectile getProjectile();
 
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;

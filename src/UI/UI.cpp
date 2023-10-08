@@ -2,38 +2,34 @@
 
 #include "raygui.h"
 #include <stdexcept>
+#include <iostream>
 
 UIBuilder &UIBuilder::addButton(std::string ID, ButtonData buttonData, std::function<void()> callback) {
-    buttons[ID] = buttonData;
-    buttonCallbacks[ID] = callback;
+    ui->buttons[ID] = buttonData;
+    ui->buttonCallbacks[ID] = callback;
     return *this;
 }
 
+UIBuilder::UIBuilder() : ui(std::make_shared<UI>()) {}
+
 UIBuilder &UIBuilder::addDummyRect(std::string ID, DummyRectData dummyRectData) {
-    dummyRects[ID] = dummyRectData;
+    ui->dummyRects[ID] = dummyRectData;
     return *this;
 }
 
 UIBuilder &UIBuilder::addDropdown(std::string ID, DropdownData dropdownData) {
-    dropdowns[ID] = dropdownData;
+    ui->dropdowns[ID] = dropdownData;
     return *this;
 }
 
-UI UIBuilder::build() const {
-    UI ui;
-    ui.buttons = std::move(buttons);
-    ui.buttonCallbacks = std::move(buttonCallbacks);
-    ui.dummyRects = std::move(dummyRects);
-    ui.dropdowns = std::move(dropdowns);
-    ui.background = std::move(background);
-
-    for (auto &dropdown : ui.dropdowns) {
-        ui.dropdownStates[dropdown.first] = dropdown.second.active;
+std::shared_ptr<UI> UIBuilder::build()  {
+    for (auto &dropdown : ui->dropdowns) {
+        ui->dropdownStates[dropdown.first] = dropdown.second.active;
     }
 
-    for (auto &button : ui.buttons) {
-        ui.prevButtonStates[button.first] = false;
-        ui.buttonStates[button.first] = false;
+    for (auto &button : ui->buttons) {
+        ui->prevButtonStates[button.first] = false;
+        ui->buttonStates[button.first] = false;
     }
 
     return ui;
@@ -69,7 +65,12 @@ void UI::update() {
     GuiUnlock();
 }
 
-bool UI::isButtonPressed(std::string ID) const {
+Color UI::getBackgroundColor() const {
+    return GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
+}
+
+bool UI::isButtonPressed(std::string ID) const
+{
     if (buttonStates.find(ID) == buttonStates.end()) return false;
     return buttonStates.at(ID) && !prevButtonStates.at(ID);
 }

@@ -1,6 +1,43 @@
 #include "tile.h"
 
-unsigned Tile::getId() const {
+Tile::Tile() {
+    renderer = std::make_shared<TileRenderer>();
+}
+
+Tile::Tile(const Tile &other)
+{
+    pos = other.pos;
+    size = other.size;
+    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
+    renderer->changeObject(&pos);
+    id = other.id;
+    form = other.form;
+    isUp = other.isUp;
+    isDown = other.isDown;
+    isLeft = other.isLeft;
+    isRight = other.isRight;
+    canClimbLeft = other.canClimbLeft;
+    canClimbRight = other.canClimbRight;
+}
+
+Tile &Tile::operator=(const Tile &other) {
+    pos = other.pos;
+    size = other.size;
+    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
+    renderer->changeObject(&pos);
+    id = other.id;
+    form = other.form;
+    isUp = other.isUp;
+    isDown = other.isDown;
+    isLeft = other.isLeft;
+    isRight = other.isRight;
+    canClimbLeft = other.canClimbLeft;
+    canClimbRight = other.canClimbRight;
+    return *this;
+}
+
+unsigned Tile::getId() const
+{
     return id;
 }
 
@@ -9,24 +46,26 @@ unsigned Tile::getForm() const {
 }
 
 void Tile::updateState() {
-    std::string state = "";
-    state += isUp ? "u" : "0";
-    state += isDown ? "d" : "0";
-    state += isLeft ? "l" : "0";
-    state += isRight ? "r" : "0";
-    renderer.setState(state);
+    auto renderer = std::dynamic_pointer_cast<TileRenderer>(this->renderer);
+    unsigned short int state = 0;
+    if (isUp) state += 8;
+    if (isDown) state += 4;
+    if (isLeft) state += 2;
+    if (isRight) state += 1;
+    renderer->setSpritePos(state);
 }
 
 void Tile::update() { }
 
 void Tile::render() {
-    renderer.render();
+    renderer->render();
 }
 
 TileBuilder TileBuilder::spawn(Vec2 pos, Vec2 size) {
     TileBuilder builder;
     builder.tile.pos = pos;
     builder.tile.size = size;
+    builder.tile.renderer = std::make_shared<TileRenderer>(&builder.tile.pos);
     return builder;
 }
 
@@ -56,43 +95,9 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 
 Tile TileBuilder::build() {
     if (tile.id == 0) return Tile();
+    auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile.renderer);
 
-    tile.renderer.loadTexture("texture", "resources/textures/Tiles_" + std::to_string(tile.id) + ".png");
-
-    Vec2 textureSize = tile.renderer.getTextureSize("texture");
-
-    tile.renderer.addToState("0000", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(9, 11), 3}).build());
-    tile.renderer.addToState("000r", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {9, GetRandomValue(0, 2)}).build());
-    tile.renderer.addToState("00l0", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {12, GetRandomValue(0, 2)}).build());
-    tile.renderer.addToState("00lr", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(6, 8), 4}).build());
-    tile.renderer.addToState("0d00", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(6, 8), 0}).build());
-    tile.renderer.addToState("0d0r", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {0, 3}).build());
-    tile.renderer.addToState("0dl0", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {1, 3}).build());
-    tile.renderer.addToState("0dlr", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(1, 3), 0}).build());
-    tile.renderer.addToState("u000", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(6, 8), 3}).build());
-    tile.renderer.addToState("u00r", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {0, 4}).build());
-    tile.renderer.addToState("u0l0", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {1, 4}).build());
-    tile.renderer.addToState("u0lr", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(1, 3), 2}).build());
-    tile.renderer.addToState("ud00", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {5, GetRandomValue(0, 2)}).build());
-    tile.renderer.addToState("ud0r", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {0, GetRandomValue(0, 2)}).build());
-    tile.renderer.addToState("udl0", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {4, GetRandomValue(0, 2)}).build());
-    tile.renderer.addToState("udlr", "main", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "texture", textureSize)
-        .spriteSheet({16, 15}, {GetRandomValue(1, 3), 1}).build());
+    renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile.id) + ".png");
     tile.updateState();
     return tile;
 }

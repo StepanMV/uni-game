@@ -38,31 +38,34 @@ std::shared_ptr<Texture2D> Renderer::getFromVRAM(std::string filename, bool flip
     }
 }
 
-size_t Renderer::getElementIndex(std::string element) {
+size_t CoolRenderer::getElementIndex(std::string element) {
     auto it = std::find(stateOrder.begin(), stateOrder.end(), element);
     if (it == stateOrder.end()) throw std::runtime_error("Invalid element");
     return it - stateOrder.begin();
 }
 
-void Renderer::loadTexture(std::string ID, std::string filename) {
+CoolRenderer::CoolRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
+
+void CoolRenderer::loadTexture(std::string ID, std::string filename)
+{
     textures.emplace(ID, getFromVRAM(filename, false));
     textures.emplace(ID + " flipped", getFromVRAM(filename, true));
 }
 
-void Renderer::addToState(std::string stateID, std::string element, std::shared_ptr<TextureData> textureData) {
+void CoolRenderer::addToState(std::string stateID, std::string element, std::shared_ptr<TextureData> textureData) {
     objectStates[stateID].push_back(textureData);
     stateOrder.push_back(element);
 }
 
-Vec2 Renderer::getTextureSize(std::string ID) {
-    return Vec2{textures[ID]->width, textures[ID]->height};
+Vec2 CoolRenderer::getTextureSize(std::string ID) {
+    return Vec2{(float) textures[ID]->width, (float) textures[ID]->height};
 }
 
-void Renderer::setState(std::string ID) {
+void CoolRenderer::setState(std::string ID) {
     currentStateID = ID;
 }
 
-void Renderer::setFlipped(bool flipped, std::string element) {
+void CoolRenderer::setFlipped(bool flipped, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             element->setFlipped(flipped);
@@ -72,7 +75,7 @@ void Renderer::setFlipped(bool flipped, std::string element) {
     }
 }
 
-void Renderer::setRotation(double rotation, std::string element)
+void CoolRenderer::setRotation(double rotation, std::string element)
 {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
@@ -83,7 +86,7 @@ void Renderer::setRotation(double rotation, std::string element)
     }
 }
 
-void Renderer::setScale(double scale, std::string element) {
+void CoolRenderer::setScale(double scale, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             element->setScale(scale);
@@ -93,7 +96,7 @@ void Renderer::setScale(double scale, std::string element) {
     }
 }
 
-void Renderer::setDestOffset(Vec2 offset, std::string element) {
+void CoolRenderer::setDestOffset(Vec2 offset, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             element->setDestOffset(offset);
@@ -103,7 +106,7 @@ void Renderer::setDestOffset(Vec2 offset, std::string element) {
     }
 }
 
-void Renderer::setOffset(Vec2 offset, std::string element) {
+void CoolRenderer::setOffset(Vec2 offset, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             if (element->getType() == TextureType::CROPPED_TEXTURE) {
@@ -117,7 +120,7 @@ void Renderer::setOffset(Vec2 offset, std::string element) {
     }
 }
 
-void Renderer::setSpritePos(Vec2 pos, std::string element) {
+void CoolRenderer::setSpritePos(Vec2 pos, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             if (element->getType() == TextureType::SPRITE_SHEET) {
@@ -131,7 +134,7 @@ void Renderer::setSpritePos(Vec2 pos, std::string element) {
     }
 }
 
-void Renderer::setAnimationSpeed(float speed, std::string element) {
+void CoolRenderer::setAnimationSpeed(float speed, std::string element) {
     if (element.empty()) {
         for (auto& element : objectStates[currentStateID]) {
             if (element->getType() == TextureType::ANIMATION) {
@@ -144,7 +147,7 @@ void Renderer::setAnimationSpeed(float speed, std::string element) {
         std::dynamic_pointer_cast<Animation>(objectStates[currentStateID][index])->setSpeed(speed);
     }
 }
-void Renderer::render() {
+void CoolRenderer::render() {
     if (currentStateID.empty()) return;
     for (auto& element : objectStates[currentStateID]) {
         if (element->getType() == TextureType::ANIMATION) {
@@ -161,5 +164,43 @@ void Renderer::render() {
         dest.x += objectPos->x;
         dest.y += objectPos->y;
         DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, element->getRotation(), WHITE);
+    }
+}
+
+TileRenderer::TileRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
+
+void TileRenderer::loadTexture(std::string filename) {
+    texture = getFromVRAM(filename);
+}
+
+void TileRenderer::setSpritePos(unsigned short int state) {
+    spritePos = getSpritePos(state);
+}
+
+void TileRenderer::render() {
+    Rectangle source = {spritePos.x * 18, spritePos.y * 18, 16, 16};
+    Rectangle dest = {objectPos->x, objectPos->y, 16, 16};
+    DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, 0, WHITE);
+}
+
+Vec2 TileRenderer::getSpritePos(unsigned short int state) {
+    switch(state) {
+        case 0b0000: return {GetRandomValue(9, 11), 3};
+        case 0b0001: return {9, GetRandomValue(0, 2)};
+        case 0b0010: return {12, GetRandomValue(0, 2)};
+        case 0b0011: return {GetRandomValue(6, 8), 4};
+        case 0b0100: return {GetRandomValue(6, 8), 0};
+        case 0b0101: return {0, 3};
+        case 0b0110: return {1, 3};
+        case 0b0111: return {GetRandomValue(1, 3), 0};
+        case 0b1000: return {GetRandomValue(6, 8), 3};
+        case 0b1001: return {0, 4};
+        case 0b1010: return {1, 4};
+        case 0b1011: return {GetRandomValue(1, 3), 2};
+        case 0b1100: return {5, GetRandomValue(0, 2)};
+        case 0b1101: return {0, GetRandomValue(0, 2)};
+        case 0b1110: return {4, GetRandomValue(0, 2)};
+        case 0b1111: return {GetRandomValue(1, 3), 1};
+        default: return {GetRandomValue(9, 11), 3};
     }
 }

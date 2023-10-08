@@ -24,12 +24,16 @@ public:
 
 	void load();
 
+	const std::map<std::string, std::shared_ptr<UI>> uis;
+
 private:
+	void createUIS();
 
 	void update();
-
+	void checkUI();
 	void draw();
 
 	Level level;
-	UI ui;
+	std::shared_ptr<UI> ui;
+    std::shared_ptr<Background> background;
 };

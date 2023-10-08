@@ -4,18 +4,18 @@
 #include <vector>
 #include "tile.h"
 #include "player.h"
+#include "ui.h"
 
 
 class Level {
 public:
     Level();
+    ~Level();
 
-    Level(const Level& other) = delete;
-    Level& operator=(const Level& other) = delete;
-
-    void loadLevelFile(std::string filepath);
-    void load(std::string filepath, bool editor = false);
-    void save(std::string filepath);
+    void linkUI(std::shared_ptr<UI> ui, std::shared_ptr<Background> bg);
+    void loadGame(std::string filepath);
+    void loadEditor(std::string filepath);
+    void save();
 
     bool isTile(Vector2 localPos) const;
     void placeTile(const Vec2 tilePos, int id);
@@ -32,22 +32,28 @@ public:
 
     bool isLoaded() const;
 
-    ~Level();
-
     static const unsigned tileSize;
     static const unsigned levelSizeX;
     static const unsigned levelSizeY;
     static const unsigned levelOffset;
 
 private:
-    bool loaded = false, editor = false;
+    void loadFile(std::string filepath);
+    void updateEditor();
+
+
+    bool loaded = false;
+    bool editor = false;
     int placedBlockId = 1;
-    int j = 1;
 
     Player player;
     Camera2D camera;
+    std::shared_ptr<UI> ui;
+    std::shared_ptr<Background> background;
 
-    std::string filename;
+    //std::vector<Projectile> projectiles;
+
+    std::string filepath;
     unsigned long startRenderX, endRenderX, startRenderY, endRenderY;
     std::vector<std::vector<Tile>> tiles;
 };

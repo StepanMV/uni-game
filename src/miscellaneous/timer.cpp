@@ -14,8 +14,8 @@ void Timer::update() {
     if (done) return;
     currentTime = GetTime();
     if (currentTime - startTime > duration) {
-        callback();
         done = true;
+        callback();
     }
 }
 

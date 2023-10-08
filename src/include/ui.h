@@ -15,6 +15,9 @@ public:
     void update();
     //void render();
 
+    Color getBackgroundColor() const;
+    std::shared_ptr<Background> getBackground() const;
+
     bool isButtonPressed(std::string ID) const;
     bool isButtonReleased(std::string ID) const;
     bool isButtonHeld(std::string ID) const;
@@ -31,22 +34,18 @@ private:
     std::unordered_map<std::string, ButtonData> buttons;
     std::unordered_map<std::string, DummyRectData> dummyRects;
     std::unordered_map<std::string, DropdownData> dropdowns;
-    Background background;
 
     friend class UIBuilder;
 };
 
 class UIBuilder {
 public:
+    UIBuilder();
     UIBuilder& addButton(std::string ID, ButtonData buttonData, std::function<void()> callback = []() {});
     UIBuilder& addDummyRect(std::string ID, DummyRectData dummyRectData);
     UIBuilder& addDropdown(std::string ID, DropdownData dropdownData);
-    UI build() const;
+    std::shared_ptr<UI> build();
 
 private:
-    std::unordered_map<std::string, std::function<void()>> buttonCallbacks;
-    std::unordered_map<std::string, ButtonData> buttons;
-    std::unordered_map<std::string, DummyRectData> dummyRects;
-    std::unordered_map<std::string, DropdownData> dropdowns;
-    Background background;
+    std::shared_ptr<UI> ui;
 };

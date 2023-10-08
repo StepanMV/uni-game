@@ -4,6 +4,9 @@
 
 class Tile: public Object {
 public:
+    Tile();
+    Tile(const Tile& other);
+    Tile& operator=(const Tile& other);
 
     unsigned getId() const;
     unsigned getForm() const;

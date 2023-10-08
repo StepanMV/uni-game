@@ -8,27 +8,12 @@ Vec2 Object::getPos() const {
 Vec2 Object::getSize() const {
     return size;
 }
-void Object::move() {
-    pos += physics.calcSpeed();
-}
 
-Object::Object() : pos(Vec2{0, 0}), size(Vec2{0, 0}), renderer(Renderer(&pos)), physics(Physics()) { }
-
-Object::Object(const Object &other) : pos(other.pos),
-                                      size(other.size),
-                                      renderer(other.renderer),
-                                      physics(other.physics)
+Vec2 Object::move()
 {
-    renderer.changeObject(&pos);
-}
-
-Object &Object::operator=(const Object &other) {
-    pos = other.pos;
-    size = other.size;
-    renderer = other.renderer;
-    physics = other.physics;
-    renderer.changeObject(&pos);
-    return *this;
+    Vec2 speed = physics->calcSpeed();
+    pos += speed;
+    return speed;
 }
 
 bool Object::checkCollision(const Object &other) const
