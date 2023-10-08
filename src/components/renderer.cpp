@@ -27,7 +27,13 @@ void Renderer::unloadTextures() {
 
 std::shared_ptr<Texture2D> Renderer::getFromVRAM(std::string filename, bool flipped) {
     std::string textureName = filename + (flipped ? " flipped" : "");
-    if (texturesVRAM.find(textureName) == texturesVRAM.end() || texturesVRAM[textureName].expired()) {
+
+    for (auto it = texturesVRAM.begin(); it != texturesVRAM.end();) {
+        if (it->second.expired()) it = texturesVRAM.erase(it);
+        else ++it;
+    }
+    
+    if (texturesVRAM.find(textureName) == texturesVRAM.end()) {
         if (flipped) ImageFlipHorizontal(&texturesRAM[filename]);
         auto texturePtr = std::shared_ptr<Texture2D>(new Texture2D(LoadTextureFromImage(texturesRAM[filename])), [](Texture2D* texture) { UnloadTexture(*texture); });
         if (flipped) ImageFlipHorizontal(&texturesRAM[filename]);
