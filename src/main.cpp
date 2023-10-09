@@ -6,8 +6,8 @@
 
 int main()
 {
-   //Game game(1280, 720, 60, "Low-budget Terraria");
-    Game game(1920, 1080, 60, "Low-budget Terraria");
+    Game game(1366, 720, 60, "Low-budget Terraria");
+    //Game game(1920, 1080, 60, "Low-budget Terraria");
     game.load();
 
     GuiLoadStyleCyber();

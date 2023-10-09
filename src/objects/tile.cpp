@@ -20,6 +20,7 @@ Tile::Tile(const Tile &other)
     canClimbRight = other.canClimbRight;
     hitbox = other.hitbox;
     angle = other.angle;
+    isPlatform = other.isPlatform;
 }
 
 Tile &Tile::operator=(const Tile &other) {
@@ -37,6 +38,7 @@ Tile &Tile::operator=(const Tile &other) {
     canClimbRight = other.canClimbRight;
     hitbox = other.hitbox;
     angle = other.angle;
+    isPlatform = other.isPlatform;
     return *this;
 }
 
@@ -103,6 +105,7 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 
 Tile TileBuilder::build() {
     if (tile.id == 0) return Tile();
+    tile.isPlatform = tile.id == 1;
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile.renderer);
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile.id) + ".png");

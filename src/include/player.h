@@ -11,6 +11,8 @@ class Player: public Entity {
         virtual void update() override;
         virtual void render() override;
 
+        void goDownEditor();
+
         Projectile getProjectile() const override;
 
         virtual void onCollision(Tile& other) override;
@@ -27,7 +29,9 @@ class Player: public Entity {
 
     private:
         bool facingLeft = false;
-        std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1/*, [&](){isAttacking = true;}*/);
+        bool skipPlatform = false;
+        std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);
+        std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         double startY = pos.y;
         friend class PlayerBuilder;
 };

@@ -1,5 +1,4 @@
 #include "vec2.h"
-#include <cmath>
 
 Vec2::Vec2(float _x, float _y): x(_x), y(_y) {}
 

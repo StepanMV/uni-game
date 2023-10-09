@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include <cmath>
 
 class Vec2 {
 public:

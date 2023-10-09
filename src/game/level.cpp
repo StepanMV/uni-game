@@ -291,6 +291,7 @@ void Level::updateEditor() {
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     if (IsKeyPressed(KEY_Q)) placedBlockId++;
     if (IsKeyPressed(KEY_E)) placedBlockId--;
+    if(IsKeyDown(KEY_S)) player.goDownEditor();
 }
 
 void Level::checkCollision() {
