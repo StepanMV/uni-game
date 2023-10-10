@@ -4,11 +4,6 @@
 #include "keyboard.h"
 #include "projectile.h"
 
-Player::Player() {
-    renderer = std::make_shared<CoolRenderer>();
-    physics = std::make_shared<Physics>();
-}
-
 void Player::update() {
     onBoard();
     physics->accel = Vec2(0, 0);
