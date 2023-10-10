@@ -13,6 +13,7 @@ float Vec2::dot(const Vec2& v) const {
 
 void Vec2::normalize() {
     float length = sqrt(x * x + y * y);
+    if(!length) return;
     x /= length;
     y /= length;
 }

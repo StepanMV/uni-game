@@ -11,7 +11,8 @@ class Projectile: public Object {
         Projectile& operator=(const Projectile& other);
         Projectile(unsigned _id, unsigned _damage, const bool _fromPlayer);
 
-        void setDirection(Vec2 direction);
+        void setDirection(Vec2 target);
+        void setAccelDirection(Vec2 target);
 
         unsigned getId() const;
 

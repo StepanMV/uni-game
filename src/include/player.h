@@ -3,7 +3,6 @@
 #include "entity.h"
 #include "timer.h"
 
-
 class Player: public Entity {
     public:
         Player();
@@ -12,6 +11,7 @@ class Player: public Entity {
         virtual void render() override;
 
         Projectile getProjectile() const override;
+        Projectile getWeapon() const;
 
         virtual void onCollision(Tile& other) override;
         virtual void onCollision(Entity& other) override;
@@ -27,6 +27,7 @@ class Player: public Entity {
 
     private:
         bool facingLeft = false;
+        bool isWeapon = false;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1/*, [&](){isAttacking = true;}*/);
         double startY = pos.y;
         friend class PlayerBuilder;

@@ -13,6 +13,7 @@ public:
     Rectangle getCollisionBox(const Object& other) const;
 
     void calcHitbox();
+    void setCenterOffset(Vec2 offset);
     virtual bool isAlive() const = 0;
 
 
@@ -26,6 +27,7 @@ public:
 protected:
     Vec2 pos, size;
     std::vector<Vec2> hitbox;
+    Vec2 centerOffset = Vec2(0, 0);
     float angle = 0;
 
     std::shared_ptr<Renderer> renderer;

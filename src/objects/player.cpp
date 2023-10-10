@@ -43,6 +43,7 @@ void Player::update() {
     }
 
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        isWeapon = true;
         if(isAttacking) {
             projTimer->reset();
         }
@@ -53,6 +54,9 @@ void Player::update() {
             isAttacking = false;
         }
     }
+    else {
+        isWeapon = false;
+    }
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         isAttacking = true;
     }
@@ -62,13 +66,19 @@ void Player::update() {
     if (Keyboard::isKeyDown(KEY_S)) {
         physics->accel += Vec2(0, 2.5);
     }
-
     physics->onGround = false;
 }
 
 Projectile Player::getProjectile() const {
     if(isAttacking) {
         return Projectile(1, 1, true);
+    }
+    return Projectile(0, 1, true);
+}
+
+Projectile Player::getWeapon() const {
+    if(isWeapon) {
+        return Projectile(2, 1, true);
     }
     return Projectile(0, 1, true);
 }

@@ -43,16 +43,28 @@ std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
     return points;
 }
 
+void Object::setCenterOffset(Vec2 offset) {
+    centerOffset = offset;
+}
+
 void Object::calcHitbox() {
     hitbox.clear();
     hitbox.push_back(Vec2(+size.x / 2, +size.y / 2));
     hitbox.push_back(Vec2(+size.x / 2, -size.y / 2));
     hitbox.push_back(Vec2(-size.x / 2, -size.y / 2));
     hitbox.push_back(Vec2(-size.x / 2, +size.y / 2));
+    Vec2 oldCenter = centerOffset;
+    Vec2 posOffset = -oldCenter;
+    posOffset.rotate(angle);
+    centerOffset = -posOffset;
+    posOffset += oldCenter;
     for(auto& point : hitbox) {
+        point -= oldCenter;
         point.rotate(angle);
+        point += oldCenter;
         point += pos;
     }
+    pos += posOffset;
 }
 
 
@@ -138,7 +150,7 @@ bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
 }
 
 bool Object::MyCheckCollision(const Object& other) const {
-    if(!other.isAlive()) {
+    if(!other.isAlive() || !isAlive()) {
         return false;
     }
     return calculate(hitbox, other.hitbox);
