@@ -20,6 +20,8 @@ Projectile::Projectile(const Projectile &other) {
     fromPlayer = other.fromPlayer;
     id = other.id;
     centerOffset = other.centerOffset;
+    startCenter = other.startCenter;
+    startHitbox = other.startHitbox;
     renderer->changeObject(&pos);
 }
 
@@ -35,6 +37,8 @@ Projectile &Projectile::operator=(const Projectile &other) {
     fromPlayer = other.fromPlayer;
     id = other.id;
     centerOffset = other.centerOffset;
+    startCenter = other.startCenter;
+    startHitbox = other.startHitbox;
     renderer->changeObject(&pos);
     return *this;
 }
@@ -106,13 +110,18 @@ unsigned Projectile::getId() const {
     return id;
 }
 
+void Projectile::setId(unsigned id) {
+    this->id = id;
+}
+
+void Projectile::setPos(Vec2 pos) {
+    this->pos = pos;
+}
+
 void Projectile::update() {
     if(id == 1) {
         angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
     }
-    angle = -angle;
-    calcHitbox();
-    angle = -angle;
     if(id == 2) {
         angle += 10;
         if(angle > 135) {

@@ -41,7 +41,6 @@ void Player::update() {
     if(Keyboard::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -2.5);
     }
-
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         isWeapon = true;
         if(isAttacking) {
@@ -77,9 +76,7 @@ Projectile Player::getProjectile() const {
 }
 
 Projectile Player::getWeapon() const {
-    if(isWeapon) {
-        return Projectile(2, 1, true);
-    }
+    if(isWeapon) return Projectile(2, 1, true);
     return Projectile(0, 1, true);
 }
 

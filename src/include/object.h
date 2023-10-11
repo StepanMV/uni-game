@@ -26,7 +26,15 @@ public:
 
 protected:
     Vec2 pos, size;
-    std::vector<Vec2> hitbox;
+    std::vector<Vec2> hitbox = std::vector<Vec2>(4);
+    
+    std::vector<Vec2> startHitbox = {Vec2(+size.x / 2, +size.y / 2),
+                                    Vec2(+size.x / 2, -size.y / 2),
+                                    Vec2(-size.x / 2, -size.y / 2),
+                                    Vec2(-size.x / 2, +size.y / 2)};
+    Vec2 startCenter = Vec2(0, 0);
+    
+    
     Vec2 centerOffset = Vec2(0, 0);
     float angle = 0;
 

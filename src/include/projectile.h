@@ -15,6 +15,8 @@ class Projectile: public Object {
         void setAccelDirection(Vec2 target);
 
         unsigned getId() const;
+        void setId(unsigned id);
+        void setPos(Vec2 pos);
 
         void breakProjectile();
         virtual bool isAlive() const override;
