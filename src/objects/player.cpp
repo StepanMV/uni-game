@@ -127,11 +127,11 @@ void Player::onCollision(Tile& other) {
     if(other.isPlatform && skipPlatform) {
         return;
     }
-    if((physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+    if(!other.isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
+        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
+        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
@@ -141,11 +141,11 @@ void Player::onCollision(Tile& other) {
         }
     }
     if(other.isPlatform) return;
-    if(physics->speed.y < 0 && pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2){
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+    if(!other.isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2){
+        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
+        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
@@ -154,11 +154,11 @@ void Player::onCollision(Tile& other) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
     }
-    if((!other.isLeft) && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
+    if(!other.isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
         if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
@@ -166,11 +166,11 @@ void Player::onCollision(Tile& other) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    if((!other.isRight) && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
+    if(!other.isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
         if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {

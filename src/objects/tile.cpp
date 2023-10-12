@@ -24,7 +24,7 @@ void Tile::updateState() {
 }
 
 bool Tile::isAlive() const {
-    return id != 0;
+    return id != 0 && !isPlatform;
 }
 
 void Tile::update() { }

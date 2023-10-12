@@ -119,33 +119,40 @@ bool Level::isTile(Vector2 pos) const {
 
 void setClimb(std::vector<std::vector<Tile>>& tiles, unsigned idY, unsigned idX) {
     if(idY >= 3) {
-        tiles[idY][idX].canClimbLeft = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX - 1].getId() == 0 && idY > Level::levelOffset + 2);
-        tiles[idY][idX].canClimbRight = (tiles[idY - 1][idX].getId() == 0 && tiles[idY - 2][idX].getId() == 0 && tiles[idY - 3][idX].getId() == 0 && tiles[idY - 3][idX + 1].getId() == 0 && idY > Level::levelOffset + 2);
+        tiles[idY][idX].canClimbLeft = (!tiles[idY - 1][idX].isAlive() && !tiles[idY - 2][idX].isAlive() && !tiles[idY - 3][idX].isAlive() && !tiles[idY - 3][idX - 1].isAlive() && idY > Level::levelOffset + 2);
+        tiles[idY][idX].canClimbRight = (!tiles[idY - 1][idX].isAlive() && !tiles[idY - 2][idX].isAlive() && !tiles[idY - 3][idX].isAlive() && !tiles[idY - 3][idX + 1].isAlive() && idY > Level::levelOffset + 2);
     }
 }
 
 void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned& idX, bool isAdded) {
-    if(tiles[idY - 1][idX].getId() != 0) {
-        tiles[idY - 1][idX].isDown = isAdded;
-        tiles[idY][idX].isUp = isAdded;
-        tiles[idY - 1][idX].updateState();
+    if(tiles[idY][idX].isPlatform) {
+        tiles[idY - 1][idX].isDown = false;
+        tiles[idY + 1][idX].isUp = false;
+        tiles[idY][idX - 1].isRight = false;
+        tiles[idY][idX + 1].isLeft = false;
     }
-    if(tiles[idY + 1][idX].getId() != 0) {
-        tiles[idY + 1][idX].isUp = isAdded;
-        tiles[idY][idX].isDown = isAdded;
-        tiles[idY + 1][idX].updateState();
+    else {
+        if(tiles[idY - 1][idX].getId() && !tiles[idY - 1][idX].isPlatform) {
+            tiles[idY - 1][idX].isDown = isAdded;
+            tiles[idY][idX].isUp = isAdded;
+            tiles[idY - 1][idX].updateState();
+        }
+        if(tiles[idY + 1][idX].getId() && !tiles[idY + 1][idX].isPlatform) {
+            tiles[idY + 1][idX].isUp = isAdded;
+            tiles[idY][idX].isDown = isAdded;
+            tiles[idY + 1][idX].updateState();
+        }
+        if(tiles[idY][idX - 1].getId() && !tiles[idY][idX - 1].isPlatform) {
+            tiles[idY][idX - 1].isRight = isAdded;
+            tiles[idY][idX].isLeft = isAdded;
+            tiles[idY][idX - 1].updateState();
+        }
+        if(tiles[idY][idX + 1].getId() && !tiles[idY][idX + 1].isPlatform) {
+            tiles[idY][idX + 1].isLeft = isAdded;
+            tiles[idY][idX].isRight = isAdded;
+            tiles[idY][idX + 1].updateState();
+        }
     }
-    if(tiles[idY][idX - 1].getId() != 0) {
-        tiles[idY][idX - 1].isRight = isAdded;
-        tiles[idY][idX].isLeft = isAdded;
-        tiles[idY][idX - 1].updateState();
-    }
-    if(tiles[idY][idX + 1].getId() != 0) {
-        tiles[idY][idX + 1].isLeft = isAdded;
-        tiles[idY][idX].isRight = isAdded;
-        tiles[idY][idX + 1].updateState();
-    }
-
     tiles[idY][idX].updateState();
 
     if(isAdded) {
