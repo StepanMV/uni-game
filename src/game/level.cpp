@@ -276,13 +276,13 @@ void Level::update() {
         }
         projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
         Projectile projectile = player.getProjectile();
-        Projectile weapon = player.getWeapon();
-        if(weapon.getId() != 0) {
-            weapon.spawn(player.getPos() + Vec2(20, -40), Vec2(40, 100), 10);
-            weapon.setCenterOffset(Vec2(0, weapon.getSize().y / 2 + 10));
-            weapon.setDirection(weapon.getPos());
-            projectiles.push_back(weapon);
-        }
+        // Projectile weapon = player.getWeapon();
+        // if(weapon.getId() != 0) {
+        //     weapon.spawn(player.getPos() + Vec2(20, -40), Vec2(40, 100), 10);
+        //     weapon.setCenterOffset(Vec2(0, weapon.getSize().y / 2 + 10));
+        //     weapon.setDirection(weapon.getPos());
+        //     projectiles.push_back(weapon);
+        // }
         if(projectile.getId() != 0) {
             projectile.spawn(player.getPos(), Vec2(22, 24), 10);
             projectile.setDirection(mp);

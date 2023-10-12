@@ -78,7 +78,12 @@ bool Projectile::isAlive() const {
 
 void Projectile::spawn(Vec2 pos, Vec2 size, double lifetime) {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    timer = Timer::getInstance(lifetime);
+    if(lifetime > 0) {
+        timer = Timer::getInstance(lifetime);
+    }
+    else {
+        timer = std::make_shared<Timer>();
+    }
     if(id == 1) renderer->setState("fly");
     if(id == 2) renderer->setState("attack");
     this->pos = pos;
@@ -116,6 +121,7 @@ void Projectile::setId(unsigned id) {
 
 void Projectile::setPos(Vec2 pos) {
     this->pos = pos;
+    this->pos += startCenter;
 }
 
 void Projectile::update() {
@@ -126,7 +132,9 @@ void Projectile::update() {
         angle += 10;
         if(angle > 135) {
             breakProjectile();
+            angle = -30;
         }
+        angle = (int)angle % 360;
     }
     calcHitbox();
     if(timer->isDone()) {

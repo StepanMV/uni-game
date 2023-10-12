@@ -2,6 +2,7 @@
 
 #include "entity.h"
 #include "timer.h"
+#include "projectile.h"
 
 class Player: public Entity {
     public:
@@ -28,6 +29,7 @@ class Player: public Entity {
     private:
         bool facingLeft = false;
         bool isWeapon = false;
+        Projectile weapon;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1/*, [&](){isAttacking = true;}*/);
         double startY = pos.y;
         friend class PlayerBuilder;

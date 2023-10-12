@@ -24,7 +24,7 @@ class Projectile: public Object {
         virtual void update() override;
         void onCollision(Tile& other);
         virtual void render() override;
-        void spawn(Vec2 pos, Vec2 size, double lifetime);
+        void spawn(Vec2 pos, Vec2 size, double lifetime = 0);
         void moveStraight();
         void moveHoming();
         void bounce();

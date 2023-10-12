@@ -2,7 +2,6 @@
 #include "tile.h"
 #include "level.h"
 #include "keyboard.h"
-#include "projectile.h"
 
 Player::Player() {
     renderer = std::make_shared<CoolRenderer>();
@@ -42,7 +41,9 @@ void Player::update() {
         physics->accel += Vec2(0, -2.5);
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        isWeapon = true;
+        if(!isWeapon) {
+            isWeapon = true;
+        }
         if(isAttacking) {
             projTimer->reset();
         }
@@ -65,6 +66,11 @@ void Player::update() {
     if (Keyboard::isKeyDown(KEY_S)) {
         physics->accel += Vec2(0, 2.5);
     }
+    if(isWeapon) {
+        weapon.setId(2);
+        weapon.setPos(pos + Vec2(0, -20 - weapon.getSize().y / 2));
+        weapon.update();
+    }
     physics->onGround = false;
 }
 
@@ -83,6 +89,9 @@ Projectile Player::getWeapon() const {
 void Player::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
+    if(isWeapon) {
+        weapon.render();
+    }
 
     if (physics->speed.x > 0) {
         facingLeft = false;
@@ -224,6 +233,11 @@ Player PlayerBuilder::build()
 {
     if (headTexturePath.empty() || legsTexturePath.empty() || bodyTexturePath.empty()) return player;
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player.renderer);
+
+    player.weapon = Projectile(2, 1, true);
+    player.weapon.spawn(player.pos, Vec2(40, 100), 10);
+    player.weapon.setCenterOffset(Vec2(0, 20 + player.weapon.getSize().y / 2));
+    player.weapon.setDirection(player.weapon.getPos());
 
     renderer->loadTexture("legs", legsTexturePath);
     renderer->loadTexture("head", headTexturePath);
