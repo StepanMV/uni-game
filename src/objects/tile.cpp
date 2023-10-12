@@ -1,45 +1,7 @@
 #include "tile.h"
 
 Tile::Tile() {
-    renderer = std::make_shared<TileRenderer>();
-}
-
-Tile::Tile(const Tile &other)
-{
-    pos = other.pos;
-    size = other.size;
-    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
-    renderer->changeObject(&pos);
-    id = other.id;
-    form = other.form;
-    isUp = other.isUp;
-    isDown = other.isDown;
-    isLeft = other.isLeft;
-    isRight = other.isRight;
-    canClimbLeft = other.canClimbLeft;
-    canClimbRight = other.canClimbRight;
-    hitbox = other.hitbox;
-    angle = other.angle;
-    isPlatform = other.isPlatform;
-}
-
-Tile &Tile::operator=(const Tile &other) {
-    pos = other.pos;
-    size = other.size;
-    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
-    renderer->changeObject(&pos);
-    id = other.id;
-    form = other.form;
-    isUp = other.isUp;
-    isDown = other.isDown;
-    isLeft = other.isLeft;
-    isRight = other.isRight;
-    canClimbLeft = other.canClimbLeft;
-    canClimbRight = other.canClimbRight;
-    hitbox = other.hitbox;
-    angle = other.angle;
-    isPlatform = other.isPlatform;
-    return *this;
+    this->renderer = std::make_shared<TileRenderer>(&this->pos);
 }
 
 unsigned Tile::getId() const

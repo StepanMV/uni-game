@@ -6,7 +6,7 @@
 
 class Player: public Entity {
     public:
-        Player();
+        Player() = default;
 
         virtual void update() override;
         virtual void render() override;

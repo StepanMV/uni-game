@@ -7,10 +7,12 @@
 
 class Object {
 public:
+    Object() = default;
+    Object(const Object& other);
+    Object& operator=(const Object& other);
 
     bool checkCollision(const Object& other) const;
     bool MyCheckCollision(const Object& other) const;
-    Rectangle getCollisionBox(const Object& other) const;
 
     void calcHitbox();
     virtual bool isAlive() const = 0;
