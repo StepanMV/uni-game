@@ -126,10 +126,12 @@ void setClimb(std::vector<std::vector<Tile>>& tiles, unsigned idY, unsigned idX)
 
 void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned& idX, bool isAdded) {
     if(tiles[idY][idX].isPlatform) {
-        tiles[idY - 1][idX].isDown = false;
-        tiles[idY + 1][idX].isUp = false;
-        tiles[idY][idX - 1].isRight = false;
-        tiles[idY][idX + 1].isLeft = false;
+        tiles[idY][idX].isRight = isAdded && tiles[idY][idX + 1].getId();
+        tiles[idY][idX].isLeft = isAdded && tiles[idY][idX - 1].getId();
+        tiles[idY][idX - 1].isRight = isAdded && tiles[idY][idX - 1].isPlatform;
+        tiles[idY][idX + 1].isLeft = isAdded && tiles[idY][idX + 1].isPlatform;
+        tiles[idY][idX - 1].updateState();
+        tiles[idY][idX + 1].updateState();
     }
     else {
         if(tiles[idY - 1][idX].getId() && !tiles[idY - 1][idX].isPlatform) {
@@ -142,14 +144,14 @@ void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned&
             tiles[idY][idX].isDown = isAdded;
             tiles[idY + 1][idX].updateState();
         }
-        if(tiles[idY][idX - 1].getId() && !tiles[idY][idX - 1].isPlatform) {
+        if(tiles[idY][idX - 1].getId()) {
             tiles[idY][idX - 1].isRight = isAdded;
-            tiles[idY][idX].isLeft = isAdded;
+            tiles[idY][idX].isLeft = isAdded && !tiles[idY][idX - 1].isPlatform;
             tiles[idY][idX - 1].updateState();
         }
-        if(tiles[idY][idX + 1].getId() && !tiles[idY][idX + 1].isPlatform) {
+        if(tiles[idY][idX + 1].getId()) {
             tiles[idY][idX + 1].isLeft = isAdded;
-            tiles[idY][idX].isRight = isAdded;
+            tiles[idY][idX].isRight = isAdded && !tiles[idY][idX + 1].isPlatform;
             tiles[idY][idX + 1].updateState();
         }
     }
@@ -232,7 +234,6 @@ void Level::render() {
     BeginMode2D(camera);
     
     this->calcCords();
-    player.render();
 
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
@@ -241,6 +242,8 @@ void Level::render() {
             }
         }
     }
+
+    player.render();
 
     for(auto& projectile: projectiles) {
         if(projectile.getId() != 0) {
