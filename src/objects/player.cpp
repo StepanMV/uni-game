@@ -55,10 +55,19 @@ void Player::update() {
         isAttacking = false;
     }
     if (Keyboard::isKeyDown(KEY_S)) {
-        physics->accel += Vec2(0, 2.5);
+        if(physics->onGround) {
+            skipPlatform = true;
+        }
+        platformTimer->reset();
     }
-
+    if(platformTimer->isDone()) {
+        skipPlatform = false;
+    }
     physics->onGround = false;
+}
+
+void Player::goDownEditor() {
+    physics->accel += Vec2(0, 2.5);
 }
 
 Projectile Player::getProjectile() const {
@@ -115,11 +124,14 @@ void Player::onCollision(Tile& other) {
     if(other.getId() == 0) {
         return;
     }
-    if((!other.isUp) && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
+    if(other.isPlatform && skipPlatform) {
+        return;
+    }
+    if(!other.isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
+        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
+        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
@@ -128,11 +140,12 @@ void Player::onCollision(Tile& other) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
     }
-    if((!other.isDown) && (physics->speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
+    if(other.isPlatform) return;
+    if(!other.isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2){
+        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
             pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
+        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
         else {
@@ -141,11 +154,11 @@ void Player::onCollision(Tile& other) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
     }
-    if((!other.isLeft) && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
+    if(!other.isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
         if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
+        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {
@@ -153,11 +166,11 @@ void Player::onCollision(Tile& other) {
             pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    if((!other.isRight) && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
+    if(!other.isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
         if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
             pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
+        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
             pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
         }
         else {

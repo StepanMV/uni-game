@@ -18,6 +18,7 @@ public:
 
     bool isUp = false, isDown = false, isLeft = false, isRight = false;
     bool canClimbLeft = true, canClimbRight = true;
+    bool isPlatform = false;
 private:
     friend class TileBuilder;
 

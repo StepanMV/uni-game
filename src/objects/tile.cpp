@@ -24,7 +24,7 @@ void Tile::updateState() {
 }
 
 bool Tile::isAlive() const {
-    return id != 0;
+    return id != 0 && !isPlatform;
 }
 
 void Tile::update() { }
@@ -67,6 +67,7 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 
 Tile TileBuilder::build() {
     if (tile.id == 0) return Tile();
+    tile.isPlatform = tile.id == 1;
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile.renderer);
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile.id) + ".png");
