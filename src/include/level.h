@@ -2,10 +2,15 @@
 
 #include <string>
 #include <vector>
-#include "tile.h"
-#include "projectile.h"
-#include "player.h"
+// #include "tile.h"
+// #include "projectile.h"
+// #include "player.h"
 #include "ui.h"
+
+class Tile;
+class Projectile;
+class Player;
+class Object;
 
 
 class Level {
@@ -38,22 +43,33 @@ public:
     static const unsigned levelSizeY;
     static const unsigned levelOffset;
 
+    static void addObject(std::shared_ptr<Object> object);
+    //static void addTile(std::shared_ptr<Tile> tile);
+
+    void checkObjExisting();//
+
 private:
     void loadFile(std::string filepath);
     void updateEditor();
 
+    void setLocalPos(unsigned& idY, unsigned& idX, bool isAdded);
+    void setClimb(unsigned idY, unsigned idX);
+
+    static std::vector<std::shared_ptr<Object>> objects;
+    std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
+    std::shared_ptr<Player> player;
 
     bool loaded = false;
     bool editor = false;
     int placedBlockId = 1;
 
-    Player player;
+    //Player player;
     Camera2D camera;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Background> background;
-    std::vector<Projectile> projectiles;
+    //std::vector<Projectile> projectiles;
 
     std::string filepath;
     unsigned long startRenderX, endRenderX, startRenderY, endRenderY;
-    std::vector<std::vector<Tile>> tiles;
+    //std::vector<std::vector<Tile>> tiles;
 };

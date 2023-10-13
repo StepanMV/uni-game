@@ -13,6 +13,26 @@ unsigned Tile::getForm() const {
     return form;
 }
 
+void Tile::onCollision(std::shared_ptr<Tile> other) {
+
+}
+
+void Tile::onCollision(std::shared_ptr<Entity> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+bool Tile::isCollideable() const {
+    return id != 0;
+}
+
+void Tile::breakObject() {
+    id = 0;
+}
+
 void Tile::updateState() {
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(this->renderer);
     unsigned short int state = 0;

@@ -6,17 +6,20 @@
 
 class Player: public Entity {
     public:
-        Player() = default;
-
         virtual void update() override;
         virtual void render() override;
 
         void goDownEditor();
 
-        Projectile getProjectile() const override;
+        void getProjectile() const override;
 
-        virtual void onCollision(Tile& other) override;
-        virtual void onCollision(Entity& other) override;
+        virtual void onCollision(std::shared_ptr<Tile> other) override;
+        virtual void onCollision(std::shared_ptr<Entity> other) override;
+        virtual void onCollision(std::shared_ptr<Projectile> other) override;
+
+        virtual bool isCollideable() const override;
+        virtual void breakObject() override;
+
         void onBoard();
         /*
         void moveRight();
@@ -28,6 +31,8 @@ class Player: public Entity {
         */
 
     private:
+        Player() = default;
+
         bool facingLeft = false;
         bool skipPlatform = false;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);

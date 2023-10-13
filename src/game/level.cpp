@@ -1,6 +1,7 @@
 #include "level.h"
-#include "player.h"
+#include "tile.h"
 #include "projectile.h"
+#include "player.h"
 #include <fstream>
 #include <filesystem>
 
@@ -8,6 +9,11 @@ const unsigned Level::tileSize = 16;
 const unsigned Level::levelSizeX = 2100;
 const unsigned Level::levelSizeY = 1100;
 const unsigned Level::levelOffset = 50;
+std::vector<std::shared_ptr<Object>> Level::objects;
+
+void Level::addObject(std::shared_ptr<Object> object) {
+    objects.push_back(object);
+}
 
 //posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
 Level::Level() {
@@ -15,7 +21,7 @@ Level::Level() {
     for(int i = 0; i < levelSizeY; i++) {
         tiles[i].resize(levelSizeX);
         for(int j = 0; j < levelSizeX; j++) {
-            tiles[i][j] = Tile();
+            tiles[i][j] = Tile::createTile();
         }
     }
 }
@@ -37,7 +43,7 @@ void Level::loadFile(std::string filepath) {
                 return;
             }
             inf >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
-            tiles[posY / tileSize][posX / tileSize] = std::move(TileBuilder::spawn({(float) posX, (float) posY}, {tileSize, tileSize})
+            tiles[posY / tileSize][posX / tileSize] = Tile::createTile(TileBuilder::spawn({(float) posX, (float) posY}, {tileSize, tileSize})
                 .setID(id)
                 .setForm(form)
                 .setNeighbors(isUp, isDown, isLeft, isRight)
@@ -60,13 +66,15 @@ void Level::loadGame(std::string filename)
     camera.target = Vector2{0, 0};
     camera.rotation = 0.0f;
     camera.zoom = 1.f;
-    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
+    objects.clear();
+    player = std::make_shared<Player>(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0.75)
         .setHeadTexture("resources/textures/Armor_Head_3.png")
         .setBodyTexture("resources/textures/Armor_3.png")
         .setLegsTexture("resources/textures/Armor_Legs_3.png")
         .build());
+    objects.push_back(player);
 
     loaded = true;
 }
@@ -78,7 +86,8 @@ void Level::loadEditor(std::string filename) {
     camera.rotation = 0.0f;
     camera.zoom = 1.f;
 
-    player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
+    objects.clear();
+    player = std::make_shared<Player>(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0)
         .build());
@@ -96,17 +105,17 @@ void Level::save() {
     }
     for (int i = 0; i < levelSizeY; i++) {
         for (int j = 0; j < levelSizeX; j++) {
-            if (tiles[i][j].getId() != 0) {
-                outf << tiles[i][j].getPos().x << " " 
-                << tiles[i][j].getPos().y << " " 
-                << tiles[i][j].getId() << " " 
-                << tiles[i][j].getForm() << " "
-                << tiles[i][j].isUp << " " 
-                << tiles[i][j].isDown << " " 
-                << tiles[i][j].isLeft << " " 
-                << tiles[i][j].isRight << " " 
-                << tiles[i][j].canClimbLeft << " "
-                << tiles[i][j].canClimbRight << std::endl;
+            if (tiles[i][j]->getId() != 0) {
+                outf << tiles[i][j]->getPos().x << " " 
+                << tiles[i][j]->getPos().y << " " 
+                << tiles[i][j]->getId() << " " 
+                << tiles[i][j]->getForm() << " "
+                << tiles[i][j]->isUp << " " 
+                << tiles[i][j]->isDown << " " 
+                << tiles[i][j]->isLeft << " " 
+                << tiles[i][j]->isRight << " " 
+                << tiles[i][j]->canClimbLeft << " "
+                << tiles[i][j]->canClimbRight << std::endl;
             }
         }
     }
@@ -114,58 +123,58 @@ void Level::save() {
 }
 
 bool Level::isTile(Vector2 pos) const {
-    return tiles[pos.y / tileSize][pos.x / tileSize].getId() != 0;
+    return tiles[pos.y / tileSize][pos.x / tileSize]->getId() != 0;
 }
 
-void setClimb(std::vector<std::vector<Tile>>& tiles, unsigned idY, unsigned idX) {
+void Level::setClimb(unsigned idY, unsigned idX) {
     if(idY >= 3) {
-        tiles[idY][idX].canClimbLeft = (!tiles[idY - 1][idX].isAlive() && !tiles[idY - 2][idX].isAlive() && !tiles[idY - 3][idX].isAlive() && !tiles[idY - 3][idX - 1].isAlive() && idY > Level::levelOffset + 2);
-        tiles[idY][idX].canClimbRight = (!tiles[idY - 1][idX].isAlive() && !tiles[idY - 2][idX].isAlive() && !tiles[idY - 3][idX].isAlive() && !tiles[idY - 3][idX + 1].isAlive() && idY > Level::levelOffset + 2);
+        tiles[idY][idX]->canClimbLeft = (!tiles[idY - 1][idX]->isAlive() && !tiles[idY - 2][idX]->isAlive() && !tiles[idY - 3][idX]->isAlive() && !tiles[idY - 3][idX - 1]->isAlive() && idY > Level::levelOffset + 2);
+        tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isAlive() && !tiles[idY - 2][idX]->isAlive() && !tiles[idY - 3][idX]->isAlive() && !tiles[idY - 3][idX + 1]->isAlive() && idY > Level::levelOffset + 2);
     }
 }
 
-void setLocalPos(std::vector<std::vector<Tile>>& tiles, unsigned& idY, unsigned& idX, bool isAdded) {
-    if(tiles[idY][idX].isPlatform) {
-        tiles[idY][idX].isRight = isAdded && tiles[idY][idX + 1].getId();
-        tiles[idY][idX].isLeft = isAdded && tiles[idY][idX - 1].getId();
-        tiles[idY][idX - 1].isRight = isAdded && tiles[idY][idX - 1].isPlatform;
-        tiles[idY][idX + 1].isLeft = isAdded && tiles[idY][idX + 1].isPlatform;
-        tiles[idY][idX - 1].updateState();
-        tiles[idY][idX + 1].updateState();
+void Level::setLocalPos(unsigned& idY, unsigned& idX, bool isAdded) {
+    if(tiles[idY][idX]->isPlatform) {
+        tiles[idY][idX]->isRight = isAdded && tiles[idY][idX + 1]->getId();
+        tiles[idY][idX]->isLeft = isAdded && tiles[idY][idX - 1]->getId();
+        tiles[idY][idX - 1]->isRight = isAdded && tiles[idY][idX - 1]->isPlatform;
+        tiles[idY][idX + 1]->isLeft = isAdded && tiles[idY][idX + 1]->isPlatform;
+        tiles[idY][idX - 1]->updateState();
+        tiles[idY][idX + 1]->updateState();
     }
     else {
-        if(tiles[idY - 1][idX].getId() && !tiles[idY - 1][idX].isPlatform) {
-            tiles[idY - 1][idX].isDown = isAdded;
-            tiles[idY][idX].isUp = isAdded;
-            tiles[idY - 1][idX].updateState();
+        if(tiles[idY - 1][idX]->getId() && !tiles[idY - 1][idX]->isPlatform) {
+            tiles[idY - 1][idX]->isDown = isAdded;
+            tiles[idY][idX]->isUp = isAdded;
+            tiles[idY - 1][idX]->updateState();
         }
-        if(tiles[idY + 1][idX].getId() && !tiles[idY + 1][idX].isPlatform) {
-            tiles[idY + 1][idX].isUp = isAdded;
-            tiles[idY][idX].isDown = isAdded;
-            tiles[idY + 1][idX].updateState();
+        if(tiles[idY + 1][idX]->getId() && !tiles[idY + 1][idX]->isPlatform) {
+            tiles[idY + 1][idX]->isUp = isAdded;
+            tiles[idY][idX]->isDown = isAdded;
+            tiles[idY + 1][idX]->updateState();
         }
-        if(tiles[idY][idX - 1].getId()) {
-            tiles[idY][idX - 1].isRight = isAdded;
-            tiles[idY][idX].isLeft = isAdded && !tiles[idY][idX - 1].isPlatform;
-            tiles[idY][idX - 1].updateState();
+        if(tiles[idY][idX - 1]->getId()) {
+            tiles[idY][idX - 1]->isRight = isAdded;
+            tiles[idY][idX]->isLeft = isAdded && !tiles[idY][idX - 1]->isPlatform;
+            tiles[idY][idX - 1]->updateState();
         }
-        if(tiles[idY][idX + 1].getId()) {
-            tiles[idY][idX + 1].isLeft = isAdded;
-            tiles[idY][idX].isRight = isAdded && !tiles[idY][idX + 1].isPlatform;
-            tiles[idY][idX + 1].updateState();
+        if(tiles[idY][idX + 1]->getId()) {
+            tiles[idY][idX + 1]->isLeft = isAdded;
+            tiles[idY][idX]->isRight = isAdded && !tiles[idY][idX + 1]->isPlatform;
+            tiles[idY][idX + 1]->updateState();
         }
     }
-    tiles[idY][idX].updateState();
+    tiles[idY][idX]->updateState();
 
     if(isAdded) {
-        setClimb(tiles, idY, idX);
+        setClimb(idY, idX);
     }
 
-    setClimb(tiles, idY + 1, idX);
-    setClimb(tiles, idY + 2, idX);
-    setClimb(tiles, idY + 3, idX);
-    setClimb(tiles, idY + 3, idX - 1);
-    setClimb(tiles, idY + 3, idX + 1);
+    setClimb(idY + 1, idX);
+    setClimb(idY + 2, idX);
+    setClimb(idY + 3, idX);
+    setClimb(idY + 3, idX - 1);
+    setClimb(idY + 3, idX + 1);
 }
 
 void Level::cameraOnBoard() {
@@ -194,10 +203,8 @@ void Level::placeTile(const Vec2 tilePos, int id) {
     if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
     if(isTile(tilePos.toRaylib())) return;
 
-    Tile tile = std::move(TileBuilder::spawn({(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).setID(id).build());
-
-    tiles[idY][idX] = std::move(tile);
-    setLocalPos(tiles, idY, idX, true);
+    tiles[idY][idX] = Tile::createTile(TileBuilder::spawn({(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).setID(id).build());
+    setLocalPos(idY, idX, true);
 }
 
 void Level::breakTile(const Vec2 tilePos) {
@@ -207,8 +214,8 @@ void Level::breakTile(const Vec2 tilePos) {
     if(idX < 1 || idY < 1 || idX > levelSizeX - 1 || idY > levelSizeY - 1) return;
     if(!isTile(tilePos.toRaylib())) return;
 
-    tiles[idY][idX] = std::move(Tile());
-    setLocalPos(tiles, idY, idX, false);
+    tiles[idY][idX] = Tile::createTile();
+    setLocalPos(idY, idX, false);
 }
 
 void Level::calcCords() {
@@ -230,6 +237,10 @@ void Level::calcCords() {
     }
 }
 
+void Level::checkObjExisting() {
+    objects.erase(std::remove_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> object){return !object->isAlive();}), objects.end());
+}
+
 void Level::render() {
     BeginMode2D(camera);
     
@@ -237,58 +248,49 @@ void Level::render() {
 
     for(int i = startRenderY; i < endRenderY; i++) {
         for(int j = startRenderX; j < endRenderX; j++) {
-            if(tiles[i][j].getId() != 0) {
-                tiles[i][j].render();
+            if(tiles[i][j]->getId() != 0) {
+                tiles[i][j]->render();
             }
         }
     }
-
-    player.render();
-
-    for(auto& projectile: projectiles) {
-        if(projectile.getId() != 0) {
-            projectile.render();
+    for(auto& object : objects) {
+        if(object->isAlive()) {
+            object->render();
         }
     }
 
     EndMode2D();
 
-    DrawText(std::to_string(player.getPos().x / tileSize).c_str(), 10, 40, 20, RED);
-    DrawText(std::to_string(player.getPos().y / tileSize).c_str(), 10, 70, 20, RED);
+    DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
+    DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
 }
 
-void Level::update() {
-	Vec2 playerSpeed = player.move();
-    
-    camera.target = player.getPos().toRaylib();
+void Level::update() {  
+    checkObjExisting();
+    player->move();
+    camera.target = player->getPos().toRaylib();
     cameraOnBoard();
-    player.update();
+    player->update();
     this->checkCollision();
+    Vec2 playerSpeed = player->getSpeed();
     background->setSpeed(0.2 * playerSpeed);
 
     if (editor) updateEditor();
 
     if (!editor){
-        for(auto it = projectiles.begin(); it != projectiles.end(); it++) {
-            if(it->getId() != 0) {
-                it->move();
-                it->update();
+        for(auto& object : objects) {
+            if(object->isAlive()) {
+                if(object != player) {
+                    object->move();
+                    object->update();
+                }
             }
-            if(it->getPos().x < levelOffset * tileSize || 
-            it->getPos().y < levelOffset * tileSize || 
-            it->getPos().x > (levelSizeX - levelOffset) * tileSize ||
-            it->getPos().y > (levelSizeY - levelOffset) * tileSize) {
-                it->breakProjectile();
+            if(object->getPos().x < levelOffset * tileSize ||
+            object->getPos().y < levelOffset * tileSize ||
+            object->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+            object->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+                object->breakObject();
             }
-        }
-        projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](Projectile& projectile){return projectile.getId() == 0;}), projectiles.end());
-        Projectile projectile = player.getProjectile();
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
-        Vec2 mp = {mousePos.x, mousePos.y};
-        if(projectile.getId() != 0) {
-            projectile.spawn(player.getPos(), Vec2(22, 24), 10);
-            projectile.setDirection(mp);
-            projectiles.push_back(projectile);
         }
     }
 }
@@ -301,22 +303,27 @@ void Level::updateEditor() {
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     if (IsKeyPressed(KEY_Q)) placedBlockId++;
     if (IsKeyPressed(KEY_E)) placedBlockId--;
-    if(IsKeyDown(KEY_S)) player.goDownEditor();
+    if(IsKeyDown(KEY_S)) player->goDownEditor();
 }
 
 void Level::checkCollision() {
-    for(int i = player.getPos().y / tileSize - 5; i < player.getPos().y / tileSize + 5; i++) {
-        for(int j = player.getPos().x / tileSize - 5; j < player.getPos().x / tileSize + 5; j++) {
-            if(!editor && player.checkCollision(tiles[i][j])) {
-                player.onCollision(tiles[i][j]);
+    for(auto& object : objects) {
+        if(object->isAlive()) {
+            for(int i = object->getPos().y / tileSize - object->getSize().y; i < object->getPos().y / tileSize + object->getSize().y; i++) {
+                for(int j = object->getPos().x / tileSize - object->getSize().x; j < object->getPos().x / tileSize + object->getSize().x; j++) {
+                    if(object->checkCollision(tiles[i][j])) {
+                        object->onCollision(tiles[i][j]);
+                    }
+                }
             }
         }
     }
-    for (auto& projectile : projectiles) {
-        for(int i = projectile.getPos().y / tileSize - 1; i < projectile.getPos().y / tileSize + 1; i++) {
-            for(int j = projectile.getPos().x / tileSize - 1; j < projectile.getPos().x / tileSize + 1; j++) {
-                if(projectile.MyCheckCollision(tiles[i][j])) {
-                    projectile.onCollision(tiles[i][j]);
+    for(auto& obj1 : objects) {
+        for(auto& obj2 : objects) {
+            if(obj1 != obj2) {
+                if(obj1->checkCollision(obj2)) {
+                    //if(obj2 = dynamic_cast<std::shared_ptr<Projectile>>(obj2)) obj1->onCollision(obj2);
+                    //if(obj2.get() = dynamic_cast<Projectile*>(obj2.get())) obj1->onCollision(obj2);
                 }
             }
         }

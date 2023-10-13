@@ -6,6 +6,7 @@
 
 void Player::update() {
     onBoard();
+    calcHitbox();
     physics->accel = Vec2(0, 0);
     if (IsKeyPressed(KEY_SPACE)) {
         if(physics->onGround) {
@@ -64,17 +65,20 @@ void Player::update() {
         skipPlatform = false;
     }
     physics->onGround = false;
+    //getProjectile();
 }
 
 void Player::goDownEditor() {
     physics->accel += Vec2(0, 2.5);
 }
 
-Projectile Player::getProjectile() const {
+void Player::getProjectile() const {
     if(isAttacking) {
-        return Projectile(1, 1, true);
+        Projectile::createProjectile(1, 1, true);
     }
-    return Projectile(0, 1, true);
+    else {
+        Projectile::createProjectile(0, 1, true);
+    }
 }
 
 void Player::render() {
@@ -120,68 +124,81 @@ void Player::onBoard() {
     }
 }
 
-void Player::onCollision(Tile& other) {
-    if(other.getId() == 0) {
+void Player::onCollision(std::shared_ptr<Tile> other) {
+    if(other->getId() == 0) {
         return;
     }
-    if(other.isPlatform && skipPlatform) {
+    if(other->isPlatform && skipPlatform) {
         return;
     }
-    if(!other.isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
-        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(!other->isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->onGround = true;
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
     }
-    if(other.isPlatform) return;
-    if(!other.isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2){
-        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(other->isPlatform) return;
+    if(!other->isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other->getPos().y - other->getSize().y / 2){
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->jumping = false;
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
     }
-    if(!other.isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
-        if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
+        if((other->canClimbLeft) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
     }
-    if(!other.isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
-        if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
+        if((other->canClimbRight) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
     }
 }
 
-void Player::onCollision(Entity& other) {
+void Player::onCollision(std::shared_ptr<Entity> other) {
     
+}
+
+void Player::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+bool Player::isCollideable() const
+{
+    return true;
+}
+
+void Player::breakObject() {
+    //?
 }
 
 PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
