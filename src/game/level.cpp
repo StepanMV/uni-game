@@ -274,51 +274,48 @@ void Level::render() {
 }
 
 void Level::update() {  
-    checkObjExisting();
-    player->move();
-    camera.target = player->getPos().toRaylib();
-    cameraOnBoard();
-    player->update();
-    this->checkCollision();
-    Vec2 playerSpeed = player->getSpeed();
-    background->setSpeed(0.2 * playerSpeed);
 
     if (editor) updateEditor();
 
     if (!editor){
         for(auto& object : objects) {
-            if(object->isAlive()) {
-                if(object != player) {
-                    object->move();
-                    object->update();
-                }
-            }
             if(object->getPos().x < levelOffset * tileSize ||
-            object->getPos().y < levelOffset * tileSize ||
-            object->getPos().x > (levelSizeX - levelOffset) * tileSize ||
-            object->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+                object->getPos().y < levelOffset * tileSize ||
+                object->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+                object->getPos().y > (levelSizeY - levelOffset) * tileSize) {
                 object->breakObject();
             }
+            if(object->isAlive()) {
+                object->move();
+                object->update();
+            }
         }
+        this->checkCollision();
+        checkObjExisting();
     }
+    camera.target = player->getPos().toRaylib();
+    cameraOnBoard();
+    Vec2 playerSpeed = player->getSpeed();
+    background->setSpeed(0.2 * playerSpeed);
 }
 
 void Level::updateEditor() {
-
+    objects.clear();
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera);
     Vec2 mp = {mousePos.x, mousePos.y};
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
     if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     if (IsKeyPressed(KEY_Q)) placedBlockId++;
     if (IsKeyPressed(KEY_E)) placedBlockId--;
-    if(IsKeyDown(KEY_S)) player->goDownEditor();
+    player->move();
+    player->moveEditor();
 }
 
 void Level::checkCollision() {
     for(auto& object : objects) {
         if(object->isAlive()) {
-            for(int i = (object->getPos().y - object->getSize().y) / tileSize - 5; i < (object->getPos().y + object->getSize().y) / tileSize + 5; i++) {
-                for(int j = (object->getPos().x - object->getSize().x) / tileSize - 5; j < (object->getPos().x + object->getSize().x) / tileSize + 5; j++) {
+            for(int i = (object->getPos().y - object->getSize().y) / tileSize; i < (object->getPos().y + object->getSize().y) / tileSize; i++) {
+                for(int j = (object->getPos().x - object->getSize().x) / tileSize; j < (object->getPos().x + object->getSize().x) / tileSize; j++) {
                     if(object->MyCheckCollision(tiles[i][j])) {
                         object->onCollision(tiles[i][j]);
                     }
@@ -330,8 +327,8 @@ void Level::checkCollision() {
         for(auto& obj2 : objects) {
             if(obj1 != obj2) {
                 if(obj1->checkCollision(obj2)) {
-                    //if(obj2 = dynamic_cast<std::shared_ptr<Projectile>>(obj2)) obj1->onCollision(obj2);
-                    //if(obj2.get() = dynamic_cast<Projectile*>(obj2.get())) obj1->onCollision(obj2);
+                    if(std::dynamic_pointer_cast<Projectile>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Projectile>(obj2));
+                    if(std::dynamic_pointer_cast<Entity>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Entity>(obj2));
                 }
             }
         }

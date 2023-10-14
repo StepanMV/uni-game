@@ -68,13 +68,27 @@ void Player::update() {
     getProjectile();
 }
 
-void Player::goDownEditor() {
-    physics->accel += Vec2(0, 2.5);
+void Player::moveEditor() {
+    onBoard();
+    physics->accel = Vec2(0, 0);
+    if (IsKeyDown(KEY_A)) {
+        physics->accel += Vec2(-1.5, 0);
+    }
+    if (IsKeyDown(KEY_D)) {
+        physics->accel += Vec2(1.5, 0);
+    }
+    if (IsKeyDown(KEY_W)) {
+        physics->accel += Vec2(0, -1.5);
+    }
+    if (IsKeyDown(KEY_S)) {
+        physics->accel += Vec2(0, 1.5);
+    }
 }
 
 void Player::getProjectile() const {
     if(isAttacking) {
-        Projectile::createProjectile(1, 1, true)->spawn(pos, Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
+        if(facingLeft) Projectile::createProjectile(1, 1, true)->spawn(pos + Vec2(-size.x / 2 - 10, -size.y / 2 - 30), Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
+        else Projectile::createProjectile(1, 1, true)->spawn(pos + Vec2(size.x / 2 + 10, -size.y / 2 - 30), Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
     }
 }
 

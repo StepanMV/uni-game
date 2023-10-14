@@ -89,7 +89,7 @@ void Projectile::onCollision(std::shared_ptr<Tile> other) {
 }
 
 void Projectile::onCollision(std::shared_ptr<Entity> other) {
-
+    breakObject();
 }
 
 void Projectile::onCollision(std::shared_ptr<Projectile> other) {

@@ -9,7 +9,7 @@ class Player: public Entity {
         virtual void update() override;
         virtual void render() override;
 
-        void goDownEditor();
+        void moveEditor();
 
         void getProjectile() const override;
 

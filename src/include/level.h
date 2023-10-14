@@ -44,9 +44,8 @@ public:
     static const unsigned levelOffset;
 
     static void addObject(std::shared_ptr<Object> object);
-    //static void addTile(std::shared_ptr<Tile> tile);
 
-    void checkObjExisting();//
+    void checkObjExisting();
 
 private:
     void loadFile(std::string filepath);
@@ -63,13 +62,10 @@ private:
     bool editor = false;
     int placedBlockId = 1;
 
-    //Player player;
     Camera2D camera;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Background> background;
-    //std::vector<Projectile> projectiles;
 
     std::string filepath;
     unsigned long startRenderX, endRenderX, startRenderY, endRenderY;
-    //std::vector<std::vector<Tile>> tiles;
 };
