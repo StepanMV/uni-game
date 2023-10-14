@@ -13,7 +13,6 @@ public:
     Level();
     ~Level();
 
-    void linkUI(std::shared_ptr<UI> ui, std::shared_ptr<Background> bg);
     void loadGame(std::string filepath);
     void loadEditor(std::string filepath);
     void save();
@@ -49,8 +48,6 @@ private:
 
     Player player;
     Camera2D camera;
-    std::shared_ptr<UI> ui;
-    std::shared_ptr<Background> background;
     std::vector<Projectile> projectiles;
 
     std::string filepath;

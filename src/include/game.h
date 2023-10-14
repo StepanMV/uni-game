@@ -7,10 +7,11 @@
 #include "player.h"
 #include "tile.h"
 #include "ui.h"
+#include "ini_file.h"
 
 class Game {
 public:
-	Game(int width, int height, int fps, std::string title);
+	Game(std::string title);
 
 	Game(const Game& other) = delete;
 
@@ -25,6 +26,9 @@ public:
 	void load();
 
 	const std::map<std::string, std::shared_ptr<UI>> uis;
+	const static std::shared_ptr<IniFile> settings;
+	static std::shared_ptr<UI> ui;
+	static std::shared_ptr<Background> background;
 
 private:
 	void createUIS();
@@ -34,6 +38,4 @@ private:
 	void draw();
 
 	Level level;
-	std::shared_ptr<UI> ui;
-    std::shared_ptr<Background> background;
 };

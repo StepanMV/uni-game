@@ -3,8 +3,13 @@
 #include "raygui.h"
 #include <stdexcept>
 #include <iostream>
+#include "game.h"
 
 UIBuilder &UIBuilder::addButton(std::string ID, ButtonData buttonData, std::function<void()> callback) {
+    buttonData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    buttonData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    buttonData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    buttonData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
     ui->buttons[ID] = buttonData;
     ui->buttonCallbacks[ID] = callback;
     return *this;
@@ -13,12 +18,30 @@ UIBuilder &UIBuilder::addButton(std::string ID, ButtonData buttonData, std::func
 UIBuilder::UIBuilder() : ui(std::make_shared<UI>()) {}
 
 UIBuilder &UIBuilder::addDummyRect(std::string ID, DummyRectData dummyRectData) {
+    dummyRectData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    dummyRectData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    dummyRectData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    dummyRectData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
     ui->dummyRects[ID] = dummyRectData;
     return *this;
 }
 
 UIBuilder &UIBuilder::addDropdown(std::string ID, DropdownData dropdownData) {
+    dropdownData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    dropdownData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    dropdownData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    dropdownData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
     ui->dropdowns[ID] = dropdownData;
+    return *this;
+}
+
+UIBuilder &UIBuilder::addBar(std::string ID, BarData barData) {
+    barData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    barData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    barData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    barData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    barData.text += " ";
+    ui->bars[ID] = barData;
     return *this;
 }
 
@@ -62,6 +85,10 @@ void UI::update() {
         }
     }
 
+    for (auto &bar : bars) {
+        barPercentages[bar.first] = GuiProgressBar(bar.second.rect, bar.second.text.c_str(), nullptr, bar.second.value, bar.second.minValue, bar.second.maxValue);
+    }
+
     GuiUnlock();
 }
 
@@ -83,6 +110,11 @@ bool UI::isButtonReleased(std::string ID) const {
 bool UI::isButtonHeld(std::string ID) const {
     if (buttonStates.find(ID) == buttonStates.end()) return false;
     return buttonStates.at(ID);
+}
+
+void UI::setBarValue(std::string ID, float *value) {
+    if (bars.find(ID) == bars.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
+    bars.at(ID).value = value;
 }
 
 int UI::getDropdownValue(std::string ID) const {

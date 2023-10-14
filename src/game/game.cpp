@@ -5,13 +5,18 @@
 #include "tile.h"
 #include "renderer.h"
 #include "keyboard.h"
+#include "ui.h"
 
 #include <vector>
 #include <iostream>
 
-Game::Game(int width, int height, int fps, std::string title) {	
-	SetTargetFPS(fps);
-	InitWindow(width, height, title.c_str());
+const std::shared_ptr<IniFile> Game::settings = std::make_shared<IniFile>("settings.ini");
+std::shared_ptr<UI> Game::ui = nullptr;
+std::shared_ptr<Background> Game::background = nullptr;
+
+Game::Game(std::string title) {	
+	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
+	InitWindow(settings->readInt("Screen", "screenWidth", 1920), settings->readInt("Screen", "screenHeight", 1080), title.c_str());
 	//ToggleFullscreen();
 }
 
@@ -32,11 +37,13 @@ void Game::tick() {
 }
 
 void Game::load() {
+	Game::settings->writeDouble("Runtime", "screenCoefW", Game::settings->readDouble("Screen", "screenWidth", 1920) / 1920.0);
+	Game::settings->writeDouble("Runtime", "screenCoefH", Game::settings->readDouble("Screen", "screenHeight", 1080) / 1080.0);
 	Renderer::loadTextures("resources/textures");
 	Keyboard::init();
 	createUIS();
 	ui = uis.at("startMenu");
-	background = Background::create(2, 0.25);
+	background = Background::create(1, 0.25);
 }
 
 void Game::createUIS() {
@@ -57,6 +64,9 @@ void Game::createUIS() {
 			.build()
 		},
 		{"game", UIBuilder()
+			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", nullptr, 0, 100 })
+			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", nullptr, 0, 100 })
+			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", nullptr, 0, 100 })
 			.build()
 		},
 		{"editor", UIBuilder()
@@ -77,29 +87,24 @@ void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
 		level.loadGame("saves/level.txt");
 		ui = uis.at("game");
-		level.linkUI(ui, background);
 	}
 	if (ui->isButtonPressed("editor")) {
 		level.loadEditor("saves/level.txt");
 		ui = uis.at("editor");
-		level.linkUI(ui, background);
 	}
 	if (ui->isButtonPressed("exitMenu")) {
 		level.save();
 		level = Level();
 		ui = uis.at("startMenu");
-		level.linkUI(ui, background);
 		background->setSpeed({1, 0});
 	}
 	if (ui->isButtonPressed("continue")) {
 		ui = uis.at("game");
-		level.linkUI(ui, background);
 	}
 
 	if (Keyboard::isKeyPressed(KEY_ESCAPE)) {
 		if (level.isLoaded()) {
 			ui = uis.at("pauseMenu");
-			level.linkUI(ui, background);
 		}
 	}
 }
@@ -108,7 +113,6 @@ void Game::draw() {
 	BeginDrawing();
 
 		ClearBackground(background ? background->getColor() : ui->getBackgroundColor());
-
 		background->update();
 		if(level.isLoaded()) level.render();
 		ui->update();

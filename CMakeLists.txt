@@ -35,3 +35,6 @@ target_link_libraries(${PROJECT_NAME} raylib)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
 file(COPY resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+file(COPY extra/saves DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(COPY extra/settings.ini DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

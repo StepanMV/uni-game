@@ -1,6 +1,7 @@
 #include "level.h"
 #include "player.h"
 #include "projectile.h"
+#include "game.h"
 #include <fstream>
 #include <filesystem>
 
@@ -46,11 +47,6 @@ void Level::loadFile(std::string filepath) {
         }
         inf.close();
     }
-}
-
-void Level::linkUI(std::shared_ptr<UI> ui, std::shared_ptr<Background> bg) {
-    this->ui = ui;
-    this->background = bg;
 }
 
 void Level::loadGame(std::string filename)
@@ -264,7 +260,7 @@ void Level::update() {
     cameraOnBoard();
     player.update();
     this->checkCollision();
-    background->setSpeed(0.2 * playerSpeed);
+    Game::background->setSpeed(0.2 * playerSpeed);
 
     if (editor) updateEditor();
 
