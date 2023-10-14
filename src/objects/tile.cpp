@@ -25,6 +25,10 @@ void Tile::onCollision(std::shared_ptr<Projectile> other) {
     
 }
 
+bool Tile::isAlive() const {
+    return id != 0;
+}
+
 bool Tile::isCollideable() const {
     return id != 0;
 }
@@ -41,10 +45,6 @@ void Tile::updateState() {
     if (isLeft) state += 2;
     if (isRight) state += 1;
     renderer->setSpritePos(state);
-}
-
-bool Tile::isAlive() const {
-    return id != 0 && !isPlatform;
 }
 
 void Tile::update() { }

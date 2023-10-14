@@ -65,7 +65,7 @@ void Player::update() {
         skipPlatform = false;
     }
     physics->onGround = false;
-    //getProjectile();
+    getProjectile();
 }
 
 void Player::goDownEditor() {
@@ -74,10 +74,7 @@ void Player::goDownEditor() {
 
 void Player::getProjectile() const {
     if(isAttacking) {
-        Projectile::createProjectile(1, 1, true);
-    }
-    else {
-        Projectile::createProjectile(0, 1, true);
+        Projectile::createProjectile(1, 1, true)->spawn(pos, Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
     }
 }
 

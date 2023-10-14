@@ -7,13 +7,12 @@ class Tile;
 class Projectile: public Object {
     public:
         template<class... Args>
-        static void createProjectile(Args&&... args) {
-            Projectile* proj = new Projectile(args...);
-            proj->spawn(Vec2(0, 0), Vec2(22, 24), 10);
-            //Level::addObject(std::shared_ptr<Projectile>(new Projectile(args...)));
-            Level::addObject(std::shared_ptr<Projectile>(proj));
+        static std::shared_ptr<Projectile> createProjectile(Args&&... args) {
+            std::shared_ptr<Projectile> proj = std::shared_ptr<Projectile>(new Projectile(args...));
+            Level::addObject(proj);
+            return proj;
         }
-        void setDirection(Vec2 direction);
+        Projectile& setDirection(Vec2 direction);
 
         unsigned getId() const;
 
@@ -26,7 +25,7 @@ class Projectile: public Object {
         void onCollision(std::shared_ptr<Entity> other) override;
         void onCollision(std::shared_ptr<Projectile> other) override;
         virtual void render() override;
-        void spawn(Vec2 pos, Vec2 size, double lifetime);
+        Projectile& spawn(Vec2 pos, Vec2 size, double lifetime);
         void moveStraight();
         void moveHoming();
         void bounce();

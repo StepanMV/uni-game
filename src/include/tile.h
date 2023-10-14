@@ -4,6 +4,11 @@
 
 class Tile: public Object {
 public:
+    template<class... Args>
+    static std::shared_ptr<Tile> createTile(Args&&... args) {
+        return std::shared_ptr<Tile>(new Tile(args...));
+    }
+
     unsigned getId() const;
     unsigned getForm() const;
 
@@ -16,15 +21,9 @@ public:
     virtual bool isCollideable() const override;
     virtual void breakObject() override;
 
-    template<class... Args>
-    static std::shared_ptr<Tile> createTile(Args&&... args) {
-        return std::shared_ptr<Tile>(new Tile(args...));
-    }
-
     void updateState();
 
     virtual bool isAlive() const override;
-
     virtual void update() override;
     virtual void render() override;
 

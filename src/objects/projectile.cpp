@@ -64,24 +64,26 @@ bool Projectile::isCollideable() const {
     return id != 0;
 }
 
-void Projectile::spawn(Vec2 pos, Vec2 size, double lifetime) {
+Projectile& Projectile::spawn(Vec2 pos, Vec2 size, double lifetime) {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     timer = Timer::getInstance(lifetime);
     renderer->setState("fly");
     this->pos = pos;
     this->size = size;
+    return *this;
 }
 
-void Projectile::setDirection(Vec2 target)
+Projectile& Projectile::setDirection(Vec2 target)
 {
     physics->speed = target - pos;
     calcHitbox();
     physics->speed.normalize();
     physics->speed *= 5;
+    return *this;
 }
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
-    if(other->getId() != 0) {
+    if(!other->isPlatform) {
         breakObject();
     }
 }

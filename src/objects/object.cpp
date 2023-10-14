@@ -162,7 +162,7 @@ bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
 }
 
 bool Object::MyCheckCollision(const std::shared_ptr<Object> other) const {
-    if(!other->isAlive()) {
+    if(!other->isCollideable() || !isCollideable()) {
         return false;
     }
     return calculate(hitbox, other->hitbox);

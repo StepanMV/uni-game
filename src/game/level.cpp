@@ -12,7 +12,7 @@ const unsigned Level::levelOffset = 50;
 std::vector<std::shared_ptr<Object>> Level::objects;
 
 void Level::addObject(std::shared_ptr<Object> object) {
-    objects.push_back(object);
+    if(object) objects.push_back(object);
 }
 
 //posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
@@ -128,8 +128,10 @@ bool Level::isTile(Vector2 pos) const {
 
 void Level::setClimb(unsigned idY, unsigned idX) {
     if(idY >= 3) {
-        tiles[idY][idX]->canClimbLeft = (!tiles[idY - 1][idX]->isAlive() && !tiles[idY - 2][idX]->isAlive() && !tiles[idY - 3][idX]->isAlive() && !tiles[idY - 3][idX - 1]->isAlive() && idY > Level::levelOffset + 2);
-        tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isAlive() && !tiles[idY - 2][idX]->isAlive() && !tiles[idY - 3][idX]->isAlive() && !tiles[idY - 3][idX + 1]->isAlive() && idY > Level::levelOffset + 2);
+        tiles[idY][idX]->canClimbLeft = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX - 1]->isCollideable() && idY > Level::levelOffset + 2);
+        tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX + 1]->isCollideable() && idY > Level::levelOffset + 2);
+        //tiles[idY][idX]->canClimbLeft = (tiles[idY][idX]->canClimbLeft && !tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX - 1]->isCollideable() && idY > Level::levelOffset + 2);
+        //tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX + 1]->isCollideable() && idY > Level::levelOffset + 2);
     }
 }
 
@@ -309,9 +311,9 @@ void Level::updateEditor() {
 void Level::checkCollision() {
     for(auto& object : objects) {
         if(object->isAlive()) {
-            for(int i = object->getPos().y / tileSize - object->getSize().y; i < object->getPos().y / tileSize + object->getSize().y; i++) {
-                for(int j = object->getPos().x / tileSize - object->getSize().x; j < object->getPos().x / tileSize + object->getSize().x; j++) {
-                    if(object->checkCollision(tiles[i][j])) {
+            for(int i = (object->getPos().y - object->getSize().y) / tileSize; i < (object->getPos().y + object->getSize().y) / tileSize; i++) {
+                for(int j = (object->getPos().x - object->getSize().x) / tileSize; j < (object->getPos().x + object->getSize().x) / tileSize; j++) {
+                    if(object->MyCheckCollision(tiles[i][j])) {
                         object->onCollision(tiles[i][j]);
                     }
                 }
