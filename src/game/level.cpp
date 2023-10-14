@@ -128,11 +128,17 @@ bool Level::isTile(Vector2 pos) const {
 
 void Level::setClimb(unsigned idY, unsigned idX) {
     if(idY >= 3) {
-        tiles[idY][idX]->canClimbLeft = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX - 1]->isCollideable() && idY > Level::levelOffset + 2);
-        tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX + 1]->isCollideable() && idY > Level::levelOffset + 2);
-        //tiles[idY][idX]->canClimbLeft = (tiles[idY][idX]->canClimbLeft && !tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX - 1]->isCollideable() && idY > Level::levelOffset + 2);
-        //tiles[idY][idX]->canClimbRight = (!tiles[idY - 1][idX]->isCollideable() && !tiles[idY - 2][idX]->isCollideable() && !tiles[idY - 3][idX]->isCollideable() && !tiles[idY - 3][idX + 1]->isCollideable() && idY > Level::levelOffset + 2);
-    }
+        tiles[idY][idX]->canClimbLeft = (!(tiles[idY - 1][idX]->getId() && !tiles[idY - 1][idX]->isPlatform)
+        && !(tiles[idY - 2][idX]->getId() && !tiles[idY - 2][idX]->isPlatform)
+        && !(tiles[idY - 3][idX]->getId() && !tiles[idY - 3][idX]->isPlatform)
+        && !(tiles[idY - 3][idX - 1]->getId() && !tiles[idY - 3][idX - 1]->isPlatform)
+        && idY > Level::levelOffset + 2);
+        tiles[idY][idX]->canClimbRight = (!(tiles[idY - 1][idX]->getId() && !tiles[idY - 1][idX]->isPlatform) 
+        && !(tiles[idY - 2][idX]->getId() && !tiles[idY - 2][idX]->isPlatform) 
+        && !(tiles[idY - 3][idX]->getId() && !tiles[idY - 3][idX]->isPlatform) 
+        && !(tiles[idY - 3][idX + 1]->getId() && !tiles[idY - 3][idX + 1]->isPlatform) 
+        && idY > Level::levelOffset + 2);
+        }
 }
 
 void Level::setLocalPos(unsigned& idY, unsigned& idX, bool isAdded) {
@@ -311,8 +317,8 @@ void Level::updateEditor() {
 void Level::checkCollision() {
     for(auto& object : objects) {
         if(object->isAlive()) {
-            for(int i = (object->getPos().y - object->getSize().y) / tileSize; i < (object->getPos().y + object->getSize().y) / tileSize; i++) {
-                for(int j = (object->getPos().x - object->getSize().x) / tileSize; j < (object->getPos().x + object->getSize().x) / tileSize; j++) {
+            for(int i = (object->getPos().y - object->getSize().y) / tileSize - 5; i < (object->getPos().y + object->getSize().y) / tileSize + 5; i++) {
+                for(int j = (object->getPos().x - object->getSize().x) / tileSize - 5; j < (object->getPos().x + object->getSize().x) / tileSize + 5; j++) {
                     if(object->MyCheckCollision(tiles[i][j])) {
                         object->onCollision(tiles[i][j]);
                     }
