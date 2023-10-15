@@ -17,11 +17,15 @@ void Tile::onCollision(std::shared_ptr<Tile> other) {
 
 }
 
-void Tile::onCollision(std::shared_ptr<Entity> other) {
+void Tile::onCollision(std::shared_ptr<Enemy> other) {
     
 }
 
 void Tile::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Player> other) {
     
 }
 

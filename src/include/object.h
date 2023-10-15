@@ -6,16 +6,14 @@
 #include "vec2.h"
 #include <memory>
 
-class Tile;
-class Entity;
-
 class Object {
 public:
 
     bool checkCollision(const std::shared_ptr<Object> other) const;
     bool MyCheckCollision(const std::shared_ptr<Object> other) const;
     virtual void onCollision(std::shared_ptr<Tile> other) = 0;
-    virtual void onCollision(std::shared_ptr<Entity> other) = 0;
+    virtual void onCollision(std::shared_ptr<Player> other) = 0;
+    virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
     virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
     //virtual void onCollision(const std::shared_ptr<Object> other) = 0;
 

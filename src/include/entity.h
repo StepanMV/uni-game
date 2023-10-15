@@ -9,13 +9,14 @@ class Projectile;
 class Entity: public Object {
     public:
         virtual void onCollision(std::shared_ptr<Tile> other) = 0;
-        virtual void onCollision(std::shared_ptr<Entity> other) = 0;
+        virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
         virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
+        virtual void onCollision(std::shared_ptr<Player> other) = 0;
 
         virtual bool isAlive() const override;
         
         bool getAttacking() const;
-        virtual void getProjectile() const = 0;
+        virtual void attack() = 0;
         
         /*
         virtual void move();

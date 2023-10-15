@@ -2,15 +2,13 @@
 
 #include <string>
 #include <vector>
-// #include "tile.h"
-// #include "projectile.h"
-// #include "player.h"
 #include "ui.h"
 
 class Tile;
 class Projectile;
 class Player;
 class Object;
+class Enemy;
 
 
 class Level {

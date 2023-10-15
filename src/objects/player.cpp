@@ -65,7 +65,7 @@ void Player::update() {
     }
     calcHitbox();
     physics->onGround = false;
-    getProjectile();
+    attack();
 }
 
 void Player::moveEditor() {
@@ -85,10 +85,18 @@ void Player::moveEditor() {
     }
 }
 
-void Player::getProjectile() const {
+void Player::attack() {
     if(isAttacking) {
-        if(facingLeft) Projectile::createProjectile(1, 1, true)->spawn(pos + Vec2(-size.x / 2 - 10, -size.y / 2 - 30), Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
-        else Projectile::createProjectile(1, 1, true)->spawn(pos + Vec2(size.x / 2 + 10, -size.y / 2 - 30), Vec2(22, 24), 10).setDirection(Vec2(GetMousePosition().x, GetMousePosition().y));
+        //not working on board
+        //camera???
+        Vec2 worldMP = pos.fromScreenToWorld();
+        Vec2 spawnPos = worldMP - pos;
+        spawnPos.normalize();
+        spawnPos *= size.x / 2;
+        spawnPos += pos;
+        if(worldMP.x < pos.x) facingLeft = true;
+        else facingLeft = false;
+        Projectile::createProjectile(1, 1, true)->spawn(spawnPos, Vec2(22, 24), 10).setDirection(worldMP);
     }
 }
 
@@ -196,11 +204,15 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
     }
 }
 
-void Player::onCollision(std::shared_ptr<Entity> other) {
+void Player::onCollision(std::shared_ptr<Enemy> other) {
     
 }
 
 void Player::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Player::onCollision(std::shared_ptr<Player> other) {
     
 }
 

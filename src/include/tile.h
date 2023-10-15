@@ -16,7 +16,8 @@ public:
     static void createObj(Args&&... args) = delete;
 
     virtual void onCollision(std::shared_ptr<Tile> other) override;
-    virtual void onCollision(std::shared_ptr<Entity> other) override;
+    virtual void onCollision(std::shared_ptr<Enemy> other) override;
+    virtual void onCollision(std::shared_ptr<Player> other) override;
     virtual void onCollision(std::shared_ptr<Projectile> other) override;
     virtual bool isCollideable() const override;
     virtual void breakObject() override;

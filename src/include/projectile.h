@@ -22,7 +22,8 @@ class Projectile: public Object {
 
         virtual void update() override;
         void onCollision(std::shared_ptr<Tile> other) override;
-        void onCollision(std::shared_ptr<Entity> other) override;
+        void onCollision(std::shared_ptr<Enemy> other) override;
+        void onCollision(std::shared_ptr<Player> other) override;
         void onCollision(std::shared_ptr<Projectile> other) override;
         virtual void render() override;
         Projectile& spawn(Vec2 pos, Vec2 size, double lifetime);

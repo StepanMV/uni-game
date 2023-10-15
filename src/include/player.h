@@ -11,10 +11,11 @@ class Player: public Entity {
 
         void moveEditor();
 
-        void getProjectile() const override;
+        void attack() override;
 
         virtual void onCollision(std::shared_ptr<Tile> other) override;
-        virtual void onCollision(std::shared_ptr<Entity> other) override;
+        virtual void onCollision(std::shared_ptr<Enemy> other) override;
+        virtual void onCollision(std::shared_ptr<Player> other) override;
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
 
         virtual bool isCollideable() const override;

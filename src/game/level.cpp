@@ -2,6 +2,7 @@
 #include "tile.h"
 #include "projectile.h"
 #include "player.h"
+#include "enemy.h"
 #include <fstream>
 #include <filesystem>
 
@@ -328,7 +329,8 @@ void Level::checkCollision() {
             if(obj1 != obj2) {
                 if(obj1->checkCollision(obj2)) {
                     if(std::dynamic_pointer_cast<Projectile>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Projectile>(obj2));
-                    if(std::dynamic_pointer_cast<Entity>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Entity>(obj2));
+                    if(std::dynamic_pointer_cast<Enemy>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Enemy>(obj2));
+                    if(std::dynamic_pointer_cast<Player>(obj2)) obj1->onCollision(std::dynamic_pointer_cast<Player>(obj2));
                 }
             }
         }
