@@ -45,6 +45,12 @@ UIBuilder &UIBuilder::addBar(std::string ID, BarData barData) {
     return *this;
 }
 
+UIBuilder &UIBuilder::addObject(std::string ID, Vec2 pos, std::shared_ptr<Renderer> object) {
+    ui->objects[ID] = std::make_pair(pos, object);
+    object->changeObject(&ui->objects[ID].first);
+    return *this;
+}
+
 std::shared_ptr<UI> UIBuilder::build()  {
     for (auto &dropdown : ui->dropdowns) {
         ui->dropdownStates[dropdown.first] = dropdown.second.active;
@@ -89,6 +95,10 @@ void UI::update() {
         barPercentages[bar.first] = GuiProgressBar(bar.second.rect, bar.second.text.c_str(), nullptr, bar.second.value, bar.second.minValue, bar.second.maxValue);
     }
 
+    for (auto &object : objects) {
+        object.second.second->render();
+    }
+
     GuiUnlock();
 }
 
@@ -120,4 +130,14 @@ void UI::setBarValue(std::string ID, float *value) {
 int UI::getDropdownValue(std::string ID) const {
     if (dropdownStates.find(ID) == dropdownStates.end()) throw std::runtime_error("Dropdown with ID " + ID + " does not exist");
     return dropdownStates.at(ID);
+}
+
+int UI::getBarPercentage(std::string ID) const {
+    if (barPercentages.find(ID) == barPercentages.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
+    return barPercentages.at(ID);
+}
+
+std::shared_ptr<Renderer> UI::getObject(std::string ID) const {
+    if (objects.find(ID) == objects.end()) throw std::runtime_error("Dummy object with ID " + ID + " does not exist");
+    return objects.at(ID).second;
 }

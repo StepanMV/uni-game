@@ -206,33 +206,19 @@ PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
     return *this;
 }
 
-PlayerBuilder &PlayerBuilder::setHeadTexture(const std::string &texturePath) {
-    headTexturePath = texturePath;
-    return *this;
-}
-
-PlayerBuilder &PlayerBuilder::setLegsTexture(const std::string &texturePath) {
-    legsTexturePath = texturePath;
-    return *this;
-}
-
-PlayerBuilder &PlayerBuilder::setBodyTexture(const std::string &texturePath) {
-    bodyTexturePath = texturePath;
+PlayerBuilder &PlayerBuilder::setTextureID(const int textureID) {
+    this->textureID = textureID;
     return *this;
 }
 
 Player PlayerBuilder::build()
 {
-    if (headTexturePath.empty() || legsTexturePath.empty() || bodyTexturePath.empty()) return player;
+    if (textureID == 0) return player;
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player.renderer);
 
-    renderer->loadTexture("legs", legsTexturePath);
-    renderer->loadTexture("head", headTexturePath);
-    renderer->loadTexture("body", bodyTexturePath);
-
-    Vec2 headSize = renderer->getTextureSize("head");
-    Vec2 legsSize = renderer->getTextureSize("legs");
-    Vec2 bodySize = renderer->getTextureSize("body");
+    Vec2 legsSize = renderer->loadTexture("legs", "resources/textures/Armor_Legs_" + std::to_string(textureID) + ".png");
+    Vec2 headSize = renderer->loadTexture("head", "resources/textures/Armor_Head_" + std::to_string(textureID) + ".png");
+    Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(textureID) + ".png");
 
 
     renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)

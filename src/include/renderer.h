@@ -36,7 +36,7 @@ public:
     TileRenderer() = default;
     TileRenderer(Vec2* objectPos);
 
-    void loadTexture(std::string filename);
+    Vec2 loadTexture(std::string filename);
     void setSpritePos(unsigned short int state);
 
     void render() override;
@@ -52,7 +52,7 @@ public:
     CoolRenderer(Vec2* objectPos);
 
     // Для инициализации
-    void loadTexture(std::string ID, std::string filename);
+    Vec2 loadTexture(std::string ID, std::string filename);
     void addToState(std::string stateID, std::string element, std::shared_ptr<TextureData> textureData);
     Vec2 getTextureSize(std::string ID);
 
@@ -77,9 +77,3 @@ private:
     std::vector<std::string> stateOrder;
     std::map<std::string, std::shared_ptr<Texture2D>> textures;
 };
-
-
-/* 
-tile renderer..?
-data: ptr to texture, sheet pos
-*/

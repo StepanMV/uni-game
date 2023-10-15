@@ -41,13 +41,11 @@ public:
     static PlayerBuilder spawn(Vec2 pos, Vec2 size);
     PlayerBuilder& setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
     PlayerBuilder& setForces(double friction, double gravity);
-    PlayerBuilder& setHeadTexture(const std::string& texturePath);
-    PlayerBuilder& setLegsTexture(const std::string& texturePath);
-    PlayerBuilder& setBodyTexture(const std::string& texturePath);
+    PlayerBuilder& setTextureID(const int textureID);
 
     Player build();
 
 private:
-    std::string headTexturePath, legsTexturePath, bodyTexturePath;
+    int textureID = 0;
     Player player;
 };

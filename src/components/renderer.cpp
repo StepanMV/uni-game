@@ -52,10 +52,11 @@ size_t CoolRenderer::getElementIndex(std::string element) {
 
 CoolRenderer::CoolRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
 
-void CoolRenderer::loadTexture(std::string ID, std::string filename)
+Vec2 CoolRenderer::loadTexture(std::string ID, std::string filename)
 {
     textures.emplace(ID, getFromVRAM(filename, false));
     textures.emplace(ID + " flipped", getFromVRAM(filename, true));
+    return {textures[ID]->width, textures[ID]->height};
 }
 
 void CoolRenderer::addToState(std::string stateID, std::string element, std::shared_ptr<TextureData> textureData) {
@@ -175,8 +176,9 @@ void CoolRenderer::render() {
 
 TileRenderer::TileRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
 
-void TileRenderer::loadTexture(std::string filename) {
+Vec2 TileRenderer::loadTexture(std::string filename) {
     texture = getFromVRAM(filename);
+    return {texture->width, texture->height};
 }
 
 void TileRenderer::setSpritePos(unsigned short int state) {

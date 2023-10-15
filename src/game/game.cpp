@@ -17,12 +17,13 @@ std::shared_ptr<Background> Game::background = nullptr;
 Game::Game(std::string title) {	
 	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
 	InitWindow(settings->readInt("Screen", "screenWidth", 1920), settings->readInt("Screen", "screenHeight", 1080), title.c_str());
-	//ToggleFullscreen();
+	if(settings->readBool("Screen", "fullscreen")) ToggleFullscreen();
 }
 
 Game::~Game() noexcept
 {
 	Renderer::unloadTextures();
+	settings->deleteSection("Runtime");
 	CloseWindow();
 }
 

@@ -59,9 +59,7 @@ void Level::loadGame(std::string filename)
     player = std::move(PlayerBuilder::spawn(Vec2(500 * tileSize, (levelSizeY - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0.75)
-        .setHeadTexture("resources/textures/Armor_Head_3.png")
-        .setBodyTexture("resources/textures/Armor_3.png")
-        .setLegsTexture("resources/textures/Armor_Legs_3.png")
+        .setTextureID(3)
         .build());
 
     loaded = true;
