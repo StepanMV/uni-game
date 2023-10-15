@@ -3,55 +3,6 @@
 #include "tile.h"
 #include <iostream>
 
-Projectile::Projectile() {
-    renderer = std::make_shared<CoolRenderer>();
-    physics = std::make_shared<Physics>();
-}
-
-Projectile::Projectile(const Projectile &other) {
-    renderer = other.renderer;
-    physics = other.physics;
-    pos = other.pos;
-    size = other.size;
-    hitbox = other.hitbox;
-    angle = other.angle;
-    timer = other.timer;
-    damage = other.damage;
-    fromPlayer = other.fromPlayer;
-    id = other.id;
-    renderer->changeObject(&pos);
-}
-
-Projectile &Projectile::operator=(const Projectile &other) {
-    renderer = other.renderer;
-    physics = other.physics;
-    pos = other.pos;
-    size = other.size;
-    hitbox = other.hitbox;
-    angle = other.angle;
-    timer = other.timer;
-    damage = other.damage;
-    fromPlayer = other.fromPlayer;
-    id = other.id;
-    renderer->changeObject(&pos);
-    return *this;
-}
-
-Projectile::Projectile(unsigned _id, unsigned _damage, const bool _fromPlayer) : damage(_damage), fromPlayer(_fromPlayer),
-                                                                                 id(_id)
-{
-    renderer = std::make_shared<CoolRenderer>(&pos);
-    physics = std::make_shared<Physics>();
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    if(id == 1) {
-        renderer->loadTexture("star", "resources/textures/Gore_16.png");
-        Vec2 textureSize = renderer->getTextureSize("star");
-        renderer->addToState("fly", "star", TextureDataBuilder::init(TextureType::TEXTURE, "star", textureSize).build());
-        physics->friction = 0;
-        physics->gravity = 0;
-    }
-}
-
 void Projectile::breakObject() {
     id = 0;
 }
@@ -64,22 +15,12 @@ bool Projectile::isCollideable() const {
     return id != 0;
 }
 
-Projectile& Projectile::spawn(Vec2 pos, Vec2 size, double lifetime) {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    timer = Timer::getInstance(lifetime);
-    renderer->setState("fly");
-    this->pos = pos;
-    this->size = size;
-    return *this;
-}
-
-Projectile& Projectile::setDirection(Vec2 target)
+void Projectile::setDirection(Vec2 target)
 {
     physics->speed = target - pos;
     calcHitbox();
     physics->speed.normalize();
     physics->speed *= 5;
-    return *this;
 }
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
@@ -116,4 +57,36 @@ void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setRotation(angle);
     renderer->render();
+}
+
+ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
+    ProjectileBuilder builder;
+    builder.projectile = std::make_shared<Projectile>();
+    builder.projectile->pos = pos;
+    builder.projectile->size = size;
+    builder.projectile->id = _id;
+    builder.projectile->renderer = std::make_shared<CoolRenderer>(&builder.projectile->pos);
+    builder.projectile->physics = std::make_shared<Physics>();
+    return builder;
+}
+
+ProjectileBuilder &ProjectileBuilder::extra(double lifetime, unsigned _damage, bool _fromPlayer) {
+    projectile->timer = Timer::getInstance(lifetime);
+    projectile->damage = _damage;
+    projectile->fromPlayer = _fromPlayer;
+    return *this;
+}
+
+std::shared_ptr<Projectile> ProjectileBuilder::build() {
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(projectile->renderer);
+    if(projectile->id == 1) {
+        renderer->loadTexture("star", "resources/textures/Gore_16.png");
+        Vec2 textureSize = renderer->getTextureSize("star");
+        renderer->addToState("fly", "star", TextureDataBuilder::init(TextureType::TEXTURE, "star", textureSize).build());
+        renderer->setState("fly");
+        projectile->physics->friction = 0;
+        projectile->physics->gravity = 0;
+    }
+    Level::addObject(projectile);
+    return projectile;
 }

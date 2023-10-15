@@ -96,7 +96,8 @@ void Player::attack() {
         spawnPos += pos;
         if(worldMP.x < pos.x) facingLeft = true;
         else facingLeft = false;
-        Projectile::createProjectile(1, 1, true)->spawn(spawnPos, Vec2(22, 24), 10).setDirection(worldMP);
+        auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+        proj->setDirection(worldMP);
     }
 }
 

@@ -32,8 +32,6 @@ class Player: public Entity {
         */
 
     private:
-        Player() = default;
-
         bool facingLeft = false;
         bool skipPlatform = false;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);

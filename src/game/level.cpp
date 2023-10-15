@@ -11,6 +11,7 @@ const unsigned Level::levelSizeX = 2100;
 const unsigned Level::levelSizeY = 1100;
 const unsigned Level::levelOffset = 50;
 std::vector<std::shared_ptr<Object>> Level::objects;
+Camera2D Level::camera;
 
 void Level::addObject(std::shared_ptr<Object> object) {
     if(object) objects.push_back(object);
@@ -279,16 +280,16 @@ void Level::update() {
     if (editor) updateEditor();
 
     if (!editor){
-        for(auto& object : objects) {
-            if(object->getPos().x < levelOffset * tileSize ||
-                object->getPos().y < levelOffset * tileSize ||
-                object->getPos().x > (levelSizeX - levelOffset) * tileSize ||
-                object->getPos().y > (levelSizeY - levelOffset) * tileSize) {
-                object->breakObject();
+        for(int i = 0; i < objects.size(); i++) {
+            if(objects[i]->getPos().x < levelOffset * tileSize ||
+                objects[i]->getPos().y < levelOffset * tileSize ||
+                objects[i]->getPos().x > (levelSizeX - levelOffset) * tileSize ||
+                objects[i]->getPos().y > (levelSizeY - levelOffset) * tileSize) {
+                objects[i]->breakObject();
             }
-            if(object->isAlive()) {
-                object->move();
-                object->update();
+            if(objects[i]->isAlive()) {
+                objects[i]->move();
+                objects[i]->update();
             }
         }
         this->checkCollision();

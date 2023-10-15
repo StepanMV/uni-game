@@ -12,7 +12,7 @@ class Projectile: public Object {
             Level::addObject(proj);
             return proj;
         }
-        Projectile& setDirection(Vec2 direction);
+        void setDirection(Vec2 direction);
 
         unsigned getId() const;
 
@@ -26,7 +26,6 @@ class Projectile: public Object {
         void onCollision(std::shared_ptr<Player> other) override;
         void onCollision(std::shared_ptr<Projectile> other) override;
         virtual void render() override;
-        Projectile& spawn(Vec2 pos, Vec2 size, double lifetime);
         void moveStraight();
         void moveHoming();
         void bounce();
@@ -35,13 +34,22 @@ class Projectile: public Object {
         void falling();
 
     private:
-        Projectile();
-        Projectile(const Projectile& other);
-        Projectile& operator=(const Projectile& other);
-        Projectile(unsigned _id, unsigned _damage, const bool _fromPlayer);
 
         std::shared_ptr<Timer> timer;
         unsigned damage;
         bool fromPlayer;
         unsigned id;
+
+        friend class ProjectileBuilder;
+};
+
+class ProjectileBuilder {
+public:
+    static ProjectileBuilder spawn(Vec2 pos, Vec2 size, unsigned _id);
+    ProjectileBuilder& extra(double lifetime, unsigned _damage, bool _fromPlayer);
+
+    std::shared_ptr<Projectile> build();
+
+private:
+    std::shared_ptr<Projectile> projectile;
 };

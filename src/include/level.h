@@ -44,6 +44,7 @@ public:
     static void addObject(std::shared_ptr<Object> object);
 
     void checkObjExisting();
+    static Camera2D camera;
 
 private:
     void loadFile(std::string filepath);
@@ -60,7 +61,6 @@ private:
     bool editor = false;
     int placedBlockId = 1;
 
-    Camera2D camera;
     std::shared_ptr<UI> ui;
     std::shared_ptr<Background> background;
 
