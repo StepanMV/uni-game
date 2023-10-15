@@ -87,9 +87,8 @@ void Player::moveEditor() {
 
 void Player::attack() {
     if(isAttacking) {
-        //not working on board
-        //camera???
-        Vec2 worldMP = pos.fromScreenToWorld();
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera);
+        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         Vec2 spawnPos = worldMP - pos;
         spawnPos.normalize();
         spawnPos *= size.x / 2;

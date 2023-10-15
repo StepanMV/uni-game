@@ -42,11 +42,6 @@ Vec2& Vec2::operator*=(const float& k) {
     return *this;
 }
 
-Vec2 Vec2::fromScreenToWorld() const
-{
-    return Vec2(this->x + GetMouseX() - GetScreenWidth() / 2, this->y + GetMouseY() - GetScreenHeight() / 2);
-}
-
 Vec2 operator+(const Vec2& v1, const Vec2& v2) {
     return Vec2(v1.x + v2.x, v1.y + v2.y);
 }
