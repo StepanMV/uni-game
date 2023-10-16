@@ -67,16 +67,49 @@ std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
     return points;
 }
 
+void Object::setCenterOffset(Vec2 offset) {
+    centerOffset = offset;
+}
+
+// void Object::calcHitbox() {
+//     hitbox.clear();
+//     hitbox.push_back(Vec2(+size.x / 2, +size.y / 2));
+//     hitbox.push_back(Vec2(+size.x / 2, -size.y / 2));
+//     hitbox.push_back(Vec2(-size.x / 2, -size.y / 2));
+//     hitbox.push_back(Vec2(-size.x / 2, +size.y / 2));
+//     Vec2 oldCenter = centerOffset;
+//     Vec2 posOffset = -oldCenter;
+//     posOffset.rotate(angle);
+//     centerOffset = -posOffset;
+//     posOffset += oldCenter;
+//     for(auto& point : hitbox) {
+//         point -= oldCenter;
+//         point.rotate(angle);
+//         point += oldCenter;
+//         point += pos;
+//     }
+//     pos += posOffset;
+// }
+
 void Object::calcHitbox() {
-    hitbox.clear();
-    hitbox.push_back(Vec2(+size.x / 2, +size.y / 2));
-    hitbox.push_back(Vec2(+size.x / 2, -size.y / 2));
-    hitbox.push_back(Vec2(-size.x / 2, -size.y / 2));
-    hitbox.push_back(Vec2(-size.x / 2, +size.y / 2));
-    for(auto& point : hitbox) {
-        point.rotate(angle);
-        point += pos;
+    pos -= startCenter;
+    startCenter = -centerOffset;
+    startCenter.rotate(angle);
+    startCenter += centerOffset;
+    for(int i = 0; i < 4; i++) {
+        hitbox[i] -= startHitbox[i];
     }
+    startHitbox = {Vec2(+size.x / 2, +size.y / 2),
+                   Vec2(+size.x / 2, -size.y / 2),
+                   Vec2(-size.x / 2, -size.y / 2),
+                   Vec2(-size.x / 2, +size.y / 2)};
+    for(int i = 0; i < 4; i++) {
+        startHitbox[i] -= centerOffset;
+        startHitbox[i].rotate(angle);
+        startHitbox[i] += centerOffset;
+        hitbox[i] = startHitbox[i] + pos;
+    }
+    pos += startCenter;
 }
 
 

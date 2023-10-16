@@ -18,6 +18,7 @@ public:
     //virtual void onCollision(const std::shared_ptr<Object> other) = 0;
 
     void calcHitbox();
+    void setCenterOffset(Vec2 offset);
     virtual bool isAlive() const = 0;
     virtual bool isCollideable() const = 0;
     virtual void breakObject() = 0;
@@ -37,7 +38,16 @@ protected:
     Object& operator=(const Object& other);
 
     Vec2 pos, size;
-    std::vector<Vec2> hitbox;
+    std::vector<Vec2> hitbox = std::vector<Vec2>(4);
+    
+    std::vector<Vec2> startHitbox = {Vec2(+size.x / 2, +size.y / 2),
+                                    Vec2(+size.x / 2, -size.y / 2),
+                                    Vec2(-size.x / 2, -size.y / 2),
+                                    Vec2(-size.x / 2, +size.y / 2)};
+    Vec2 startCenter = Vec2(0, 0);
+    
+    
+    Vec2 centerOffset = Vec2(0, 0);
     float angle = 0;
 
     std::shared_ptr<Renderer> renderer;

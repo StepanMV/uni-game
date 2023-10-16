@@ -2,7 +2,6 @@
 #include "tile.h"
 #include "level.h"
 #include "keyboard.h"
-#include "projectile.h"
 
 void Player::update() {
     onBoard();
@@ -36,7 +35,6 @@ void Player::update() {
     if(Keyboard::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -2.5);
     }
-
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if(isAttacking) {
             projTimer->reset();

@@ -2,7 +2,7 @@
 
 #include "entity.h"
 #include "timer.h"
-
+#include "projectile.h"
 
 class Player: public Entity {
     public:

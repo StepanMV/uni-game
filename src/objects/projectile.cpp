@@ -45,13 +45,22 @@ unsigned Projectile::getId() const {
     return id;
 }
 
+void Projectile::setId(unsigned id) {
+    this->id = id;
+}
+
+void Projectile::setPos(Vec2 pos) {
+    this->pos = pos;
+    this->pos += startCenter;
+}
+
 void Projectile::update() {
     angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
     calcHitbox();
     if(timer->isDone()) {
         breakObject();
     }
-}   
+}  
 
 void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);

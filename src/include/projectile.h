@@ -15,6 +15,8 @@ class Projectile: public Object {
         void setDirection(Vec2 direction);
 
         unsigned getId() const;
+        void setId(unsigned id);
+        void setPos(Vec2 pos);
 
         virtual void breakObject() override;
         virtual bool isCollideable() const override;
