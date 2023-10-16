@@ -12,6 +12,7 @@ struct DropdownData { Rectangle rect; std::string text; int active; bool editMod
 
 class UI {
 public:
+    UI();
     void update();
     //void render();
 

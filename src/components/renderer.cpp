@@ -191,22 +191,22 @@ void TileRenderer::render() {
 
 Vec2 TileRenderer::getSpritePos(unsigned short int state) {
     switch(state) {
-        case 0b0000: return {GetRandomValue(9, 11), 3};
-        case 0b0001: return {9, GetRandomValue(0, 2)};
-        case 0b0010: return {12, GetRandomValue(0, 2)};
-        case 0b0011: return {GetRandomValue(6, 8), 4};
-        case 0b0100: return {GetRandomValue(6, 8), 0};
+        case 0b0000: return {(float) GetRandomValue(9, 11), 3};
+        case 0b0001: return {9, (float) GetRandomValue(0, 2)};
+        case 0b0010: return {12, (float) GetRandomValue(0, 2)};
+        case 0b0011: return {(float) GetRandomValue(6, 8), 4};
+        case 0b0100: return {(float) GetRandomValue(6, 8), 0};
         case 0b0101: return {0, 3};
         case 0b0110: return {1, 3};
-        case 0b0111: return {GetRandomValue(1, 3), 0};
-        case 0b1000: return {GetRandomValue(6, 8), 3};
+        case 0b0111: return {(float) GetRandomValue(1, 3), 0};
+        case 0b1000: return {(float) GetRandomValue(6, 8), 3};
         case 0b1001: return {0, 4};
         case 0b1010: return {1, 4};
-        case 0b1011: return {GetRandomValue(1, 3), 2};
-        case 0b1100: return {5, GetRandomValue(0, 2)};
-        case 0b1101: return {0, GetRandomValue(0, 2)};
-        case 0b1110: return {4, GetRandomValue(0, 2)};
-        case 0b1111: return {GetRandomValue(1, 3), 1};
-        default: return {GetRandomValue(9, 11), 3};
+        case 0b1011: return {(float) GetRandomValue(1, 3), 2};
+        case 0b1100: return {5, (float) GetRandomValue(0, 2)};
+        case 0b1101: return {0, (float) GetRandomValue(0, 2)};
+        case 0b1110: return {4, (float) GetRandomValue(0, 2)};
+        case 0b1111: return {(float) GetRandomValue(1, 3), 1};
+        default: return {(float) GetRandomValue(9, 11), 3};
     }
 }
