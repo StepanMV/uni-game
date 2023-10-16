@@ -2,12 +2,11 @@
 #include "object.h"
 
 class Particle: public Object {
-    public:
-        Particle(double _time);
-        
+    public: 
         virtual void update() override;
 
         ~Particle();
     private:
+        Particle(double _time);
         double time;
 };

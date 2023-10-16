@@ -63,18 +63,41 @@ void Player::update() {
     if(platformTimer->isDone()) {
         skipPlatform = false;
     }
+    calcHitbox();
     physics->onGround = false;
+    attack();
 }
 
-void Player::goDownEditor() {
-    physics->accel += Vec2(0, 2.5);
-}
-
-Projectile Player::getProjectile() const {
-    if(isAttacking) {
-        return Projectile(1, 1, true);
+void Player::moveEditor() {
+    onBoard();
+    physics->accel = Vec2(0, 0);
+    if (IsKeyDown(KEY_A)) {
+        physics->accel += Vec2(-1.5, 0);
     }
-    return Projectile(0, 1, true);
+    if (IsKeyDown(KEY_D)) {
+        physics->accel += Vec2(1.5, 0);
+    }
+    if (IsKeyDown(KEY_W)) {
+        physics->accel += Vec2(0, -1.5);
+    }
+    if (IsKeyDown(KEY_S)) {
+        physics->accel += Vec2(0, 1.5);
+    }
+}
+
+void Player::attack() {
+    if(isAttacking) {
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera);
+        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+        Vec2 spawnPos = worldMP - pos;
+        spawnPos.normalize();
+        spawnPos *= size.x / 2;
+        spawnPos += pos;
+        if(worldMP.x < pos.x) facingLeft = true;
+        else facingLeft = false;
+        auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+        proj->setDirection(worldMP);
+    }
 }
 
 void Player::render() {
@@ -120,68 +143,86 @@ void Player::onBoard() {
     }
 }
 
-void Player::onCollision(Tile& other) {
-    if(other.getId() == 0) {
+void Player::onCollision(std::shared_ptr<Tile> other) {
+    if(other->isPlatform && skipPlatform) {
         return;
     }
-    if(other.isPlatform && skipPlatform) {
-        return;
-    }
-    if(!other.isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
-        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(!other->isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->onGround = true;
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
+        calcHitbox();
     }
-    if(other.isPlatform) return;
-    if(!other.isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2){
-        if(other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(other->isPlatform) return;
+    if(!other->isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other->getPos().y - other->getSize().y / 2){
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 2) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->jumping = false;
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
+        calcHitbox();
     }
-    if(!other.isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
-        if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
+        if((other->canClimbLeft) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
+        calcHitbox();
     }
-    if(!other.isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
-        if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
+        if((other->canClimbRight) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
+        calcHitbox();
     }
 }
 
-void Player::onCollision(Entity& other) {
+void Player::onCollision(std::shared_ptr<Enemy> other) {
     
+}
+
+void Player::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Player::onCollision(std::shared_ptr<Player> other) {
+    
+}
+
+bool Player::isCollideable() const
+{
+    return true;
+}
+
+void Player::breakObject() {
+    //?
 }
 
 PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {

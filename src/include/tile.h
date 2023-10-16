@@ -4,15 +4,27 @@
 
 class Tile: public Object {
 public:
-    Tile();
+    template<class... Args>
+    static std::shared_ptr<Tile> createTile(Args&&... args) {
+        return std::shared_ptr<Tile>(new Tile(args...));
+    }
 
     unsigned getId() const;
     unsigned getForm() const;
 
+    template<class... Args>
+    static void createObj(Args&&... args) = delete;
+
+    virtual void onCollision(std::shared_ptr<Tile> other) override;
+    virtual void onCollision(std::shared_ptr<Enemy> other) override;
+    virtual void onCollision(std::shared_ptr<Player> other) override;
+    virtual void onCollision(std::shared_ptr<Projectile> other) override;
+    virtual bool isCollideable() const override;
+    virtual void breakObject() override;
+
     void updateState();
 
     virtual bool isAlive() const override;
-
     virtual void update() override;
     virtual void render() override;
 
@@ -20,8 +32,9 @@ public:
     bool canClimbLeft = true, canClimbRight = true;
     bool isPlatform = false;
 private:
-    friend class TileBuilder;
 
+    Tile();
+    friend class TileBuilder;
     unsigned id = 0;
     unsigned form = 0;
 };
