@@ -1,43 +1,7 @@
 #include "tile.h"
 
 Tile::Tile() {
-    renderer = std::make_shared<TileRenderer>();
-}
-
-Tile::Tile(const Tile &other)
-{
-    pos = other.pos;
-    size = other.size;
-    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
-    renderer->changeObject(&pos);
-    id = other.id;
-    form = other.form;
-    isUp = other.isUp;
-    isDown = other.isDown;
-    isLeft = other.isLeft;
-    isRight = other.isRight;
-    canClimbLeft = other.canClimbLeft;
-    canClimbRight = other.canClimbRight;
-    hitbox = other.hitbox;
-    angle = other.angle;
-}
-
-Tile &Tile::operator=(const Tile &other) {
-    pos = other.pos;
-    size = other.size;
-    renderer = std::make_shared<TileRenderer>(*std::dynamic_pointer_cast<TileRenderer>(other.renderer));
-    renderer->changeObject(&pos);
-    id = other.id;
-    form = other.form;
-    isUp = other.isUp;
-    isDown = other.isDown;
-    isLeft = other.isLeft;
-    isRight = other.isRight;
-    canClimbLeft = other.canClimbLeft;
-    canClimbRight = other.canClimbRight;
-    hitbox = other.hitbox;
-    angle = other.angle;
-    return *this;
+    this->renderer = std::make_shared<TileRenderer>(&this->pos);
 }
 
 unsigned Tile::getId() const
@@ -49,6 +13,34 @@ unsigned Tile::getForm() const {
     return form;
 }
 
+void Tile::onCollision(std::shared_ptr<Tile> other) {
+
+}
+
+void Tile::onCollision(std::shared_ptr<Enemy> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Player> other) {
+    
+}
+
+bool Tile::isAlive() const {
+    return id != 0;
+}
+
+bool Tile::isCollideable() const {
+    return id != 0;
+}
+
+void Tile::breakObject() {
+    id = 0;
+}
+
 void Tile::updateState() {
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(this->renderer);
     unsigned short int state = 0;
@@ -57,10 +49,6 @@ void Tile::updateState() {
     if (isLeft) state += 2;
     if (isRight) state += 1;
     renderer->setSpritePos(state);
-}
-
-bool Tile::isAlive() const {
-    return id != 0;
 }
 
 void Tile::update() { }
@@ -103,6 +91,7 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 
 Tile TileBuilder::build() {
     if (tile.id == 0) return Tile();
+    tile.isPlatform = tile.id == 1;
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile.renderer);
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile.id) + ".png");

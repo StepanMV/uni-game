@@ -1,16 +1,17 @@
 #pragma once
 #include "raylib.h"
+#include <cmath>
 
 class Vec2 {
 public:
     Vec2() = default;
     Vec2(float _x, float _y);
 
-        Vector2 toRaylib() const;
+    Vector2 toRaylib() const;
 
-        float dot(const Vec2& v) const;
-        void normalize();
-        void rotate(float angle);
+    float dot(const Vec2& v) const;
+    void normalize();
+    void rotate(float angle);
 
     Vec2& operator+=(const Vec2& v);
     Vec2& operator-=(const Vec2& v);

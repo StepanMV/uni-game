@@ -10,28 +10,52 @@ Vec2 Object::getSize() const {
     return size;
 }
 
-Vec2 Object::move()
+void Object::move()
 {
     Vec2 speed = physics->calcSpeed();
     pos += speed;
-    return speed;
 }
 
-bool Object::checkCollision(const Object &other) const
+Vec2 Object::getSpeed() {
+    return physics->speed;
+}
+
+Object::Object(const Object &other) {
+    pos = other.pos;
+    size = other.size;
+    if (std::shared_ptr<CoolRenderer> rend = std::dynamic_pointer_cast<CoolRenderer>(other.renderer)) {
+        this->renderer = std::make_shared<CoolRenderer>(*rend);
+    } else if (std::shared_ptr<TileRenderer> rend = std::dynamic_pointer_cast<TileRenderer>(other.renderer)) {
+        this->renderer = std::make_shared<TileRenderer>(*rend);
+    }
+    renderer->changeObject(&pos);
+    if (other.physics) physics = std::make_shared<Physics>(*other.physics);
+    hitbox = other.hitbox;
+    angle = other.angle;
+}
+
+Object &Object::operator=(const Object &other) {
+    pos = other.pos;
+    size = other.size;
+    if (std::shared_ptr<CoolRenderer> rend = std::dynamic_pointer_cast<CoolRenderer>(other.renderer)) {
+        this->renderer = std::make_shared<CoolRenderer>(*rend);
+    } else if (std::shared_ptr<TileRenderer> rend = std::dynamic_pointer_cast<TileRenderer>(other.renderer)) {
+        this->renderer = std::make_shared<TileRenderer>(*rend);
+    }
+    renderer->changeObject(&pos);
+    if (other.physics) physics = std::make_shared<Physics>(*other.physics);
+    hitbox = other.hitbox;
+    angle = other.angle;
+    return *this;
+}
+
+bool Object::checkCollision(const std::shared_ptr<Object> other) const
 {
     Rectangle thisHitbox = Rectangle{(float) (pos.x - size.x / 2), (float) (pos.y - size.y / 2), (float) size.x, (float) size.y};
-    Vec2 otherPos = other.getPos();
-    Vec2 otherSize = other.getSize();
+    Vec2 otherPos = other->getPos();
+    Vec2 otherSize = other->getSize();
     Rectangle otherHitbox = Rectangle{(float) (otherPos.x - otherSize.x / 2), (float) (otherPos.y - otherSize.y / 2), (float) otherSize.x, (float) otherSize.y};
     return CheckCollisionRecs(thisHitbox, otherHitbox);
-}
-
-Rectangle Object::getCollisionBox(const Object& other) const {
-    Rectangle thisHitbox = Rectangle{(float) (pos.x - size.x / 2), (float) (pos.y - size.y / 2), (float) size.x, (float) size.y};
-    Vec2 otherPos = other.getPos();
-    Vec2 otherSize = other.getSize();
-    Rectangle otherHitbox = Rectangle{(float) (otherPos.x - otherSize.x / 2), (float) (otherPos.y - otherSize.y / 2), (float) otherSize.x, (float) otherSize.y};
-    return GetCollisionRec(thisHitbox, otherHitbox);
 }
 
 std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
@@ -170,9 +194,9 @@ bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
     }
 }
 
-bool Object::MyCheckCollision(const Object& other) const {
-    if(!other.isAlive() || !isAlive()) {
+bool Object::MyCheckCollision(const std::shared_ptr<Object> other) const {
+    if(!other->isCollideable() || !isCollideable()) {
         return false;
     }
-    return calculate(hitbox, other.hitbox);
+    return calculate(hitbox, other->hitbox);
 }

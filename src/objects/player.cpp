@@ -3,11 +3,6 @@
 #include "level.h"
 #include "keyboard.h"
 
-Player::Player() {
-    renderer = std::make_shared<CoolRenderer>();
-    physics = std::make_shared<Physics>();
-}
-
 void Player::update() {
     onBoard();
     physics->accel = Vec2(0, 0);
@@ -41,9 +36,6 @@ void Player::update() {
         physics->accel += Vec2(0, -2.5);
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        if(!isWeapon) {
-            isWeapon = true;
-        }
         if(isAttacking) {
             projTimer->reset();
         }
@@ -54,9 +46,6 @@ void Player::update() {
             isAttacking = false;
         }
     }
-    else {
-        isWeapon = false;
-    }
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         isAttacking = true;
     }
@@ -64,34 +53,54 @@ void Player::update() {
         isAttacking = false;
     }
     if (Keyboard::isKeyDown(KEY_S)) {
-        physics->accel += Vec2(0, 2.5);
+        if(physics->onGround) {
+            skipPlatform = true;
+        }
+        platformTimer->reset();
     }
-    if(isWeapon) {
-        weapon.setId(2);
-        weapon.setPos(pos + Vec2(0, -20 - weapon.getSize().y / 2));
-        weapon.update();
+    if(platformTimer->isDone()) {
+        skipPlatform = false;
     }
+    calcHitbox();
     physics->onGround = false;
+    attack();
 }
 
-Projectile Player::getProjectile() const {
-    if(isAttacking) {
-        return Projectile(1, 1, true);
+void Player::moveEditor() {
+    onBoard();
+    physics->accel = Vec2(0, 0);
+    if (IsKeyDown(KEY_A)) {
+        physics->accel += Vec2(-1.5, 0);
     }
-    return Projectile(0, 1, true);
+    if (IsKeyDown(KEY_D)) {
+        physics->accel += Vec2(1.5, 0);
+    }
+    if (IsKeyDown(KEY_W)) {
+        physics->accel += Vec2(0, -1.5);
+    }
+    if (IsKeyDown(KEY_S)) {
+        physics->accel += Vec2(0, 1.5);
+    }
 }
 
-Projectile Player::getWeapon() const {
-    if(isWeapon) return Projectile(2, 1, true);
-    return Projectile(0, 1, true);
+void Player::attack() {
+    if(isAttacking) {
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera);
+        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+        Vec2 spawnPos = worldMP - pos;
+        spawnPos.normalize();
+        spawnPos *= size.x / 2;
+        spawnPos += pos;
+        if(worldMP.x < pos.x) facingLeft = true;
+        else facingLeft = false;
+        auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+        proj->setDirection(worldMP);
+    }
 }
 
 void Player::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
-    if(isWeapon) {
-        weapon.render();
-    }
 
     if (physics->speed.x > 0) {
         facingLeft = false;
@@ -132,64 +141,86 @@ void Player::onBoard() {
     }
 }
 
-void Player::onCollision(Tile& other) {
-    if(other.getId() == 0) {
+void Player::onCollision(std::shared_ptr<Tile> other) {
+    if(other->isPlatform && skipPlatform) {
         return;
     }
-    if((!other.isUp) && (physics->speed.y > 0) && (pos.y + size.y / 2 < other.getPos().y + other.getSize().y / 2)) {
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(!other->isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->onGround = true;
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
+        calcHitbox();
     }
-    if((!other.isDown) && (physics->speed.y < 0) && (pos.y - size.y / 2 > other.getPos().y - other.getSize().y / 2)){
-        if(!other.isRight && other.getPos().x + other.getSize().x / 2 - pos.x + size.x / 2 <= 1) {
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+    if(other->isPlatform) return;
+    if(!other->isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other->getPos().y - other->getSize().y / 2){
+        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        else if(!other.isLeft && pos.x + size.x / 2 - other.getPos().x + other.getSize().x / 2 <= 1) {
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->jumping = false;
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
+        calcHitbox();
     }
-    if((!other.isLeft) && (physics->speed.x > 0) && (pos.x + size.x / 2 < other.getPos().x + other.getSize().x / 2)) {
-        if((other.canClimbLeft) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
+        if((other->canClimbLeft) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x - other.getSize().x / 2 - size.x / 2 + 1;
+            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
+        calcHitbox();
     }
-    if((!other.isRight) && (physics->speed.x < 0) && (pos.x - size.x / 2 > other.getPos().x - other.getSize().x / 2)) {
-        if((other.canClimbRight) && (pos.y <= other.getPos().y - other.getSize().y / 2)) {
-            pos.y = other.getPos().y - other.getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
+        if((other->canClimbRight) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        else if(!other.isDown && other.getPos().y + other.getSize().y / 2 - pos.y + size.y / 2 <= 1) {
-            pos.y = other.getPos().y + other.getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
+            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other.getPos().x + other.getSize().x / 2 + size.x / 2 - 1;
+            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
+        calcHitbox();
     }
 }
 
-void Player::onCollision(Entity& other) {
+void Player::onCollision(std::shared_ptr<Enemy> other) {
     
+}
+
+void Player::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Player::onCollision(std::shared_ptr<Player> other) {
+    
+}
+
+bool Player::isCollideable() const
+{
+    return true;
+}
+
+void Player::breakObject() {
+    //?
 }
 
 PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
@@ -233,11 +264,6 @@ Player PlayerBuilder::build()
 {
     if (headTexturePath.empty() || legsTexturePath.empty() || bodyTexturePath.empty()) return player;
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player.renderer);
-
-    player.weapon = Projectile(2, 1, true);
-    player.weapon.spawn(player.pos, Vec2(40, 100), 10);
-    player.weapon.setCenterOffset(Vec2(0, 20 + player.weapon.getSize().y / 2));
-    player.weapon.setDirection(player.weapon.getPos());
 
     renderer->loadTexture("legs", legsTexturePath);
     renderer->loadTexture("head", headTexturePath);
