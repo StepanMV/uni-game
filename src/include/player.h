@@ -2,21 +2,25 @@
 
 #include "entity.h"
 #include "timer.h"
-
+#include "projectile.h"
 
 class Player: public Entity {
     public:
-        Player() = default;
-
         virtual void update() override;
         virtual void render() override;
 
-        void goDownEditor();
+        void moveEditor();
 
-        Projectile getProjectile() const override;
+        void attack() override;
 
-        virtual void onCollision(Tile& other) override;
-        virtual void onCollision(Entity& other) override;
+        virtual void onCollision(std::shared_ptr<Tile> other) override;
+        virtual void onCollision(std::shared_ptr<Enemy> other) override;
+        virtual void onCollision(std::shared_ptr<Player> other) override;
+        virtual void onCollision(std::shared_ptr<Projectile> other) override;
+
+        virtual bool isCollideable() const override;
+        virtual void breakObject() override;
+
         void onBoard();
         /*
         void moveRight();

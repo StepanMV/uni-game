@@ -14,6 +14,7 @@ class Object;
 
 class UI {
 public:
+    UI();
     void update();
 
     Color getBackgroundColor() const;

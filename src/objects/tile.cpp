@@ -13,6 +13,34 @@ unsigned Tile::getForm() const {
     return form;
 }
 
+void Tile::onCollision(std::shared_ptr<Tile> other) {
+
+}
+
+void Tile::onCollision(std::shared_ptr<Enemy> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Projectile> other) {
+    
+}
+
+void Tile::onCollision(std::shared_ptr<Player> other) {
+    
+}
+
+bool Tile::isAlive() const {
+    return id != 0;
+}
+
+bool Tile::isCollideable() const {
+    return id != 0;
+}
+
+void Tile::breakObject() {
+    id = 0;
+}
+
 void Tile::updateState() {
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(this->renderer);
     unsigned short int state = 0;
@@ -21,10 +49,6 @@ void Tile::updateState() {
     if (isLeft) state += 2;
     if (isRight) state += 1;
     renderer->setSpritePos(state);
-}
-
-bool Tile::isAlive() const {
-    return id != 0 && !isPlatform;
 }
 
 void Tile::update() { }

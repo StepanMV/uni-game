@@ -1,6 +1,7 @@
 #include "ui.h"
 
 #include "raygui.h"
+#include "style_cyber.h"
 #include <stdexcept>
 #include <iostream>
 #include "game.h"
@@ -64,7 +65,12 @@ std::shared_ptr<UI> UIBuilder::build()  {
     return ui;
 }
 
-void UI::update() {
+UI::UI() {
+    GuiLoadStyleCyber();
+}
+
+void UI::update()
+{
     bool lock = false;
     for (auto &dropdown : dropdowns) {
         if (dropdown.second.editMode) {
