@@ -8,6 +8,9 @@
 
 class Object {
 public:
+    static void updateAll();
+    static void renderAll();
+    void destroy();
 
     bool checkCollision(const std::shared_ptr<Object> other) const;
     bool MyCheckCollision(const std::shared_ptr<Object> other) const;
@@ -19,39 +22,45 @@ public:
 
     void calcHitbox();
     void setCenterOffset(Vec2 offset);
-    virtual bool isAlive() const = 0;
+    bool isAlive() const;
     virtual bool isCollideable() const = 0;
-    virtual void breakObject() = 0;
 
 
     virtual void update() = 0;
     virtual void render() = 0;
-    void move();
-    Vec2 getSpeed();
 
+    unsigned getId() const;
+    Vec2 getSpeed();
     Vec2 getPos() const;
     Vec2 getSize() const;
+    float getAngle() const;
 
+    static std::vector<std::shared_ptr<Object>> objects;
+    static std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
+    
 protected:
+
     Object() = default;
     Object(const Object& other);
     Object& operator=(const Object& other);
 
-    Vec2 pos, size;
-    std::vector<Vec2> hitbox = std::vector<Vec2>(4);
-    
-    std::vector<Vec2> startHitbox = {Vec2(+size.x / 2, +size.y / 2),
-                                    Vec2(+size.x / 2, -size.y / 2),
-                                    Vec2(-size.x / 2, -size.y / 2),
-                                    Vec2(-size.x / 2, +size.y / 2)};
-    Vec2 startCenter = Vec2(0, 0);
-    
-    
-    Vec2 centerOffset = Vec2(0, 0);
+    unsigned int id = 0;
+    Vec2 pos = Vec2(0, 0);
+    Vec2 size = Vec2(0, 0);
     float angle = 0;
 
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<Physics> physics;
+
+    std::vector<Vec2> hitbox = std::vector<Vec2>(4);
+    Vec2 startCenter = Vec2(0, 0);
+    Vec2 centerOffset = Vec2(0, 0);
+    std::vector<Vec2> startHitbox = {
+        Vec2(+size.x / 2, +size.y / 2),
+        Vec2(+size.x / 2, -size.y / 2),
+        Vec2(-size.x / 2, -size.y / 2),
+        Vec2(-size.x / 2, +size.y / 2)
+    };
 };
 
 struct Circle {

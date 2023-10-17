@@ -5,44 +5,35 @@
 class Tile;
 
 class Projectile: public Object {
-    public:
-        template<class... Args>
-        static std::shared_ptr<Projectile> createProjectile(Args&&... args) {
-            std::shared_ptr<Projectile> proj = std::shared_ptr<Projectile>(new Projectile(args...));
-            Level::addObject(proj);
-            return proj;
-        }
-        void setDirection(Vec2 direction);
+public:
+    void setDirection(Vec2 direction);
 
-        unsigned getId() const;
-        void setId(unsigned id);
-        void setPos(Vec2 pos);
+    void setId(unsigned id);
+    void setPos(Vec2 pos);
 
-        virtual void breakObject() override;
-        virtual bool isCollideable() const override;
-        virtual bool isAlive() const override;
+    virtual bool isCollideable() const override;
 
-        virtual void update() override;
-        void onCollision(std::shared_ptr<Tile> other) override;
-        void onCollision(std::shared_ptr<Enemy> other) override;
-        void onCollision(std::shared_ptr<Player> other) override;
-        void onCollision(std::shared_ptr<Projectile> other) override;
-        virtual void render() override;
-        void moveStraight();
-        void moveHoming();
-        void bounce();
-        void redirect();
-        void hit();
-        void falling();
+    virtual void update() override;
+    void onCollision(std::shared_ptr<Tile> other) override;
+    void onCollision(std::shared_ptr<Enemy> other) override;
+    void onCollision(std::shared_ptr<Player> other) override;
+    void onCollision(std::shared_ptr<Projectile> other) override;
+    virtual void render() override;
+    void moveStraight();
+    void moveHoming();
+    void bounce();
+    void redirect();
+    void hit();
+    void falling();
 
-    private:
+private:
+    Projectile() = default;
 
-        std::shared_ptr<Timer> timer;
-        unsigned damage;
-        bool fromPlayer;
-        unsigned id;
+    std::shared_ptr<Timer> timer;
+    unsigned damage;
+    bool fromPlayer;
 
-        friend class ProjectileBuilder;
+    friend class ProjectileBuilder;
 };
 
 class ProjectileBuilder {

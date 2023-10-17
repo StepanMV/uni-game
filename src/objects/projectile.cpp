@@ -3,14 +3,6 @@
 #include "tile.h"
 #include <iostream>
 
-void Projectile::breakObject() {
-    id = 0;
-}
-
-bool Projectile::isAlive() const {
-    return id != 0;
-}
-
 bool Projectile::isCollideable() const {
     return id != 0;
 }
@@ -25,12 +17,12 @@ void Projectile::setDirection(Vec2 target)
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
     if(!other->isPlatform) {
-        breakObject();
+        destroy();
     }
 }
 
 void Projectile::onCollision(std::shared_ptr<Enemy> other) {
-    if(fromPlayer) breakObject();
+    if(fromPlayer) destroy();
 }
 
 void Projectile::onCollision(std::shared_ptr<Projectile> other) {
@@ -38,11 +30,7 @@ void Projectile::onCollision(std::shared_ptr<Projectile> other) {
 }
 
 void Projectile::onCollision(std::shared_ptr<Player> other) {
-    if(!fromPlayer) breakObject();
-}
-
-unsigned Projectile::getId() const {
-    return id;
+    if(!fromPlayer) destroy();
 }
 
 void Projectile::setId(unsigned id) {
@@ -58,7 +46,7 @@ void Projectile::update() {
     angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
     calcHitbox();
     if(timer->isDone()) {
-        breakObject();
+        destroy();
     }
 }  
 
@@ -70,7 +58,7 @@ void Projectile::render() {
 
 ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     ProjectileBuilder builder;
-    builder.projectile = std::make_shared<Projectile>();
+    builder.projectile = std::shared_ptr<Projectile>(new Projectile());
     builder.projectile->pos = pos;
     builder.projectile->size = size;
     builder.projectile->id = _id;
@@ -96,6 +84,6 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         projectile->physics->friction = 0;
         projectile->physics->gravity = 0;
     }
-    Level::addObject(projectile);
+    Object::objects.push_back(projectile);
     return projectile;
 }

@@ -19,7 +19,6 @@ class Player: public Entity {
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
 
         virtual bool isCollideable() const override;
-        virtual void breakObject() override;
 
         void onBoard();
         /*
@@ -30,6 +29,8 @@ class Player: public Entity {
         virtual void falling() override;
         virtual void takeDamage() override;
         */
+
+       static std::map<unsigned int, std::shared_ptr<Player>> players;
 
     private:
         bool facingLeft = false;
@@ -42,16 +43,12 @@ class Player: public Entity {
 
 class PlayerBuilder {
 public:
-    static PlayerBuilder spawn(Vec2 pos, Vec2 size);
+    static PlayerBuilder spawn(unsigned id, Vec2 pos, Vec2 size);
     PlayerBuilder& setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
     PlayerBuilder& setForces(double friction, double gravity);
-    PlayerBuilder& setHeadTexture(const std::string& texturePath);
-    PlayerBuilder& setLegsTexture(const std::string& texturePath);
-    PlayerBuilder& setBodyTexture(const std::string& texturePath);
 
-    Player build();
+    std::shared_ptr<Player> build();
 
 private:
-    std::string headTexturePath, legsTexturePath, bodyTexturePath;
-    Player player;
+    std::shared_ptr<Player> player;
 };
