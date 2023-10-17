@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 set(CMAKE_CXX_STANDARD 17)
-project(mygame)
+project(TerrariaBossRush VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -30,12 +30,11 @@ file(GLOB_RECURSE sources src/*.cpp src/*.h)
 file(GLOB_RECURSE sources_test tests/*.cpp tests/*.h tests/*.c)
 file(GLOB_RECURSE data resources/*)
 
-add_executable(${PROJECT_NAME} ${sources} ${data})
-add_executable(tests ${sources_test})
-#set(raylib_VERBOSE 1)
-target_link_libraries(${PROJECT_NAME} raylib)
-target_link_libraries(tests raylib)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
+add_executable(game ${sources} ${data})
+add_executable(test ${sources_test})
+target_link_libraries(game raylib)
+target_link_libraries(test raylib)
+target_include_directories(game PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
 file(COPY resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 

@@ -56,12 +56,12 @@ Vec2 CoolRenderer::loadTexture(std::string ID, std::string filename)
 {
     textures.emplace(ID, getFromVRAM(filename, false));
     textures.emplace(ID + " flipped", getFromVRAM(filename, true));
-    return {textures[ID]->width, textures[ID]->height};
+    return {(float) textures[ID]->width, (float) textures[ID]->height};
 }
 
 void CoolRenderer::addToState(std::string stateID, std::string element, std::shared_ptr<TextureData> textureData) {
     objectStates[stateID].push_back(textureData);
-    stateOrder.push_back(element);
+    stateOrder.push_back(element); 
 }
 
 Vec2 CoolRenderer::getTextureSize(std::string ID) {
@@ -178,7 +178,7 @@ TileRenderer::TileRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
 
 Vec2 TileRenderer::loadTexture(std::string filename) {
     texture = getFromVRAM(filename);
-    return {texture->width, texture->height};
+    return {(float) texture->width, (float) texture->height};
 }
 
 void TileRenderer::setSpritePos(unsigned short int state) {

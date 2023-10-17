@@ -13,6 +13,7 @@
 const std::shared_ptr<IniFile> Game::settings = std::make_shared<IniFile>("settings.ini");
 std::shared_ptr<UI> Game::ui = nullptr;
 std::shared_ptr<Background> Game::background = nullptr;
+std::shared_ptr<CoolCamera> Game::camera = nullptr;
 
 Game::Game(std::string title) {	
 	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
@@ -23,7 +24,6 @@ Game::Game(std::string title) {
 Game::~Game() noexcept
 {
 	Renderer::unloadTextures();
-	settings->deleteSection("Runtime");
 	CloseWindow();
 }
 
@@ -43,8 +43,10 @@ void Game::load() {
 	Renderer::loadTextures("resources/textures");
 	Keyboard::init();
 	createUIS();
+
 	ui = uis.at("startMenu");
 	background = Background::create(1, 0.25);
+	camera = CoolCamera::init();
 }
 
 void Game::createUIS() {
@@ -81,6 +83,7 @@ void Game::update()
     Keyboard::update();
 	Timer::updateAll();
 	if(level.isLoaded()) level.update();
+	camera->update();
 	checkUI();
 }
 

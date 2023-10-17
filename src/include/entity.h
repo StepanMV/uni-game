@@ -12,8 +12,6 @@ class Entity: public Object {
         virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
         virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
         virtual void onCollision(std::shared_ptr<Player> other) = 0;
-
-        virtual bool isAlive() const override;
         
         bool getAttacking() const;
         virtual void attack() = 0;

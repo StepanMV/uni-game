@@ -2,8 +2,13 @@
 #include "tile.h"
 #include "level.h"
 #include "keyboard.h"
+#include "game.h"
 
 void Player::update() {
+    if (id == 1) {
+        moveEditor();
+        return;
+    }
     onBoard();
     physics->accel = Vec2(0, 0);
     if (IsKeyPressed(KEY_SPACE)) {
@@ -85,7 +90,7 @@ void Player::moveEditor() {
 
 void Player::attack() {
     if(isAttacking) {
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera);
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         Vec2 spawnPos = worldMP - pos;
         spawnPos.normalize();
@@ -116,27 +121,26 @@ void Player::render() {
         renderer->setState("jump");
     }
     renderer->setFlipped(facingLeft);
-    renderer->render();
 }
 
 void Player::onBoard() {
-    if(pos.x - size.x / 2 < Level::levelOffset * Level::tileSize) {
+    if(pos.x - size.x / 2 < Level::borderOffset * Level::tileSize) {
         physics->speed.x = 0;
-        pos.x = Level::levelOffset * Level::tileSize + size.x / 2;
+        pos.x = Level::borderOffset * Level::tileSize + size.x / 2;
     }
-    if(pos.y - size.y / 2 < Level::levelOffset * Level::tileSize) {
+    if(pos.y - size.y / 2 < Level::borderOffset * Level::tileSize) {
         physics->speed.y = 0;
-        pos.y = Level::levelOffset * Level::tileSize + size.y / 2;
+        pos.y = Level::borderOffset * Level::tileSize + size.y / 2;
         physics->jumping = false;
     }
-    if(pos.x + size.x / 2 > (Level::levelSizeX - Level::levelOffset) * Level::tileSize) {
+    if(pos.x + size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
         physics->speed.x = 0;
-        pos.x = (Level::levelSizeX - Level::levelOffset) * Level::tileSize - size.x / 2;
+        pos.x = (Level::width - Level::borderOffset) * Level::tileSize - size.x / 2;
     }
-    if(pos.y + size.y / 2 > (Level::levelSizeY - Level::levelOffset) * Level::tileSize)
+    if(pos.y + size.y / 2 > (Level::height - Level::borderOffset) * Level::tileSize)
     {
         physics->speed.y = 0;
-        pos.y = (Level::levelSizeY - Level::levelOffset) * Level::tileSize - size.y / 2;
+        pos.y = (Level::height - Level::borderOffset) * Level::tileSize - size.y / 2;
         physics->onGround = true;
     }
 }
@@ -219,45 +223,43 @@ bool Player::isCollideable() const
     return true;
 }
 
-void Player::breakObject() {
-    //?
-}
-
-PlayerBuilder PlayerBuilder::spawn(Vec2 pos, Vec2 size) {
+PlayerBuilder PlayerBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     PlayerBuilder builder;
-    builder.player.pos = pos;
-    builder.player.size = size;
-    builder.player.renderer = std::make_shared<CoolRenderer>(&builder.player.pos);
-    builder.player.physics = std::make_shared<Physics>();
+    builder.player = std::make_shared<Player>();
+    builder.player->id = id;
+    builder.player->pos = pos;
+    builder.player->size = size;
+    builder.player->renderer = std::make_shared<CoolRenderer>(&builder.player->pos);
+    builder.player->physics = std::make_shared<Physics>();
     return builder;
 }
 
 PlayerBuilder &PlayerBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
-    player.physics->maxMoveSpeed = maxMoveSpeed;
-    player.physics->maxFallSpeed = maxFallSpeed;
-    player.physics->maxFlySpeed = maxFlySpeed;
+    player->physics->maxMoveSpeed = maxMoveSpeed;
+    player->physics->maxFallSpeed = maxFallSpeed;
+    player->physics->maxFlySpeed = maxFlySpeed;
     return *this;
 }
 
 PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
-    player.physics->friction = friction;
-    player.physics->gravity = gravity;
+    player->physics->friction = friction;
+    player->physics->gravity = gravity;
     return *this;
 }
-
-PlayerBuilder &PlayerBuilder::setTextureID(const int textureID) {
-    this->textureID = textureID;
-    return *this;
-}
-
-Player PlayerBuilder::build()
+std::shared_ptr<Player> PlayerBuilder::build()
 {
-    if (textureID == 0) return player;
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player.renderer);
+    if (player->id == 0) return player;
 
-    Vec2 legsSize = renderer->loadTexture("legs", "resources/textures/Armor_Legs_" + std::to_string(textureID) + ".png");
-    Vec2 headSize = renderer->loadTexture("head", "resources/textures/Armor_Head_" + std::to_string(textureID) + ".png");
-    Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(textureID) + ".png");
+    Object::objects.push_back(player);
+    Game::camera->setTarget(&player->pos);
+
+    if (player->id == 1) return player;
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player->renderer);
+
+    Vec2 legsSize = renderer->loadTexture("legs", "resources/textures/Armor_Legs_" + std::to_string(player->id) + ".png");
+    Vec2 headSize = renderer->loadTexture("head", "resources/textures/Armor_Head_" + std::to_string(player->id) + ".png");
+    Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(player->id) + ".png");
 
 
     renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
@@ -296,6 +298,5 @@ Player PlayerBuilder::build()
         .spriteSheet({1, 20}, {0, 0}).build());
     renderer->addToState("jump", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {2, 1}).build());
-
     return player;
 }
