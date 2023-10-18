@@ -37,7 +37,7 @@ class Player: public Entity {
         bool skipPlatform = false;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
-        double startY = pos.y;
+        double startY = transform->pos.y;
         friend class PlayerBuilder;
 };
 

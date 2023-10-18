@@ -13,7 +13,7 @@ const std::vector<int> Background::destYoffsets = {500, 400, 300, 200};
 Background::Background(int id) :
     id(id),
     color(bgData.at(id).color),
-    renderer(&screenCenter)
+    renderer(std::make_shared<MyTransform>(screenCenter, Vec2(0, 0), 0))
 { }
 
 std::shared_ptr<Background> Background::create(int id, float spf) {

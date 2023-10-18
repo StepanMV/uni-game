@@ -9,7 +9,6 @@ public:
     void setDirection(Vec2 direction);
 
     void setId(unsigned id);
-    void setPos(Vec2 pos);
 
     virtual bool isCollideable() const override;
 

@@ -14,8 +14,8 @@ class Renderer {
 public:
     virtual ~Renderer() = default;
     Renderer() = default;
-    Renderer(Vec2* objectPos);
-    void changeObject(Vec2* objectPos);
+    Renderer(std::shared_ptr<MyTransform> transform);
+    void changeObject(std::shared_ptr<MyTransform> transform);
 
     static void loadTextures(std::string folder);
     static void unloadTextures();
@@ -25,7 +25,7 @@ public:
 protected:
     static std::shared_ptr<Texture2D> getFromVRAM(std::string filename, bool flipped = false);
 
-    Vec2* objectPos;
+    std::shared_ptr<MyTransform> transform;
 
     static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;
     static std::unordered_map<std::string, Image> texturesRAM;
@@ -34,7 +34,7 @@ protected:
 class TileRenderer : public Renderer {
 public:
     TileRenderer() = default;
-    TileRenderer(Vec2* objectPos);
+    TileRenderer(std::shared_ptr<MyTransform> transform);
 
     Vec2 loadTexture(std::string filename);
     void setSpritePos(unsigned short int state);
@@ -49,7 +49,7 @@ private:
 class CoolRenderer : public Renderer {
 public:
     CoolRenderer() = default;
-    CoolRenderer(Vec2* objectPos);
+    CoolRenderer(std::shared_ptr<MyTransform> transform);
 
     // Для инициализации
     Vec2 loadTexture(std::string ID, std::string filename);
