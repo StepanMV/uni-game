@@ -21,44 +21,44 @@ Vec2 Object::getSpeed()
 }
 
 Vec2 Object::getPos() const {
-    return pos;
+    return transform->pos;
 }
 
 Vec2 Object::getSize() const {
-    return size;
+    return transform->size;
 }
 
 float Object::getAngle() const {
-    return angle;
+    return transform->angle;
 }
 
 Object::Object(const Object &other)
 {
-    pos = other.pos;
-    size = other.size;
+    transform->pos = other.transform->pos;
+    transform->size = other.transform->size;
     if (std::shared_ptr<CoolRenderer> rend = std::dynamic_pointer_cast<CoolRenderer>(other.renderer)) {
         this->renderer = std::make_shared<CoolRenderer>(*rend);
     } else if (std::shared_ptr<TileRenderer> rend = std::dynamic_pointer_cast<TileRenderer>(other.renderer)) {
         this->renderer = std::make_shared<TileRenderer>(*rend);
     }
-    renderer->changeObject(&pos);
+    renderer->changeObject(transform);
     if (other.physics) physics = std::make_shared<Physics>(*other.physics);
     if (other.collider) collider = std::make_shared<Collider>(*other.collider);
-    angle = other.angle;
+    transform->angle = other.transform->angle;
 }
 
 Object &Object::operator=(const Object &other) {
-    pos = other.pos;
-    size = other.size;
+    transform->pos = other.transform->pos;
+    transform->size = other.transform->size;
     if (std::shared_ptr<CoolRenderer> rend = std::dynamic_pointer_cast<CoolRenderer>(other.renderer)) {
         this->renderer = std::make_shared<CoolRenderer>(*rend);
     } else if (std::shared_ptr<TileRenderer> rend = std::dynamic_pointer_cast<TileRenderer>(other.renderer)) {
         this->renderer = std::make_shared<TileRenderer>(*rend);
     }
-    renderer->changeObject(&pos);
+    renderer->changeObject(transform);
     if (other.physics) physics = std::make_shared<Physics>(*other.physics);
     if (other.collider) collider = std::make_shared<Collider>(*other.collider);
-    angle = other.angle;
+    transform->angle = other.transform->angle;
     return *this;
 }
 
@@ -68,7 +68,7 @@ void Object::updateAll() {
     }), objects.end());
 
     for (int i = 0; i < objects.size(); ++i) {
-        objects[i]->pos += objects[i]->physics->calcSpeed();
+        objects[i]->transform->pos += objects[i]->physics->calcSpeed();
         objects[i]->update();
         //if(object->physics) object->physics->move();
 
@@ -91,6 +91,11 @@ void Object::updateAll() {
         for(auto& obj2 : objects) {
             if(!obj2->collider || !obj2->objectCollide) continue;
             if(obj1 == obj2) continue;
+            if(std::shared_ptr<Projectile> ptr1 = std::dynamic_pointer_cast<Projectile>(obj1)) {
+                if(auto ptr2 = std::dynamic_pointer_cast<Projectile>(obj2)) {
+                    continue;
+                }
+            }
             if(obj1->collider->MyCheckCollision(obj2->collider)) {
                 if(auto ptr = std::dynamic_pointer_cast<Projectile>(obj2)) obj1->onCollision(ptr);
                 if(auto ptr = std::dynamic_pointer_cast<Enemy>(obj2)) obj1->onCollision(ptr);
@@ -117,24 +122,6 @@ void Object::renderAll() {
 
 void Object::destroy() {
     id = 0;
-}
-
-bool Object::checkCollision(const std::shared_ptr<Object> other) const
-{
-    Rectangle thisHitbox = Rectangle{(float) (pos.x - size.x / 2), (float) (pos.y - size.y / 2), (float) size.x, (float) size.y};
-    Vec2 otherPos = other->getPos();
-    Vec2 otherSize = other->getSize();
-    Rectangle otherHitbox = Rectangle{(float) (otherPos.x - otherSize.x / 2), (float) (otherPos.y - otherSize.y / 2), (float) otherSize.x, (float) otherSize.y};
-    return CheckCollisionRecs(thisHitbox, otherHitbox);
-}
-
-std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
-    std::vector<Vec2> points;
-    points.push_back(pos + Vec2(-size.x / 2, -size.y / 2));
-    points.push_back(pos + Vec2(size.x / 2, -size.y / 2));
-    points.push_back(pos + Vec2(size.x / 2, size.y / 2));
-    points.push_back(pos + Vec2(-size.x / 2, size.y / 2));
-    return points;
 }
 
 bool Object::isAlive() const {

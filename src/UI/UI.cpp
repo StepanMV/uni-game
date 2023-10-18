@@ -48,7 +48,7 @@ UIBuilder &UIBuilder::addBar(std::string ID, BarData barData) {
 
 UIBuilder &UIBuilder::addObject(std::string ID, Vec2 pos, std::shared_ptr<Renderer> object) {
     ui->objects[ID] = std::make_pair(pos, object);
-    object->changeObject(&ui->objects[ID].first);
+    object->changeObject(std::make_shared<MyTransform>(ui->objects[ID].first, Vec2(0, 0), 0));
     return *this;
 }
 

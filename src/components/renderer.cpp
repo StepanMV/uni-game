@@ -7,10 +7,10 @@
 std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
 std::unordered_map<std::string, Image> Renderer::texturesRAM;
 
-Renderer::Renderer(Vec2 *objectPos) : objectPos(objectPos) { }
+Renderer::Renderer(std::shared_ptr<MyTransform> _transform) : transform(_transform) { }
 
-void Renderer::changeObject(Vec2 *objectPos) {
-    this->objectPos = objectPos;
+void Renderer::changeObject(std::shared_ptr<MyTransform> transform) {
+    this->transform = transform;
 }
 
 void Renderer::loadTextures(std::string folder)
@@ -50,7 +50,7 @@ size_t CoolRenderer::getElementIndex(std::string element) {
     return it - stateOrder.begin();
 }
 
-CoolRenderer::CoolRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
+CoolRenderer::CoolRenderer(std::shared_ptr<MyTransform> transform) : Renderer(transform) { }
 
 Vec2 CoolRenderer::loadTexture(std::string ID, std::string filename)
 {
@@ -168,13 +168,13 @@ void CoolRenderer::render() {
         auto texture = textures[textureID];
         Rectangle source = element->getSourceRect();
         Rectangle dest = element->getDestRect();
-        dest.x += objectPos->x;
-        dest.y += objectPos->y;
+        dest.x += transform->pos.x;
+        dest.y += transform->pos.y;
         DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, element->getRotation(), WHITE);
     }
 }
 
-TileRenderer::TileRenderer(Vec2 *objectPos) : Renderer(objectPos) { }
+TileRenderer::TileRenderer(std::shared_ptr<MyTransform> transform) : Renderer(transform) { }
 
 Vec2 TileRenderer::loadTexture(std::string filename) {
     texture = getFromVRAM(filename);
@@ -187,7 +187,7 @@ void TileRenderer::setSpritePos(unsigned short int state) {
 
 void TileRenderer::render() {
     Rectangle source = {spritePos.x * 18, spritePos.y * 18, 16, 16};
-    Rectangle dest = {objectPos->x, objectPos->y, 16, 16};
+    Rectangle dest = {transform->pos.x, transform->pos.y, 16, 16};
     DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, 0, WHITE);
 }
 

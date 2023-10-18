@@ -26,3 +26,11 @@ Vec2 operator-(const Vec2& v1, const Vec2& v2);
 Vec2 operator*(const Vec2& v, const float& k);
 Vec2 operator*(const float& k, const Vec2& v);
 Vec2 operator-(const Vec2& v);
+
+struct MyTransform {
+    MyTransform() = default;
+    MyTransform(Vec2 pos, Vec2 size, float angle);
+    Vec2 pos = Vec2(0, 0);
+    Vec2 size = Vec2(0, 0);
+    float angle = 0;
+};

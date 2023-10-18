@@ -1,6 +1,6 @@
 #include "collider.h"
 
-Collider::Collider(Vec2* _pos, Vec2* _size, float* _angle) : pos(_pos), size(_size), angle(_angle) {
+Collider::Collider(std::shared_ptr<MyTransform> _transform) : transform(_transform) {
     calcHitbox();
 }
 
@@ -9,25 +9,27 @@ void Collider::setCenterOffset(Vec2 offset) {
 }
 
 void Collider::calcHitbox() {
-    *angle = (int)*angle % 360;
-    *pos -= rotatedCenter;
+    transform->angle = (int)transform->angle % 360;
+    transform->pos -= rotatedCenter;
     rotatedCenter = -centerOffset;
-    rotatedCenter.rotate(*angle);
+    rotatedCenter.rotate(transform->angle);
     rotatedCenter += centerOffset;
     for(int i = 0; i < 4; i++) {
         hitbox[i] -= rotatedHitbox[i];
     }
-    rotatedHitbox = {Vec2(+size->x / 2, +size->y / 2),
-                   Vec2(+size->x / 2, -size->y / 2),
-                   Vec2(-size->x / 2, -size->y / 2),
-                   Vec2(-size->x / 2, +size->y / 2)};
+    rotatedHitbox = {
+        Vec2(+transform->size.x / 2, +transform->size.y / 2),
+        Vec2(+transform->size.x / 2, -transform->size.y / 2),
+        Vec2(-transform->size.x / 2, -transform->size.y / 2),
+        Vec2(-transform->size.x / 2, +transform->size.y / 2)
+    };
     for(int i = 0; i < 4; i++) {
         rotatedHitbox[i] -= centerOffset;
-        rotatedHitbox[i].rotate(*angle);
+        rotatedHitbox[i].rotate(transform->angle);
         rotatedHitbox[i] += centerOffset;
-        hitbox[i] = rotatedHitbox[i] + *pos;
+        hitbox[i] = rotatedHitbox[i] + transform->pos;
     }
-    *pos += rotatedCenter;
+    transform->pos += rotatedCenter;
 }
 
 //Collision GJK algorithm

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "object.h"
-#include "vec2.h"
 
 class Tile;
 class Projectile;

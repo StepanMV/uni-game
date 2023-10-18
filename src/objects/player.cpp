@@ -13,14 +13,14 @@ void Player::update() {
     physics->accel = Vec2(0, 0);
     if (IsKeyPressed(KEY_SPACE)) {
         if(physics->onGround) {
-            startY = pos.y;
+            startY = transform->pos.y;
             physics->speed.y = -20;
             physics->onGround = false;
             physics->jumping = true;
         }
     }
     if(IsKeyDown(KEY_SPACE)) {
-        if((startY - pos.y <= 100) && (physics->jumping)) {
+        if((startY - transform->pos.y <= 100) && (physics->jumping)) {
             physics->accel += Vec2(0, -2.5);
         }
         else {
@@ -92,11 +92,11 @@ void Player::attack() {
     if(isAttacking) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        Vec2 spawnPos = worldMP - pos;
+        Vec2 spawnPos = worldMP - transform->pos;
         spawnPos.normalize();
-        spawnPos *= size.x / 2;
-        spawnPos += pos;
-        if(worldMP.x < pos.x) facingLeft = true;
+        spawnPos *= transform->size.x / 2;
+        spawnPos += transform->pos;
+        if(worldMP.x < transform->pos.x) facingLeft = true;
         else facingLeft = false;
         auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
         proj->setDirection(worldMP);
@@ -124,23 +124,23 @@ void Player::render() {
 }
 
 void Player::onBoard() {
-    if(pos.x - size.x / 2 < Level::borderOffset * Level::tileSize) {
+    if(transform->pos.x - transform->size.x / 2 < Level::borderOffset * Level::tileSize) {
         physics->speed.x = 0;
-        pos.x = Level::borderOffset * Level::tileSize + size.x / 2;
+        transform->pos.x = Level::borderOffset * Level::tileSize + transform->size.x / 2;
     }
-    if(pos.y - size.y / 2 < Level::borderOffset * Level::tileSize) {
+    if(transform->pos.y - transform->size.y / 2 < Level::borderOffset * Level::tileSize) {
         physics->speed.y = 0;
-        pos.y = Level::borderOffset * Level::tileSize + size.y / 2;
+        transform->pos.y = Level::borderOffset * Level::tileSize + transform->size.y / 2;
         physics->jumping = false;
     }
-    if(pos.x + size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
+    if(transform->pos.x + transform->size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
         physics->speed.x = 0;
-        pos.x = (Level::width - Level::borderOffset) * Level::tileSize - size.x / 2;
+        transform->pos.x = (Level::width - Level::borderOffset) * Level::tileSize - transform->size.x / 2;
     }
-    if(pos.y + size.y / 2 > (Level::height - Level::borderOffset) * Level::tileSize)
+    if(transform->pos.y + transform->size.y / 2 > (Level::height - Level::borderOffset) * Level::tileSize)
     {
         physics->speed.y = 0;
-        pos.y = (Level::height - Level::borderOffset) * Level::tileSize - size.y / 2;
+        transform->pos.y = (Level::height - Level::borderOffset) * Level::tileSize - transform->size.y / 2;
         physics->onGround = true;
     }
 }
@@ -149,58 +149,58 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
     if(other->isPlatform && skipPlatform) {
         return;
     }
-    if(!other->isUp && (physics->speed.y > 0) && (pos.y + size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
-        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
+    if(!other->isUp && (physics->speed.y > 0) && (transform->pos.y + transform->size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
+        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
-            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
+        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->onGround = true;
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
         }
         collider->calcHitbox();
     }
     if(other->isPlatform) return;
-    if(!other->isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other->getPos().y - other->getSize().y / 2){
-        if(other->getPos().x + other->getSize().x / 2 - pos.x + size.x / 2 <= 2) {
-            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
+    if(!other->isDown && physics->speed.y < 0 && transform->pos.y - transform->size.y / 2 > other->getPos().y - other->getSize().y / 2){
+        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
         }
-        else if(pos.x + size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
-            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
+        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
         }
         else {
             physics->speed.y = 0;
             physics->jumping = false;
-            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
         }
         collider->calcHitbox();
     }
-    if(!other->isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
-        if((other->canClimbLeft) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isLeft && (physics->speed.x > 0) && (transform->pos.x + transform->size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
+        if((other->canClimbLeft) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
         }
-        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
         }
         collider->calcHitbox();
     }
-    if(!other->isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
-        if((other->canClimbRight) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
-            pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
+    if(!other->isRight && (physics->speed.x < 0) && (transform->pos.x - transform->size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
+        if((other->canClimbRight) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
         }
-        else if(other->getPos().y + other->getSize().y / 2 - pos.y + size.y / 2 <= 2) {
-            pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
+        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
         }
         else {
             physics->speed.x = 0;
-            pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
         }
         collider->calcHitbox();
     }
@@ -227,9 +227,9 @@ PlayerBuilder PlayerBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     PlayerBuilder builder;
     builder.player = std::make_shared<Player>();
     builder.player->id = id;
-    builder.player->pos = pos;
-    builder.player->size = size;
-    builder.player->renderer = std::make_shared<CoolRenderer>(&builder.player->pos);
+    builder.player->transform->pos = pos;
+    builder.player->transform->size = size;
+    builder.player->renderer = std::make_shared<CoolRenderer>(builder.player->transform);
     builder.player->physics = std::make_shared<Physics>();
     return builder;
 }
@@ -251,7 +251,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
     if (player->id == 0) return player;
 
     Object::objects.push_back(player);
-    Game::camera->setTarget(&player->pos);
+    Game::camera->setTarget(&player->transform->pos);
 
     if (player->id == 1) return player;
 

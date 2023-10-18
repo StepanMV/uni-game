@@ -9,7 +9,7 @@ bool Projectile::isCollideable() const {
 
 void Projectile::setDirection(Vec2 target)
 {
-    physics->speed = target - pos;
+    physics->speed = target - transform->pos;
     collider->calcHitbox();
     physics->speed.normalize();
     physics->speed *= 5;
@@ -38,7 +38,7 @@ void Projectile::setId(unsigned id) {
 }
 
 void Projectile::update() {
-    angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
+    transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
     collider->calcHitbox();
     if(timer->isDone()) {
         destroy();
@@ -47,17 +47,17 @@ void Projectile::update() {
 
 void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setRotation(angle);
+    renderer->setRotation(transform->angle);
     renderer->render();
 }
 
 ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     ProjectileBuilder builder;
     builder.projectile = std::shared_ptr<Projectile>(new Projectile());
-    builder.projectile->pos = pos;
-    builder.projectile->size = size;
+    builder.projectile->transform->pos = pos;
+    builder.projectile->transform->size = size;
     builder.projectile->id = _id;
-    builder.projectile->renderer = std::make_shared<CoolRenderer>(&builder.projectile->pos);
+    builder.projectile->renderer = std::make_shared<CoolRenderer>(builder.projectile->transform);
     builder.projectile->physics = std::make_shared<Physics>();
     return builder;
 }
