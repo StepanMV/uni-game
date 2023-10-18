@@ -10,7 +10,7 @@ bool Projectile::isCollideable() const {
 void Projectile::setDirection(Vec2 target)
 {
     physics->speed = target - pos;
-    calcHitbox();
+    collider->calcHitbox();
     physics->speed.normalize();
     physics->speed *= 5;
 }
@@ -37,14 +37,9 @@ void Projectile::setId(unsigned id) {
     this->id = id;
 }
 
-void Projectile::setPos(Vec2 pos) {
-    this->pos = pos;
-    this->pos += startCenter;
-}
-
 void Projectile::update() {
     angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
-    calcHitbox();
+    collider->calcHitbox();
     if(timer->isDone()) {
         destroy();
     }
@@ -83,6 +78,8 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         renderer->setState("fly");
         projectile->physics->friction = 0;
         projectile->physics->gravity = 0;
+        projectile->physics->maxFallSpeed = 0;
+        projectile->physics->maxFlySpeed = -100;
     }
     Object::objects.push_back(projectile);
     return projectile;

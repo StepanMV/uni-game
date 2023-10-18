@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "physics.h"
 #include "level.h"
+#include "collider.h"
 #include "vec2.h"
 #include <memory>
 
@@ -19,9 +20,7 @@ public:
     virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
     virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
     //virtual void onCollision(const std::shared_ptr<Object> other) = 0;
-
-    void calcHitbox();
-    void setCenterOffset(Vec2 offset);
+    
     bool isAlive() const;
     virtual bool isCollideable() const = 0;
 
@@ -49,21 +48,9 @@ protected:
     Vec2 size = Vec2(0, 0);
     float angle = 0;
 
+    bool tileCollide = true, objectCollide = true;
+
+    std::shared_ptr<Collider> collider = std::make_shared<Collider>(&pos, &size, &angle);
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<Physics> physics;
-
-    std::vector<Vec2> hitbox = std::vector<Vec2>(4);
-    Vec2 startCenter = Vec2(0, 0);
-    Vec2 centerOffset = Vec2(0, 0);
-    std::vector<Vec2> startHitbox = {
-        Vec2(+size.x / 2, +size.y / 2),
-        Vec2(+size.x / 2, -size.y / 2),
-        Vec2(-size.x / 2, -size.y / 2),
-        Vec2(-size.x / 2, +size.y / 2)
-    };
-};
-
-struct Circle {
-    Vec2 pos;
-    float radius;
 };

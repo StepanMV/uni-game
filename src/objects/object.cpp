@@ -43,7 +43,7 @@ Object::Object(const Object &other)
     }
     renderer->changeObject(&pos);
     if (other.physics) physics = std::make_shared<Physics>(*other.physics);
-    hitbox = other.hitbox;
+    if (other.collider) collider = std::make_shared<Collider>(*other.collider);
     angle = other.angle;
 }
 
@@ -57,7 +57,7 @@ Object &Object::operator=(const Object &other) {
     }
     renderer->changeObject(&pos);
     if (other.physics) physics = std::make_shared<Physics>(*other.physics);
-    hitbox = other.hitbox;
+    if (other.collider) collider = std::make_shared<Collider>(*other.collider);
     angle = other.angle;
     return *this;
 }
@@ -75,11 +75,11 @@ void Object::updateAll() {
     }
 
     for(auto& object : objects) {
-        //if(!object->collider) continue;
+        if(!object->collider || !object->tileCollide) continue;
         for(int i = (object->getPos().y - object->getSize().y) / Level::tileSize; i < (object->getPos().y + object->getSize().y) / Level::tileSize; i++) {
             for(int j = (object->getPos().x - object->getSize().x) / Level::tileSize; j < (object->getPos().x + object->getSize().x) / Level::tileSize; j++) {
                 if(i < 0 || j < 0 || i >= Level::height || j >= Level::width) continue;
-                if(object->MyCheckCollision(std::dynamic_pointer_cast<Object>(tiles[i][j]))) {
+                if(object->collider->MyCheckCollision(std::dynamic_pointer_cast<Object>(tiles[i][j])->collider)) {
                     object->onCollision(tiles[i][j]);
                 }
             }
@@ -87,11 +87,11 @@ void Object::updateAll() {
     }
 
     for(auto& obj1 : objects) {
-        //if(!obj1->collider) continue;
+        if(!obj1->collider || !obj1->objectCollide) continue;
         for(auto& obj2 : objects) {
-            //if(!obj2->collider) continue;
+            if(!obj2->collider || !obj2->objectCollide) continue;
             if(obj1 == obj2) continue;
-            if(obj1->checkCollision(obj2)) {
+            if(obj1->collider->MyCheckCollision(obj2->collider)) {
                 if(auto ptr = std::dynamic_pointer_cast<Projectile>(obj2)) obj1->onCollision(ptr);
                 if(auto ptr = std::dynamic_pointer_cast<Enemy>(obj2)) obj1->onCollision(ptr);
                 if(auto ptr = std::dynamic_pointer_cast<Player>(obj2)) obj1->onCollision(ptr);
@@ -137,140 +137,6 @@ std::vector<Vec2> getPointsOfRect(Vec2 pos, Vec2 size) {
     return points;
 }
 
-void Object::setCenterOffset(Vec2 offset) {
-    centerOffset = offset;
-}
-
 bool Object::isAlive() const {
     return id != 0;
-}
-
-// void Object::calcHitbox() {
-//     hitbox.clear();
-//     hitbox.push_back(Vec2(+size.x / 2, +size.y / 2));
-//     hitbox.push_back(Vec2(+size.x / 2, -size.y / 2));
-//     hitbox.push_back(Vec2(-size.x / 2, -size.y / 2));
-//     hitbox.push_back(Vec2(-size.x / 2, +size.y / 2));
-//     Vec2 oldCenter = centerOffset;
-//     Vec2 posOffset = -oldCenter;
-//     posOffset.rotate(angle);
-//     centerOffset = -posOffset;
-//     posOffset += oldCenter;
-//     for(auto& point : hitbox) {
-//         point -= oldCenter;
-//         point.rotate(angle);
-//         point += oldCenter;
-//         point += pos;
-//     }
-//     pos += posOffset;
-// }
-
-void Object::calcHitbox() {
-    pos -= startCenter;
-    startCenter = -centerOffset;
-    startCenter.rotate(angle);
-    startCenter += centerOffset;
-    for(int i = 0; i < 4; i++) {
-        hitbox[i] -= startHitbox[i];
-    }
-    startHitbox = {Vec2(+size.x / 2, +size.y / 2),
-                   Vec2(+size.x / 2, -size.y / 2),
-                   Vec2(-size.x / 2, -size.y / 2),
-                   Vec2(-size.x / 2, +size.y / 2)};
-    for(int i = 0; i < 4; i++) {
-        startHitbox[i] -= centerOffset;
-        startHitbox[i].rotate(angle);
-        startHitbox[i] += centerOffset;
-        hitbox[i] = startHitbox[i] + pos;
-    }
-    pos += startCenter;
-}
-
-
-//Collision GJK algorithm
-
-Vec2 farthestPointInDirection(std::vector<Vec2> shape, Vec2 direction) {
-    Vec2 farthestPoint = shape[0];
-    for(Vec2 point : shape) {
-        if(point.dot(direction) > farthestPoint.dot(direction)) {
-            farthestPoint = point;
-        }
-    }
-    return farthestPoint;
-}
-
-Vec2 farthestPointInDirection(Circle circle, Vec2 direction) {
-    float angle = atan2(direction.y, direction.x);
-    return circle.pos + Vec2(cos(angle), sin(angle)) * circle.radius;
-}
-
-Vec2 support(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB, Vec2 direction) {
-    return farthestPointInDirection(shapeA, direction) - farthestPointInDirection(shapeB, -direction);
-}
-
-bool calculateDirection(std::vector<Vec2>& simplex, Vec2& direction) {
-    Vec2 a = simplex[simplex.size() - 1];
-    Vec2 ao = -a;
-    if(simplex.size() == 3) {
-        Vec2 b = simplex[1];
-        Vec2 c = simplex[0];
-        Vec2 ab = b - a;
-        Vec2 ac = c - a;
-        Vec2 abPerp = Vec2(-ab.y, ab.x);
-
-        if(abPerp.dot(c) > 0) {
-            abPerp = -abPerp;
-        }
-        if(abPerp.dot(ao) > 0) {
-            simplex.erase(simplex.begin() + 1);
-            direction = abPerp;
-            return false;
-        }
-
-        Vec2 acPerp = Vec2(-ac.y, ac.x);
-        if(acPerp.dot(b) > 0) {
-            acPerp = -acPerp;
-        }
-        if(acPerp.dot(ao) > 0) {
-            simplex.erase(simplex.begin());
-            direction = acPerp;
-            return false;
-        }
-        return true;
-    } 
-    else {
-        Vec2 b = simplex[0];
-        Vec2 ab = b - a;
-        Vec2 abPerp = Vec2(-ab.y, ab.x);
-        if(abPerp.dot(ao) < 0) {
-            abPerp = -abPerp;
-        }
-        direction = abPerp;
-        return false;
-    }
-}
-
-bool calculate(std::vector<Vec2> shapeA, std::vector<Vec2> shapeB) {
-    std::vector<Vec2> simplex;
-    Vec2 direction = Vec2(1, 0);
-    simplex.push_back(support(shapeA, shapeB, direction));
-    direction = -direction;
-    while(true) {
-        simplex.push_back(support(shapeA, shapeB, direction));
-        if(simplex[simplex.size() - 1].dot(direction) <= 0) {
-            return false;
-        }
-        else {
-            if(calculateDirection(simplex, direction)) {
-                return true;
-            }
-        }
-    }
-}
-
-bool Object::MyCheckCollision(const std::shared_ptr<Object> other) const {
-    if(!other->isCollideable() || !isCollideable()) {
-        return false;
-    }
-    return calculate(hitbox, other->hitbox);
 }

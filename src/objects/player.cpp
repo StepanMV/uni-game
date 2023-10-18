@@ -66,7 +66,7 @@ void Player::update() {
     if(platformTimer->isDone()) {
         skipPlatform = false;
     }
-    calcHitbox();
+    collider->calcHitbox();
     physics->onGround = false;
     attack();
 }
@@ -161,7 +161,7 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
             physics->onGround = true;
             pos.y = other->getPos().y - other->getSize().y / 2 - size.y / 2 + 1;
         }
-        calcHitbox();
+        collider->calcHitbox();
     }
     if(other->isPlatform) return;
     if(!other->isDown && physics->speed.y < 0 && pos.y - size.y / 2 > other->getPos().y - other->getSize().y / 2){
@@ -176,7 +176,7 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
             physics->jumping = false;
             pos.y = other->getPos().y + other->getSize().y / 2 + size.y / 2 - 1;
         }
-        calcHitbox();
+        collider->calcHitbox();
     }
     if(!other->isLeft && (physics->speed.x > 0) && (pos.x + size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
         if((other->canClimbLeft) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
@@ -189,7 +189,7 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
             physics->speed.x = 0;
             pos.x = other->getPos().x - other->getSize().x / 2 - size.x / 2 + 1;
         }
-        calcHitbox();
+        collider->calcHitbox();
     }
     if(!other->isRight && (physics->speed.x < 0) && (pos.x - size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
         if((other->canClimbRight) && (pos.y <= other->getPos().y - other->getSize().y / 2)) {
@@ -202,7 +202,7 @@ void Player::onCollision(std::shared_ptr<Tile> other) {
             physics->speed.x = 0;
             pos.x = other->getPos().x + other->getSize().x / 2 + size.x / 2 - 1;
         }
-        calcHitbox();
+        collider->calcHitbox();
     }
 }
 

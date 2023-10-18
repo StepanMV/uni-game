@@ -78,6 +78,6 @@ std::shared_ptr<Tile> TileBuilder::build() {
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile->id) + ".png");
     tile->updateState();
-    tile->calcHitbox();
+    tile->collider->calcHitbox();
     return tile;
 }
