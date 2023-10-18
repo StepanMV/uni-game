@@ -79,7 +79,7 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         projectile->physics->friction = 0;
         projectile->physics->gravity = 0;
         projectile->physics->maxFallSpeed = 0;
-        projectile->physics->maxFlySpeed = -100;
+        projectile->physics->maxFlySpeed = 100;
     }
     Object::objects.push_back(projectile);
     return projectile;

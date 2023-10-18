@@ -91,10 +91,8 @@ void Object::updateAll() {
         for(auto& obj2 : objects) {
             if(!obj2->collider || !obj2->objectCollide) continue;
             if(obj1 == obj2) continue;
-            if(std::shared_ptr<Projectile> ptr1 = std::dynamic_pointer_cast<Projectile>(obj1)) {
-                if(auto ptr2 = std::dynamic_pointer_cast<Projectile>(obj2)) {
-                    continue;
-                }
+            if(std::dynamic_pointer_cast<Projectile>(obj1) && std::dynamic_pointer_cast<Projectile>(obj2)) {
+                continue;
             }
             if(obj1->collider->MyCheckCollision(obj2->collider)) {
                 if(auto ptr = std::dynamic_pointer_cast<Projectile>(obj2)) obj1->onCollision(ptr);
