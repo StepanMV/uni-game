@@ -38,10 +38,6 @@ void Tile::updateState() {
     renderer->setSpritePos(state);
 }
 
-void Tile::update() { }
-
-void Tile::render() { }
-
 TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     TileBuilder builder;
     builder.tile = std::shared_ptr<Tile>(new Tile());

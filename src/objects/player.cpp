@@ -1,7 +1,7 @@
 #include "player.h"
 #include "tile.h"
 #include "level.h"
-#include "keyboard.h"
+#include "controls.h"
 #include "game.h"
 
 void Player::update() {
@@ -37,7 +37,7 @@ void Player::update() {
     if (IsKeyDown(KEY_D)) {
         physics->accel += Vec2(1.5, 0);
     }
-    if(Keyboard::isKeyDown(KEY_W)) {
+    if(Controls::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -2.5);
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
@@ -57,7 +57,7 @@ void Player::update() {
     if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         isAttacking = false;
     }
-    if (Keyboard::isKeyDown(KEY_S)) {
+    if (Controls::isKeyDown(KEY_S)) {
         if(physics->onGround) {
             skipPlatform = true;
         }

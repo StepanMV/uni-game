@@ -4,7 +4,7 @@
 #include "player.h"
 #include "tile.h"
 #include "renderer.h"
-#include "keyboard.h"
+#include "controls.h"
 #include "ui.h"
 
 #include <vector>
@@ -41,7 +41,7 @@ void Game::load() {
 	Game::settings->writeDouble("Runtime", "screenCoefW", Game::settings->readDouble("Screen", "screenWidth", 1920) / 1920.0);
 	Game::settings->writeDouble("Runtime", "screenCoefH", Game::settings->readDouble("Screen", "screenHeight", 1080) / 1080.0);
 	Renderer::loadTextures("resources/textures");
-	Keyboard::init();
+	Controls::init();
 	createUIS();
 
 	ui = uis.at("startMenu");
@@ -80,7 +80,7 @@ void Game::createUIS() {
 
 void Game::update()
 {
-    Keyboard::update();
+    Controls::update();
 	Timer::updateAll();
 	if(level.isLoaded()) level.update();
 	camera->update();
@@ -106,7 +106,7 @@ void Game::checkUI() {
 		ui = uis.at("game");
 	}
 
-	if (Keyboard::isKeyPressed(KEY_ESCAPE)) {
+	if (Controls::isKeyPressed(KEY_ESCAPE)) {
 		if (level.isLoaded()) {
 			ui = uis.at("pauseMenu");
 		}
