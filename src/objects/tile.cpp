@@ -1,7 +1,7 @@
 #include "tile.h"
 
 Tile::Tile() {
-    this->renderer = std::make_shared<TileRenderer>(&this->pos);
+    this->collider = std::make_shared<Collider>(transform);
 }
 
 unsigned Tile::getForm() const {
@@ -46,9 +46,9 @@ TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     TileBuilder builder;
     builder.tile = std::shared_ptr<Tile>(new Tile());
     builder.tile->id = id;
-    builder.tile->pos = pos;
-    builder.tile->size = size;
-    builder.tile->renderer = std::make_shared<TileRenderer>(&builder.tile->pos);
+    builder.tile->transform->pos = pos;
+    builder.tile->transform->size = size;
+    builder.tile->renderer = std::make_shared<TileRenderer>(builder.tile->transform);
     return builder;
 }
 
@@ -78,6 +78,6 @@ std::shared_ptr<Tile> TileBuilder::build() {
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile->id) + ".png");
     tile->updateState();
-    tile->calcHitbox();
+    tile->collider->calcHitbox();
     return tile;
 }

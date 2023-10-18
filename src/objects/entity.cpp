@@ -5,6 +5,6 @@ bool Entity::getAttacking() const {
 }
 
 Entity::Entity() {
-    this->renderer = std::make_shared<CoolRenderer>(&this->pos);
+    this->renderer = std::make_shared<CoolRenderer>(transform);
     this->physics = std::make_shared<Physics>();
 }

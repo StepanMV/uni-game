@@ -62,3 +62,5 @@ Vec2 operator*(const float& k, const Vec2& v) {
 Vec2 operator-(const Vec2& v) {
     return Vec2(-v.x, -v.y);
 }
+
+MyTransform::MyTransform(Vec2 _pos, Vec2 _size, float _angle) : pos(_pos), size(_size), angle(_angle) {}
