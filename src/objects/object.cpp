@@ -112,7 +112,7 @@ void Object::renderAll() {
         object->render();
         object->renderer->render();
     }
-    auto borders = Game::camera->getRenderBounds();
+    auto borders = Level::camera->getRenderBounds();
     for(int i = borders.z; i < borders.w; ++i) {
         for (int j = borders.x; j < borders.y; ++j) {
             if (!tiles[i][j]->isAlive()) continue;

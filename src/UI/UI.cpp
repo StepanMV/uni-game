@@ -28,6 +28,15 @@ UIBuilder &UIBuilder::addDummyRect(std::string ID, DummyRectData dummyRectData) 
     return *this;
 }
 
+UIBuilder &UIBuilder::addGroupBox(std::string ID, GroupBoxData groupBoxData) {
+    groupBoxData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    groupBoxData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    groupBoxData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    groupBoxData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    ui->groupBoxes[ID] = groupBoxData;
+    return *this;
+}
+
 UIBuilder &UIBuilder::addDropdown(std::string ID, DropdownData dropdownData) {
     dropdownData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
     dropdownData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
@@ -44,6 +53,15 @@ UIBuilder &UIBuilder::addBar(std::string ID, BarData barData) {
     barData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
     barData.text += " ";
     ui->bars[ID] = barData;
+    return *this;
+}
+
+UIBuilder &UIBuilder::addSliderBar(std::string ID, SliderBarData sliderBarData) {
+    sliderBarData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    sliderBarData.rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    sliderBarData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    sliderBarData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    ui->sliderBars[ID] = sliderBarData;
     return *this;
 }
 
@@ -116,11 +134,14 @@ void UI::update()
         GuiDummyRec(dummyRect.second.rect, dummyRect.second.text.c_str());
     }
 
-    for (auto &dropdown : dropdowns) {
-        if (!dropdown.second.enabled) continue;
-        if(GuiDropdownBox(dropdown.second.rect, dropdown.second.text.c_str(), &dropdown.second.active, dropdown.second.editMode)) {
-            dropdown.second.editMode = !dropdown.second.editMode;
-        }
+    for (auto &groupBox : groupBoxes) {
+        if (!groupBox.second.enabled) continue;
+        GuiGroupBox(groupBox.second.rect, groupBox.second.text.c_str());
+    }
+
+    for (auto &sliderBar : sliderBars) {
+        if (!sliderBar.second.enabled) continue;
+        GuiSliderBar(sliderBar.second.rect, sliderBar.second.textL.c_str(), sliderBar.second.textR.c_str(), sliderBar.second.value, sliderBar.second.minValue, sliderBar.second.maxValue);
     }
 
     for (auto &bar : bars) {
@@ -139,6 +160,14 @@ void UI::update()
 
     for (auto &subUI : subUIs) {
         subUI.second->update();
+    }
+
+    for (auto &dropdown : dropdowns) {
+        if (!dropdown.second.enabled) continue;
+        if(GuiDropdownBox(dropdown.second.rect, dropdown.second.text.c_str(), &dropdown.second.active, dropdown.second.editMode)) {
+            dropdownStates[dropdown.first] = dropdown.second.active;
+            dropdown.second.editMode = !dropdown.second.editMode;
+        }
     }
 
     GuiUnlock();
@@ -199,6 +228,11 @@ int UI::getDropdownValue(std::string ID) const {
 int UI::getBarPercentage(std::string ID) const {
     if (barPercentages.find(ID) == barPercentages.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
     return barPercentages.at(ID);
+}
+
+float UI::getSliderValue(std::string ID) const {
+    if (sliderBars.find(ID) == sliderBars.end()) throw std::runtime_error("Slider bar with ID " + ID + " does not exist");
+    return *sliderBars.at(ID).value;
 }
 
 std::shared_ptr<Particle> UI::getObject(std::string ID) const {

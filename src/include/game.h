@@ -29,7 +29,6 @@ public:
 	const static std::shared_ptr<IniFile> settings;
 	static std::shared_ptr<UI> ui;
 	static std::shared_ptr<Background> background;
-    static std::shared_ptr<CoolCamera> camera;
 
 private:
 	bool close = false;

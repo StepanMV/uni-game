@@ -14,7 +14,6 @@
 const std::shared_ptr<IniFile> Game::settings = std::make_shared<IniFile>("settings.ini");
 std::shared_ptr<UI> Game::ui = nullptr;
 std::shared_ptr<Background> Game::background = nullptr;
-std::shared_ptr<CoolCamera> Game::camera = nullptr;
 
 Game::Game(std::string title) {	
 	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
@@ -29,7 +28,7 @@ Game::~Game() noexcept
 }
 
 bool Game::shouldClose() const {
-	return ui->isButtonPressed("exit") || close;
+	return close || Controls::isKeyPressed(KEY_F4) && Controls::isKeyDown(KEY_LEFT_ALT);
 }
 
 void Game::tick() {
@@ -48,7 +47,6 @@ void Game::load() {
 
 	ui = uis.at("startMenu");
 	background = Background::create(1, 0.25);
-	camera = CoolCamera::init();
 }
 
 void Game::createUIS() {
@@ -89,6 +87,16 @@ void Game::createUIS() {
 			.addScrollMenu("tileSelector", Rectangle{ 1650, 60, 240, 960 }, "TILE SELECTOR", editorScrollUI.build())
 			.addSubUI("pauseMenu", pauseMenuUI, false)
 			.build()
+		},
+		{"settings" , UIBuilder()
+			.addGroupBox("settings", GroupBoxData{ Rectangle{ 640, 120, 640, 600 }, "SETTINGS" })
+			.addButton("cancel", ButtonData{ Rectangle{ 640, 744, 312, 72 }, "CANCEL" })
+			.addButton("confirm", ButtonData{ Rectangle{ 968, 744, 312, 72 }, "CONFIRM (RESTART)" })
+			.addDummyRect("resolution", DummyRectData{ Rectangle{ 688, 168, 192, 40 }, "RESOLUTION" })
+			.addDropdown("resolutionDropdown", DropdownData{ Rectangle{ 960, 168, 288, 40 }, "1920x1080;1600x1200;1440x1080;1600x900;1366x768;1280x960;1280x720;1024x768;800x600" })
+			.addDummyRect("fullscreen", DummyRectData{ Rectangle{ 688, 248, 192, 40 }, "FULLSCREEN" })
+			.addDropdown("fullscreenDropdown", DropdownData{ Rectangle{ 960, 248, 288, 40 }, "OFF;ON" })
+			.build()
 		}
 	};
 }
@@ -98,20 +106,66 @@ void Game::update()
     Controls::update();
 	Timer::updateAll();
 	if(level.isLoaded()) level.update();
-	camera->update();
 	checkUI();
+}
+
+Vec2 resSwitch(int dropdown) {
+	switch (dropdown) {
+	case 0:
+		return { 1920, 1080 };
+	case 1:
+		return { 1600, 1200 };
+	case 2:
+		return { 1440, 1080 };
+	case 3:
+		return { 1600, 900 };
+	case 4:
+		return { 1366, 768 };
+	case 5:
+		return { 1280, 960 };
+	case 6:
+		return { 1280, 720 };
+	case 7:
+		return { 1024, 768 };
+	case 8:
+		return { 800, 600 };
+	default:
+		return { 1920, 1080 };
+	}
 }
 
 void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
-		level.loadGame("saves/level.txt");
+		unsigned levelID = ui->getDropdownValue("bossDropdown");
+		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("game");
 		ui->update();
 	}
 	if (ui->isButtonPressed("editor")) {
-		level.loadEditor("saves/level.txt");
+		unsigned levelID = ui->getDropdownValue("bossDropdown");
+		level.loadEditor("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("editor");
 		ui->update();
+	}
+	if (ui->isButtonPressed("settings")) {
+		ui = uis.at("settings");
+		ui->update();
+	}
+	if (ui->isButtonPressed("exit")) {
+		close = true;
+	}
+	if (ui->isButtonPressed("cancel")) {
+		ui = uis.at("startMenu");
+		ui->update();
+	}
+
+	if (ui->isButtonPressed("confirm")) {
+		Vec2 res = resSwitch(ui->getDropdownValue("resolutionDropdown"));
+		std::cout << ui->getDropdownValue("resolutionDropdown") << " " << res.x << " " << res.y << std::endl;
+		Game::settings->writeInt("Screen", "screenWidth", res.x);
+		Game::settings->writeInt("Screen", "screenHeight", res.y);
+		Game::settings->writeBool("Screen", "fullscreen", ui->getDropdownValue("fullscreenDropdown"));
+		close = true;
 	}
 
 	if (Controls::isKeyPressed(KEY_ESCAPE)) {

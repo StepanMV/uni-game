@@ -90,7 +90,7 @@ void Player::moveEditor() {
 
 void Player::attack() {
     if(isAttacking) {
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         Vec2 spawnPos = worldMP - transform->pos;
         spawnPos.normalize();

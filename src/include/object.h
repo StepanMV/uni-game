@@ -36,8 +36,8 @@ public:
     static std::vector<std::shared_ptr<Object>> objects;
     static std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
     
-    std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
 protected:
+    friend class UIBuilder;
 
     Object() = default;
     Object(const Object& other);
@@ -47,6 +47,7 @@ protected:
 
     bool tileCollide = true, objectCollide = true;
 
+    std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
     std::shared_ptr<Collider> collider;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<Physics> physics;

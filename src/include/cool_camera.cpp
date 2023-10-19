@@ -2,28 +2,21 @@
 #include "raylib.h"
 #include "game.h"
 
-std::shared_ptr<CoolCamera> CoolCamera::init(Vec2* target) {
+std::shared_ptr<CoolCamera> CoolCamera::init() {
     auto coolCamera = std::make_shared<CoolCamera>();
     coolCamera->camera = std::make_shared<Camera2D>();
     coolCamera->camera->offset = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
-    coolCamera->camera->target = target ? target->toRaylib() : Vector2{0.0f, 0.0f};
     coolCamera->camera->rotation = 0.0f;
     coolCamera->camera->zoom = 1.0f * Game::settings->readDouble("Runtime", "screenCoefW", 1);
-    coolCamera->position = target;
     return coolCamera;
 }
 
-void CoolCamera::setTarget(Vec2 *target)
-{
-    position = target;
-}
-
-void CoolCamera::update() {
+void CoolCamera::update(Vec2 position) {
     auto tileSize = Level::tileSize;
     auto width = Level::width;
     auto height = Level::height;
     auto borderOffset = Level::borderOffset;
-    if (position) camera->target = position->toRaylib();
+    camera->target = position.toRaylib();
 
     // Keep camera inside level bounds
     if(camera->target.x - camera->offset.x < tileSize * borderOffset) {

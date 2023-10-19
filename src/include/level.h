@@ -17,8 +17,8 @@ public:
     Level();
     ~Level();
 
-    void loadGame(std::string filepath);
-    void loadEditor(std::string filepath);
+    void loadGame(std::string filepath, unsigned int levelID);
+    void loadEditor(std::string filepath, unsigned int levelID);
     void save();
 
     bool isTile(Vector2 localPos) const;
@@ -35,6 +35,7 @@ public:
     static const unsigned width;
     static const unsigned height;
     static const unsigned borderOffset;
+    static std::shared_ptr<CoolCamera> camera;
 
 private:
     void loadFile(std::string filepath);
@@ -48,6 +49,7 @@ private:
     bool loaded = false;
     bool editor = false;
     int placedBlockId = 1;
+    unsigned int id = 0;
 
     std::string filepath;
 };
