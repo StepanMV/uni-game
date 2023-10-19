@@ -47,7 +47,6 @@ void Projectile::update() {
 
 void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setRotation(transform->angle);
     renderer->render();
 }
 
@@ -59,6 +58,7 @@ ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     builder.projectile->id = _id;
     builder.projectile->renderer = std::make_shared<CoolRenderer>(builder.projectile->transform);
     builder.projectile->physics = std::make_shared<Physics>();
+    builder.projectile->collider = std::make_shared<Collider>(builder.projectile->transform);
     return builder;
 }
 
@@ -72,8 +72,7 @@ ProjectileBuilder &ProjectileBuilder::extra(double lifetime, unsigned _damage, b
 std::shared_ptr<Projectile> ProjectileBuilder::build() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(projectile->renderer);
     if(projectile->id == 1) {
-        renderer->loadTexture("star", "resources/textures/Gore_16.png");
-        Vec2 textureSize = renderer->getTextureSize("star");
+        Vec2 textureSize = renderer->loadTexture("star", "resources/textures/Gore_16.png");
         renderer->addToState("fly", "star", TextureDataBuilder::init(TextureType::TEXTURE, "star", textureSize).build());
         renderer->setState("fly");
         projectile->physics->friction = 0;

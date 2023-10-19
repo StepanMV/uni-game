@@ -2,20 +2,25 @@
 
 #include "raylib.h"
 #include "background.h"
+#include "scroll_menu.h"
 #include <unordered_map>
 #include <string>
 #include <functional>
 
-struct ButtonData { Rectangle rect; std::string text; };
-struct DummyRectData { Rectangle rect; std::string text; };
-struct DropdownData { Rectangle rect; std::string text; int active; bool editMode; };
-struct BarData { Rectangle rect; std::string text; float* value; float minValue; float maxValue; };
-class Object;
+struct ButtonData { Rectangle rect; std::string text; bool enabled = true; };
+struct DummyRectData { Rectangle rect; std::string text; bool enabled = true; };
+struct DropdownData { Rectangle rect; std::string text; int active; bool editMode; bool enabled = true; };
+struct BarData { Rectangle rect; std::string text; float* value; float minValue; float maxValue; bool enabled = true; };
+struct SliderBarData { Rectangle rect; std::string textL; std::string textR; float* value; float minValue; float maxValue; bool enabled = true; };
+struct GroupBoxData { Rectangle rect; std::string text; bool enabled = true; };
+class Particle;
 
 class UI {
 public:
     UI();
     void update();
+
+    void setEnabled(bool enabled, std::string ID = "");
 
     Color getBackgroundColor() const;
 
@@ -27,9 +32,13 @@ public:
 
     int getDropdownValue(std::string ID) const;
     int getBarPercentage(std::string ID) const;
-    std::shared_ptr<Renderer> getObject(std::string ID) const;
+    float getSliderValue(std::string ID) const;
+    std::shared_ptr<Particle> getObject(std::string ID) const;
+    std::shared_ptr<UI> getSubUI(std::string ID) const;
 
 private:
+    bool enabled = true;
+
     std::unordered_map<std::string, std::function<void()>> buttonCallbacks;
 
     std::unordered_map<std::string, bool> prevButtonStates;
@@ -39,11 +48,16 @@ private:
 
     std::unordered_map<std::string, ButtonData> buttons;
     std::unordered_map<std::string, DummyRectData> dummyRects;
+    std::unordered_map<std::string, GroupBoxData> groupBoxes;
     std::unordered_map<std::string, DropdownData> dropdowns;
     std::unordered_map<std::string, BarData> bars;
-    std::unordered_map<std::string, std::pair<Vec2, std::shared_ptr<Renderer>>> objects;
+    std::unordered_map<std::string, SliderBarData> sliderBars;
+    std::unordered_map<std::string, std::pair<bool, std::shared_ptr<Particle>>> objects;
+    std::unordered_map<std::string, std::shared_ptr<ScrollMenu>> scrollMenus;
+    std::unordered_map<std::string, std::shared_ptr<UI>> subUIs;
 
     friend class UIBuilder;
+    friend class ScrollMenu;
 };
 
 class UIBuilder {
@@ -51,9 +65,13 @@ public:
     UIBuilder();
     UIBuilder& addButton(std::string ID, ButtonData buttonData, std::function<void()> callback = []() {});
     UIBuilder& addDummyRect(std::string ID, DummyRectData dummyRectData);
+    UIBuilder& addGroupBox(std::string ID, GroupBoxData groupBoxData);
     UIBuilder& addDropdown(std::string ID, DropdownData dropdownData);
     UIBuilder& addBar(std::string ID, BarData barData);
-    UIBuilder& addObject(std::string ID, Vec2 pos, std::shared_ptr<Renderer> object);
+    UIBuilder& addSliderBar(std::string ID, SliderBarData sliderBarData);
+    UIBuilder& addObject(std::string ID, std::shared_ptr<Particle> object, bool enabled = true);
+    UIBuilder& addScrollMenu(std::string ID, Rectangle rect, std::string text, std::shared_ptr<UI> ui, bool enabled = true);
+    UIBuilder& addSubUI(std::string ID, std::shared_ptr<UI> ui, bool enabled = true);
     std::shared_ptr<UI> build();
 
 private:

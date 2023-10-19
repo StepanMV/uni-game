@@ -14,15 +14,13 @@ public:
 
     void updateState();
 
-    virtual void update() override;
-    virtual void render() override;
+    virtual void update() override {};
+    virtual void render() override {};
 
     bool isUp = false, isDown = false, isLeft = false, isRight = false;
     bool canClimbLeft = true, canClimbRight = true;
     bool isPlatform = false;
 private:
-
-    Tile();
     friend class TileBuilder;
     unsigned form = 0;
 };

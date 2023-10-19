@@ -1,9 +1,5 @@
 #include "tile.h"
 
-Tile::Tile() {
-    this->collider = std::make_shared<Collider>(transform);
-}
-
 unsigned Tile::getForm() const {
     return form;
 }
@@ -38,10 +34,6 @@ void Tile::updateState() {
     renderer->setSpritePos(state);
 }
 
-void Tile::update() { }
-
-void Tile::render() { }
-
 TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     TileBuilder builder;
     builder.tile = std::shared_ptr<Tile>(new Tile());
@@ -73,6 +65,7 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 
 std::shared_ptr<Tile> TileBuilder::build() {
     if (tile->id == 0) return tile;
+    tile->collider = std::make_shared<Collider>(tile->transform);
     tile->isPlatform = tile->id == 1;
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile->renderer);
 

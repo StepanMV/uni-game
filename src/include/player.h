@@ -35,7 +35,7 @@ class Player: public Entity {
     private:
         bool facingLeft = false;
         bool skipPlatform = false;
-        std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);
+        std::shared_ptr<Timer> projTimer = Timer::getInstance(0.0001);
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         double startY = transform->pos.y;
         friend class PlayerBuilder;
