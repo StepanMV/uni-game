@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include "timer.h"
+#include "vec2.h"
 
 class Controls {
 public:
@@ -21,6 +22,8 @@ public:
     static bool isMouseUp(int key);
     static bool isMouseDoublePressed(int key);
     static double getMouseTimePressed(int key);
+    static float getMouseScroll();
+    static Vec2 getMousePos();
 private:
     static void resetDelayed(int key);
     static std::bitset<348 + 7> keyStatesDouble;

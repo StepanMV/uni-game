@@ -32,6 +32,7 @@ public:
     static std::shared_ptr<CoolCamera> camera;
 
 private:
+	bool close = false;
 	void createUIS();
 
 	void update();

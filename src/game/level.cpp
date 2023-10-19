@@ -1,9 +1,11 @@
 #include "level.h"
 #include "tile.h"
 #include "projectile.h"
+#include "controls.h"
 #include "game.h"
 #include "player.h"
 #include "enemy.h"
+#include "particle.h"
 #include "cool_camera.h"
 #include <fstream>
 #include <filesystem>
@@ -59,7 +61,9 @@ void Level::loadGame(std::string filename)
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0.75)
         .build();
+    Game::camera->setTarget(&player->transform->pos);
     loaded = true;
+    this->editor = false;
 }
 
 void Level::loadEditor(std::string filename) {
@@ -69,6 +73,7 @@ void Level::loadEditor(std::string filename) {
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0)
         .build();
+    Game::camera->setTarget(&player->transform->pos);
     loaded = true;
     this->editor = true;
 }
@@ -167,6 +172,10 @@ bool Level::isLoaded() const {
     return loaded;
 }
 
+void Level::unload() {
+    loaded = false;
+}
+
 void Level::placeTile(const Vec2 tilePos, int id) {
     unsigned idX = tilePos.x / tileSize;
     unsigned idY = tilePos.y / tileSize;
@@ -210,9 +219,13 @@ void Level::update() {
 void Level::updateEditor() {
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
     Vec2 mp = {mousePos.x, mousePos.y};
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
-    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
-    if (IsKeyPressed(KEY_Q)) placedBlockId++;
-    if (IsKeyPressed(KEY_E)) placedBlockId--;
+    for (int i = 1; i <= 94; ++i) {
+        if (Game::ui->getSubUI("tileSelector")->isButtonHeld("tile_" + std::to_string(i))) {
+            placedBlockId = i;
+            break;
+        }
+    }
+    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
 
 }

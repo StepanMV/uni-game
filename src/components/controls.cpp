@@ -1,5 +1,6 @@
 #include "controls.h"
 #include "raylib.h"
+#include "vec2.h"
 
 
 std::bitset<348 + 7> Controls::keyStatesDouble;
@@ -75,6 +76,14 @@ bool Controls::isMouseDoublePressed(int key) {
 
 double Controls::getMouseTimePressed(int key) {
     return keyTimes[key + 348];
+}
+
+float Controls::getMouseScroll() {
+    return GetMouseWheelMove();
+}
+
+Vec2 Controls::getMousePos() {
+    return Vec2((float) GetMouseX(), (float) GetMouseY());
 }
 
 void Controls::resetDelayed(int key) {

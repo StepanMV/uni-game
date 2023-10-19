@@ -21,8 +21,6 @@ public:
     bool canClimbLeft = true, canClimbRight = true;
     bool isPlatform = false;
 private:
-
-    Tile();
     friend class TileBuilder;
     unsigned form = 0;
 };

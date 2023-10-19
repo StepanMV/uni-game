@@ -251,7 +251,6 @@ std::shared_ptr<Player> PlayerBuilder::build()
     if (player->id == 0) return player;
 
     Object::objects.push_back(player);
-    Game::camera->setTarget(&player->transform->pos);
 
     if (player->id == 1) return player;
 
@@ -298,5 +297,6 @@ std::shared_ptr<Player> PlayerBuilder::build()
         .spriteSheet({1, 20}, {0, 0}).build());
     renderer->addToState("jump", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {2, 1}).build());
+    renderer->setState("idle");
     return player;
 }

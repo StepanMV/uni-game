@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include "game.h"
+#include "particle.h"
 
 UIBuilder &UIBuilder::addButton(std::string ID, ButtonData buttonData, std::function<void()> callback) {
     buttonData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
@@ -46,9 +47,29 @@ UIBuilder &UIBuilder::addBar(std::string ID, BarData barData) {
     return *this;
 }
 
-UIBuilder &UIBuilder::addObject(std::string ID, Vec2 pos, std::shared_ptr<Renderer> object) {
-    ui->objects[ID] = std::make_pair(pos, object);
-    object->changeObject(std::make_shared<MyTransform>(ui->objects[ID].first, Vec2(0, 0), 0));
+UIBuilder &UIBuilder::addObject(std::string ID, std::shared_ptr<Particle> object, bool enabled) {
+    object->destroy();
+    object->transform->pos.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    object->transform->pos.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    object->transform->size.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    object->transform->size.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    ui->objects[ID] = std::make_pair(enabled, object);
+    return *this;
+}
+
+UIBuilder &UIBuilder::addScrollMenu(std::string ID, Rectangle rect, std::string text, std::shared_ptr<UI> ui, bool enabled) {
+    rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    rect.y *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
+    rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
+    this->ui->scrollMenus[ID] = ScrollMenu::create(rect, text, ui);
+    this->ui->scrollMenus[ID]->setEnabled(enabled);
+    return *this;
+}
+
+UIBuilder &UIBuilder::addSubUI(std::string ID, std::shared_ptr<UI> ui, bool enabled) {
+    this->ui->subUIs[ID] = ui;
+    this->ui->subUIs[ID]->setEnabled(enabled);
     return *this;
 }
 
@@ -71,8 +92,10 @@ UI::UI() {
 
 void UI::update()
 {
+    if (!enabled) return;
     bool lock = false;
     for (auto &dropdown : dropdowns) {
+        if (!dropdown.second.enabled) continue;
         if (dropdown.second.editMode) {
             lock = true;
             break;
@@ -82,30 +105,65 @@ void UI::update()
     if (lock) GuiLock();
 
     for (auto &button : buttons) {
+        if (!button.second.enabled) continue;
         prevButtonStates[button.first] = buttonStates[button.first];
         buttonStates[button.first] = GuiButton(button.second.rect, button.second.text.c_str());
         if (buttonStates[button.first] && !prevButtonStates[button.first]) buttonCallbacks[button.first]();
     }
 
     for (auto &dummyRect : dummyRects) {
+        if (!dummyRect.second.enabled) continue;
         GuiDummyRec(dummyRect.second.rect, dummyRect.second.text.c_str());
     }
 
     for (auto &dropdown : dropdowns) {
+        if (!dropdown.second.enabled) continue;
         if(GuiDropdownBox(dropdown.second.rect, dropdown.second.text.c_str(), &dropdown.second.active, dropdown.second.editMode)) {
             dropdown.second.editMode = !dropdown.second.editMode;
         }
     }
 
     for (auto &bar : bars) {
+        if (!bar.second.enabled) continue;
         barPercentages[bar.first] = GuiProgressBar(bar.second.rect, bar.second.text.c_str(), nullptr, bar.second.value, bar.second.minValue, bar.second.maxValue);
     }
 
     for (auto &object : objects) {
-        object.second.second->render();
+        if (!object.second.first) continue;
+        object.second.second->renderer->render();
+    }
+
+    for (auto &scrollMenu : scrollMenus) {
+        scrollMenu.second->update();
+    }
+
+    for (auto &subUI : subUIs) {
+        subUI.second->update();
     }
 
     GuiUnlock();
+}
+
+void UI::setEnabled(bool enabled, std::string ID) {
+    if (ID.empty()) {
+        this->enabled = enabled;
+        if(!enabled) for (auto &button : buttons) buttonStates[button.first] = false;
+    } else {
+        if (buttons.find(ID) != buttons.end()) {
+            buttons.at(ID).enabled = enabled;
+            if(!enabled) buttonStates.at(ID) = false;
+        } else if (dummyRects.find(ID) != dummyRects.end()) {
+            dummyRects.at(ID).enabled = enabled;
+        } else if (dropdowns.find(ID) != dropdowns.end()) {
+            dropdowns.at(ID).enabled = enabled;
+        } else if (bars.find(ID) != bars.end()) {
+            bars.at(ID).enabled = enabled;
+        } else if (objects.find(ID) != objects.end()) {
+            objects.at(ID).first = enabled;
+        } else {
+            throw std::runtime_error("Element with ID " + ID + " does not exist");
+        }
+    }
 }
 
 Color UI::getBackgroundColor() const {
@@ -143,7 +201,17 @@ int UI::getBarPercentage(std::string ID) const {
     return barPercentages.at(ID);
 }
 
-std::shared_ptr<Renderer> UI::getObject(std::string ID) const {
-    if (objects.find(ID) == objects.end()) throw std::runtime_error("Dummy object with ID " + ID + " does not exist");
-    return objects.at(ID).second;
+std::shared_ptr<Particle> UI::getObject(std::string ID) const {
+    if (objects.find(ID) != objects.end()) return objects.at(ID).second;
+    return nullptr;
+}
+
+std::shared_ptr<UI> UI::getSubUI(std::string ID) const {
+    if (scrollMenus.find(ID) != scrollMenus.end()) {
+        return scrollMenus.at(ID)->ui;
+    }
+    if (subUIs.find(ID) != subUIs.end()) {
+        return subUIs.at(ID);
+    }
+    return nullptr;
 }

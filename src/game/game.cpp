@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include "controls.h"
 #include "ui.h"
+#include "particle.h"
 
 #include <vector>
 #include <iostream>
@@ -28,7 +29,7 @@ Game::~Game() noexcept
 }
 
 bool Game::shouldClose() const {
-	return ui->isButtonPressed("exit");
+	return ui->isButtonPressed("exit") || close;
 }
 
 void Game::tick() {
@@ -38,8 +39,9 @@ void Game::tick() {
 }
 
 void Game::load() {
-	Game::settings->writeDouble("Runtime", "screenCoefW", Game::settings->readDouble("Screen", "screenWidth", 1920) / 1920.0);
-	Game::settings->writeDouble("Runtime", "screenCoefH", Game::settings->readDouble("Screen", "screenHeight", 1080) / 1080.0);
+
+	Game::settings->writeDouble("Runtime", "screenCoefW", GetScreenWidth() / 1920.0);
+	Game::settings->writeDouble("Runtime", "screenCoefH", GetScreenHeight() / 1080.0);
 	Renderer::loadTextures("resources/textures");
 	Controls::init();
 	createUIS();
@@ -50,6 +52,22 @@ void Game::load() {
 }
 
 void Game::createUIS() {
+	auto editorScrollUI = UIBuilder();
+	for (int i = 1; i <= 94; ++i) {
+		editorScrollUI.addButton("tile_" + std::to_string(i),
+			ButtonData{ Rectangle{ 1650.0f + 32.0f + 104 * ((i - 1) % 2), 60.0f + 32.0f + 104 * ((i - 1) / 2), 72.0f, 72.0f }, "" });
+		editorScrollUI.addObject("tile_" + std::to_string(i),
+			Particle::createFromObject(TileBuilder::spawn(
+				i,
+				{ 1650.0f + 32.0f + 104 * ((i - 1) % 2) + 36, 60.0f + 32.0f + 104 * ((i - 1) / 2) + 36 },
+				{ 72.0f, 72.0f }
+			).build()));
+	}
+	auto pauseMenuUI = UIBuilder()
+		.addButton("continue", ButtonData{ Rectangle{ 792, 312, 336, 48 }, "CONTINUE" })
+		.addButton("exitMenu", ButtonData{ Rectangle{ 792, 408, 336, 48 }, "EXIT TO MENU" })
+		.addButton("exit", ButtonData{ Rectangle{ 792, 504, 336, 48 }, "EXIT" })
+		.build();
 	const_cast<std::map<std::string, std::shared_ptr<UI>>&>(uis) = {
 		{"startMenu", UIBuilder()
 			.addButton("start", ButtonData{ Rectangle{ 840, 432, 240, 48 }, "START" })
@@ -60,19 +78,16 @@ void Game::createUIS() {
 			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS" })
 			.build()
 		},
-		{"pauseMenu", UIBuilder()
-			.addButton("continue", ButtonData{ Rectangle{ 792, 312, 336, 48 }, "CONTINUE" })
-			.addButton("exitMenu", ButtonData{ Rectangle{ 792, 408, 336, 48 }, "EXIT TO MENU" })
-			.addButton("exit", ButtonData{ Rectangle{ 792, 504, 336, 48 }, "EXIT" })
-			.build()
-		},
 		{"game", UIBuilder()
 			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", nullptr, 0, 100 })
 			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", nullptr, 0, 100 })
 			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", nullptr, 0, 100 })
+			.addSubUI("pauseMenu", pauseMenuUI, false)
 			.build()
 		},
 		{"editor", UIBuilder()
+			.addScrollMenu("tileSelector", Rectangle{ 1650, 60, 240, 960 }, "TILE SELECTOR", editorScrollUI.build())
+			.addSubUI("pauseMenu", pauseMenuUI, false)
 			.build()
 		}
 	};
@@ -91,24 +106,31 @@ void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
 		level.loadGame("saves/level.txt");
 		ui = uis.at("game");
+		ui->update();
 	}
 	if (ui->isButtonPressed("editor")) {
 		level.loadEditor("saves/level.txt");
 		ui = uis.at("editor");
-	}
-	if (ui->isButtonPressed("exitMenu")) {
-		level.save();
-		level = Level();
-		ui = uis.at("startMenu");
-		background->setSpeed({1, 0});
-	}
-	if (ui->isButtonPressed("continue")) {
-		ui = uis.at("game");
+		ui->update();
 	}
 
 	if (Controls::isKeyPressed(KEY_ESCAPE)) {
-		if (level.isLoaded()) {
-			ui = uis.at("pauseMenu");
+		if (auto pauseMenu = ui->getSubUI("pauseMenu")) pauseMenu->setEnabled(true);
+	}
+	if (auto pauseMenu = ui->getSubUI("pauseMenu")) {
+		if (pauseMenu->isButtonPressed("exitMenu")) {
+			level.save();
+			level.unload();
+			ui = uis.at("startMenu");
+			ui->update();
+			pauseMenu->setEnabled(false);
+			background->setSpeed({1, 0});
+		}
+		if (pauseMenu->isButtonPressed("continue")) {
+			pauseMenu->setEnabled(false);
+		}
+		if (pauseMenu->isButtonPressed("exit")) {
+			close = true;
 		}
 	}
 }

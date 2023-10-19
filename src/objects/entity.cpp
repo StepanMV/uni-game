@@ -7,4 +7,5 @@ bool Entity::getAttacking() const {
 Entity::Entity() {
     this->renderer = std::make_shared<CoolRenderer>(transform);
     this->physics = std::make_shared<Physics>();
+    this->collider = std::make_shared<Collider>(transform);
 }

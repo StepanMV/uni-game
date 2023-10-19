@@ -29,6 +29,7 @@ public:
     void update();
 
     bool isLoaded() const;
+    void unload();
 
     static const unsigned tileSize;
     static const unsigned width;

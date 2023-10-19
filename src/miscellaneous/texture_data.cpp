@@ -25,7 +25,7 @@ Rectangle TextureData::getSourceRect() const {
 }
 
 Rectangle TextureData::getDestRect() const {
-    return Rectangle{destOffset.x, destOffset.y, textureSize.x * scale, textureSize.y * scale};
+    return Rectangle{destOffset.x, destOffset.y, scale, scale};
 }
 
 void TextureData::setScale(float scale) {
@@ -71,7 +71,7 @@ Rectangle SpriteSheet::getSourceRect() const {
 
 Rectangle SpriteSheet::getDestRect() const {
     Vec2 textureSize = {this->textureSize.x / sheetDimensions.x, this->textureSize.y / sheetDimensions.y};
-    return Rectangle{destOffset.x, destOffset.y, textureSize.x * scale, textureSize.y * scale};
+    return Rectangle{destOffset.x, destOffset.y, scale, scale};
 }
 
 void SpriteSheet::setSpritePos(const Vec2 &spritePos) {
@@ -129,7 +129,7 @@ Rectangle Animation::getSourceRect() const {
 
 Rectangle Animation::getDestRect() const {
     Vec2 textureSize = {this->textureSize.x / sheetDimensions.x, this->textureSize.y / sheetDimensions.y};
-    return Rectangle{destOffset.x, destOffset.y, textureSize.x * scale, textureSize.y * scale};
+    return Rectangle{destOffset.x, destOffset.y, scale, scale};
 }
 
 TextureDataBuilder TextureDataBuilder::init(TextureType type, std::string textureID, Vec2 textureSize) {
