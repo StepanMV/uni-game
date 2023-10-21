@@ -83,23 +83,30 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, 1, Vec2(40, 100)).extra(0.3, 1, true).build();
+    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::SWORD, true).build();
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
     Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
     Vec2 spawnPos = worldMP - transform->pos;
     spawnPos.normalize();
     spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
     spawnPos += transform->pos;
-    if(worldMP.x < transform->pos.x) facingLeft = true;
-    else facingLeft = false;
-    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    facingLeft = worldMP.x < transform->pos.x;
+    //simple projectiles
+    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    //"starfury"
+    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
     proj->setDirection(worldMP);
 }
 
 void Player::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
-
+    if(isAttacking) {
+        renderer->setRotation(180 + weapon->getAngle(), "armFront");
+    }
+    else {
+        renderer->setRotation(0, "armFront");
+    }
     if (physics->speed.x > 0) {
         facingLeft = false;
         renderer->setState("move");

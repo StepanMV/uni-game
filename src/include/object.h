@@ -27,7 +27,7 @@ public:
     virtual void render() = 0;
 
     unsigned getId() const;
-    Vec2 getSpeed();
+    Vec2 getSpeed() const;
     Vec2 getPos() const;
     Vec2 getSize() const;
     float getAngle() const;
