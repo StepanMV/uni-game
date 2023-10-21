@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "timer.h"
 #include "projectile.h"
+#include "weapon.h"
 
 class Player: public Entity {
     public:
@@ -35,8 +36,10 @@ class Player: public Entity {
     private:
         bool facingLeft = false;
         bool skipPlatform = false;
+        bool isWeapon = false;
         std::shared_ptr<Timer> projTimer = Timer::getInstance(0.1);
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
+        std::shared_ptr<Weapon> weapon;
         double startY = transform->pos.y;
         friend class PlayerBuilder;
 };

@@ -41,6 +41,11 @@ void Player::update() {
         physics->accel += Vec2(0, -2.5);
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        if(!isWeapon || weapon->getId() == 0) {
+            weapon = WeaponBuilder::spawn(transform, 2, Vec2(40, 100)).extra(0.3, 1, true).build();
+            weapon->setLeftSide(facingLeft);
+        }
+        isWeapon = true;
         if(isAttacking) {
             projTimer->reset();
         }
@@ -56,6 +61,9 @@ void Player::update() {
     }
     if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         isAttacking = false;
+        if(weapon->getId() == 0) {
+            isWeapon = false;
+        }
     }
     if (Keyboard::isKeyDown(KEY_S)) {
         if(physics->onGround) {
@@ -68,6 +76,7 @@ void Player::update() {
     }
     collider->calcHitbox();
     physics->onGround = false;
+    if(weapon) weapon->setLeftSide(facingLeft);
     attack();
 }
 

@@ -8,6 +8,11 @@ void Collider::setCenterOffset(Vec2 offset) {
     centerOffset = offset;
 }
 
+void Collider::setPos(Vec2 pos) {
+    transform->pos = pos;
+    transform->pos += rotatedCenter;
+}
+
 void Collider::calcHitbox() {
     transform->angle = (int)transform->angle % 360;
     transform->pos -= rotatedCenter;
