@@ -30,6 +30,7 @@ void Weapon::setLeftSide(bool _leftSide) {
         transform->angle = -transform->angle;
         attackSpeed = -attackSpeed;
     }
+    leftSide = _leftSide;
 }
 
 WeaponBuilder WeaponBuilder::spawn(std::shared_ptr<MyTransform> refTransform, unsigned id, Vec2 size) {

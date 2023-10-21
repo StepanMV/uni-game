@@ -41,28 +41,14 @@ void Player::update() {
         physics->accel += Vec2(0, -2.5);
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        if(!isWeapon || weapon->getId() == 0) {
-            weapon = WeaponBuilder::spawn(transform, 2, Vec2(40, 100)).extra(0.3, 1, true).build();
-            weapon->setLeftSide(facingLeft);
+        if(!isAttacking || !weapon->isAlive()) {
+            attack();
         }
-        isWeapon = true;
-        if(isAttacking) {
-            projTimer->reset();
-        }
-        if(projTimer->isDone()) {
-            isAttacking = true;
-        }
-        else {
-            isAttacking = false;
-        }
-    }
-    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         isAttacking = true;
     }
     if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-        isAttacking = false;
-        if(weapon->getId() == 0) {
-            isWeapon = false;
+        if(!weapon->isAlive()) {
+            isAttacking = false;
         }
     }
     if (Keyboard::isKeyDown(KEY_S)) {
@@ -77,7 +63,6 @@ void Player::update() {
     collider->calcHitbox();
     physics->onGround = false;
     if(weapon) weapon->setLeftSide(facingLeft);
-    attack();
 }
 
 void Player::moveEditor() {
@@ -98,18 +83,17 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    if(isAttacking) {
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
-        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        Vec2 spawnPos = worldMP - transform->pos;
-        spawnPos.normalize();
-        spawnPos *= transform->size.x / 2;
-        spawnPos += transform->pos;
-        if(worldMP.x < transform->pos.x) facingLeft = true;
-        else facingLeft = false;
-        auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
-        proj->setDirection(worldMP);
-    }
+    weapon = WeaponBuilder::spawn(transform, 1, Vec2(40, 100)).extra(0.3, 1, true).build();
+    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
+    Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+    Vec2 spawnPos = worldMP - transform->pos;
+    spawnPos.normalize();
+    spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
+    spawnPos += transform->pos;
+    if(worldMP.x < transform->pos.x) facingLeft = true;
+    else facingLeft = false;
+    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    proj->setDirection(worldMP);
 }
 
 void Player::render() {
