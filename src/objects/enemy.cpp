@@ -1,25 +1,50 @@
 #include "enemy.h"
 
 void Enemy::update() {
-    physics->accel = Vec2(0, 0);
-    skipPlatform = false;
-    Vec2 direction = (target->pos - transform->pos);
-    direction.y = 0;
-    if(abs(direction.x) > 1) {
-        direction.normalize();
-        direction *= 1.5;
-        move(direction);
-    }
-    else {
-        if(target->pos.y < transform->pos.y) {
+    switch(type) {
+        case EnemyType::ZOMBIE: {
+            physics->accel = Vec2(0, 0);
+            skipPlatform = false;
+            Vec2 direction = (target->pos - transform->pos);
+            direction.y = 0;
+            if(abs(direction.x) > 1) {
+                direction.normalize();
+                direction *= 1.5;
+                move(direction);
+            }
+            else {
+                if(target->pos.y < transform->pos.y) {
+                    jump();
+                }
+            }
+            if(target->pos.y > transform->pos.y) {
+                skipPlatform = true;
+            }
+            break;
+        }
+        case EnemyType::SLIME: {
+            physics->accel.y = 0;
+            if(onGround) {
+                if(!stayTimer->isDone()) {
+                    physics->accel.x = 0;
+                    physics->speed.x = 0;
+                    break;
+                }
+                else {
+                    stayTimer->reset();
+                }
+                Vec2 direction = (target->pos - transform->pos);
+                direction.y = 0;
+                direction.normalize();
+                direction *= 1.5;
+                move(direction);
+            }
             jump();
+            break;
         }
     }
-    if(target->pos.y > transform->pos.y) {
-        skipPlatform = true;
-    }
-    collider->calcHitbox();
     onGround = false;
+    collider->calcHitbox();
 }
 
 void Enemy::render() {
@@ -40,10 +65,11 @@ void Enemy::render() {
     renderer->setFlipped(!facingLeft);
 }
 
-EnemyBuilder EnemyBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
+EnemyBuilder EnemyBuilder::spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size) {
     EnemyBuilder builder;
     builder.enemy = std::shared_ptr<Enemy>(new Enemy());
     builder.enemy->id = id;
+    builder.enemy->type = type;
     builder.enemy->transform->pos = pos;
     builder.enemy->transform->size = size;
     builder.enemy->tileCollide = true;
