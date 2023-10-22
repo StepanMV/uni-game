@@ -34,6 +34,11 @@ void Tile::updateState() {
     renderer->setSpritePos(state);
 }
 
+void Tile::destroy() {
+    id = 0;
+    collider = nullptr;
+}
+
 TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     TileBuilder builder;
     builder.tile = std::shared_ptr<Tile>(new Tile());

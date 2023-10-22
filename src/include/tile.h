@@ -16,6 +16,7 @@ public:
 
     virtual void update() override {};
     virtual void render() override {};
+    virtual void destroy() override;
 
     bool isUp = false, isDown = false, isLeft = false, isRight = false;
     bool canClimbLeft = true, canClimbRight = true;

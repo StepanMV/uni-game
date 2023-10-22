@@ -101,12 +101,6 @@ void Player::attack() {
 void Player::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
-    if(isAttacking) {
-        renderer->setRotation(180 + weapon->getAngle(), "armFront");
-    }
-    else {
-        renderer->setRotation(0, "armFront");
-    }
     if (physics->speed.x > 0) {
         facingLeft = false;
         renderer->setState("move");

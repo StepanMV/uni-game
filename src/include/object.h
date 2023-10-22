@@ -11,7 +11,7 @@ class Object {
 public:
     static void updateAll();
     static void renderAll();
-    void destroy();
+    virtual void destroy();
 
     virtual void onCollision(std::shared_ptr<Tile> other) = 0;
     virtual void onCollision(std::shared_ptr<Player> other) = 0;

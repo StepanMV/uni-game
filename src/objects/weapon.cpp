@@ -24,7 +24,6 @@ void Weapon::update() {
 
 void Weapon::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setRotation(transform->angle);
     renderer->setFlipped(leftSide);
 }
 
