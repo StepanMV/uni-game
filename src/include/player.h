@@ -13,8 +13,7 @@ class Player: public Entity {
         void moveEditor();
 
         void attack() override;
-
-        virtual void onCollision(std::shared_ptr<Tile> other) override;
+        
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
         virtual void onCollision(std::shared_ptr<Player> other) override;
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
@@ -22,21 +21,10 @@ class Player: public Entity {
         virtual bool isCollideable() const override;
 
         void onBoard();
-        /*
-        void moveRight();
-        void moveLeft();
-        virtual void jump() override;
-        virtual void dash() override;
-        virtual void falling() override;
-        virtual void takeDamage() override;
-        */
 
        static std::map<unsigned int, std::shared_ptr<Player>> players;
 
     private:
-        bool facingLeft = false;
-        bool skipPlatform = false;
-        std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         std::shared_ptr<Weapon> weapon;
         double startY = transform->pos.y;
         friend class PlayerBuilder;

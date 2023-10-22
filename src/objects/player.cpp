@@ -33,7 +33,7 @@ void Player::update() {
     else {
         falling();
     }
-    if(physics->onGround) {
+    if(onGround) {
         currentFlightTime = maxFlightTime;
     }
     if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
@@ -48,7 +48,7 @@ void Player::update() {
         }
     }
     if (Controls::isKeyDown(KEY_S)) {
-        if(physics->onGround) {
+        if(onGround) {
             skipPlatform = true;
         }
         platformTimer->reset();
@@ -57,7 +57,7 @@ void Player::update() {
         skipPlatform = false;
     }
     collider->calcHitbox();
-    physics->onGround = false;
+    onGround = false;
     if(weapon) weapon->setLeftSide(facingLeft);
 }
 
@@ -107,7 +107,7 @@ void Player::render() {
         renderer->setAnimationSpeed(10 * -physics->speed.x / physics->maxMoveSpeed);
     }
 
-    if (!physics->onGround) {
+    if (!onGround) {
         renderer->setState("jump");
     }
     renderer->setFlipped(facingLeft);
@@ -121,7 +121,6 @@ void Player::onBoard() {
     if(transform->pos.y - transform->size.y / 2 < Level::borderOffset * Level::tileSize) {
         physics->speed.y = 0;
         transform->pos.y = Level::borderOffset * Level::tileSize + transform->size.y / 2;
-        physics->jumping = false;
     }
     if(transform->pos.x + transform->size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
         physics->speed.x = 0;
@@ -131,68 +130,7 @@ void Player::onBoard() {
     {
         physics->speed.y = 0;
         transform->pos.y = (Level::height - Level::borderOffset) * Level::tileSize - transform->size.y / 2;
-        physics->onGround = true;
-    }
-}
-
-void Player::onCollision(std::shared_ptr<Tile> other) {
-    if(other->isPlatform && skipPlatform) {
-        return;
-    }
-    if(!other->isUp && (physics->speed.y > 0) && (transform->pos.y + transform->size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
-        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
-            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
-        }
-        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
-            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
-        }
-        else {
-            physics->speed.y = 0;
-            physics->onGround = true;
-            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
-        }
-        collider->calcHitbox();
-    }
-    if(other->isPlatform) return;
-    if(!other->isDown && physics->speed.y < 0 && transform->pos.y - transform->size.y / 2 > other->getPos().y - other->getSize().y / 2){
-        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
-            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
-        }
-        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
-            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
-        }
-        else {
-            physics->speed.y = 0;
-            physics->jumping = false;
-            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
-        }
-        collider->calcHitbox();
-    }
-    if(!other->isLeft && (physics->speed.x > 0) && (transform->pos.x + transform->size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
-        if((other->canClimbLeft) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
-            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
-        }
-        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
-            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
-        }
-        else {
-            physics->speed.x = 0;
-            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
-        }
-        collider->calcHitbox();
-    }
-    if(!other->isRight && (physics->speed.x < 0) && (transform->pos.x - transform->size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
-        if((other->canClimbRight) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
-            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
-        }
-        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
-            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
-        }
-        else {
-            physics->speed.x = 0;
-            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
-        }
-        collider->calcHitbox();
+        onGround = true;
     }
 }
 

@@ -8,7 +8,7 @@ class Projectile;
 
 class Entity: public Object {
     public:
-        virtual void onCollision(std::shared_ptr<Tile> other) = 0;
+        virtual void onCollision(std::shared_ptr<Tile> other) override;
         virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
         virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
         virtual void onCollision(std::shared_ptr<Player> other) = 0;
@@ -22,12 +22,15 @@ class Entity: public Object {
        void plane();
        void dash(Vec2 direction);
        void falling();
-       void takeDamage() {};
+       void takeDamage(unsigned damage);
 
     protected:
         Entity();
+        bool facingLeft = false;
+        std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         bool isAttacking = false;
-        bool isFlying = false;
+        bool skipPlatform = false;
+        bool isFlying = false, onGround = false;
         double maxFlightTime = 2;
         double currentFlightTime = maxFlightTime;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);

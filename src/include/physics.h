@@ -10,7 +10,6 @@ class Physics {
         Vec2& calcSpeed();
 
         Vec2 speed, accel;
-        bool onGround, jumping;
         double maxMoveSpeed, maxFallSpeed, maxFlySpeed;
         double friction, gravity;
 

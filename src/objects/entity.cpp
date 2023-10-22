@@ -1,4 +1,5 @@
 #include "entity.h"
+#include "tile.h"
 
 bool Entity::getAttacking() const {
     return isAttacking;
@@ -21,7 +22,7 @@ void Entity::dash(Vec2 direction) {
 }
 
 void Entity::plane() {
-    if(!physics->onGround && !currentFlightTime) {
+    if(!onGround && !currentFlightTime) {
         physics->speed.y = physics->maxFallSpeed / 5;
     }
 }
@@ -35,7 +36,7 @@ void Entity::falling() {
 }
 
 void Entity::fly() {
-    if(!isFlying && !physics->onGround) {
+    if(!isFlying && !onGround) {
         isFlying = true;
         flyTimer = Timer::getInstance(currentFlightTime);
     }
@@ -48,8 +49,75 @@ void Entity::fly() {
 }
 
 void Entity::jump() {
-    if(physics->onGround) {
+    if(onGround) {
         physics->speed.y += -20;
-        physics->onGround = false;
+        onGround = false;
+    }
+}
+
+void Entity::takeDamage(unsigned damage) {
+    health -= damage;
+    if(health <= 0) {
+        this->destroy();
+    }
+}
+
+void Entity::onCollision(std::shared_ptr<Tile> other) {
+    if(other->isPlatform && skipPlatform) {
+        return;
+    }
+    if(!other->isUp && (physics->speed.y > 0) && (transform->pos.y + transform->size.y / 2 < other->getPos().y + other->getSize().y / 2)) {
+        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
+        }
+        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
+        }
+        else {
+            physics->speed.y = 0;
+            onGround = true;
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
+        }
+        collider->calcHitbox();
+    }
+    if(other->isPlatform) return;
+    if(!other->isDown && physics->speed.y < 0 && transform->pos.y - transform->size.y / 2 > other->getPos().y - other->getSize().y / 2){
+        if(other->getPos().x + other->getSize().x / 2 - transform->pos.x + transform->size.x / 2 <= 2) {
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
+        }
+        else if(transform->pos.x + transform->size.x / 2 - other->getPos().x + other->getSize().x / 2 <= 2) {
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
+        }
+        else {
+            physics->speed.y = 0;
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
+        }
+        collider->calcHitbox();
+    }
+    if(!other->isLeft && (physics->speed.x > 0) && (transform->pos.x + transform->size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
+        if((other->canClimbLeft) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
+        }
+        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
+        }
+        else {
+            physics->speed.x = 0;
+            transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
+        }
+        collider->calcHitbox();
+    }
+    if(!other->isRight && (physics->speed.x < 0) && (transform->pos.x - transform->size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
+        if((other->canClimbRight) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+            transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
+        }
+        else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
+            transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
+        }
+        else {
+            physics->speed.x = 0;
+            transform->pos.x = other->getPos().x + other->getSize().x / 2 + transform->size.x / 2 - 1;
+        }
+        collider->calcHitbox();
     }
 }
