@@ -27,7 +27,7 @@ void Controls::update()
         if (IsKeyPressed(i)) {
             if (keyStatesDelayed[i]) keyStatesDouble[i] = true;
             keyStatesDelayed[i] = true;
-            keyTimers[i].reset();
+            keyTimers[i]->reset();
         }
         if (IsKeyReleased(i)) {
             keyTimes[i] = 0;
@@ -50,6 +50,10 @@ bool Controls::isKeyUp(int key) {
     return IsKeyUp(key);
 }
 
+bool Controls::isKeyReleased(int key) {
+    return IsKeyReleased(key);
+}
+
 bool Controls::isKeyDoublePressed(int key) {
     return keyStatesDouble[key];
 }
@@ -68,6 +72,11 @@ bool Controls::isMouseDown(int key) {
 
 bool Controls::isMouseUp(int key) {
     return IsMouseButtonUp(key);
+}
+
+bool Controls::isMouseReleased(int key)
+{
+    return IsMouseButtonReleased(key);
 }
 
 bool Controls::isMouseDoublePressed(int key) {

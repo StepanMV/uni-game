@@ -11,42 +11,38 @@ void Player::update() {
     }
     onBoard();
     physics->accel = Vec2(0, 0);
-    if (IsKeyPressed(KEY_SPACE)) {
-        if(physics->onGround) {
-            startY = transform->pos.y;
-            physics->speed.y = -20;
-            physics->onGround = false;
-            physics->jumping = true;
-        }
+    if(Controls::isKeyDoublePressed(KEY_D)) {
+        dash(Vec2(1, 0));
     }
-    if(IsKeyDown(KEY_SPACE)) {
-        if((startY - transform->pos.y <= 100) && (physics->jumping)) {
-            physics->accel += Vec2(0, -2.5);
-        }
-        else {
-            physics->jumping = false;
-        }
-    }
-    else if(IsKeyReleased(KEY_SPACE)) {
-        physics->jumping = false;
+    if(Controls::isKeyDoublePressed(KEY_A)) {
+        dash(Vec2(-1, 0));
     }
     if (IsKeyDown(KEY_A)) {
-        physics->accel += Vec2(-1.5, 0);
-        
+        move(Vec2(-1.5, 0));
     }
     if (IsKeyDown(KEY_D)) {
-        physics->accel += Vec2(1.5, 0);
+        move(Vec2(1.5, 0));
     }
-    if(Controls::isKeyDown(KEY_W)) {
-        physics->accel += Vec2(0, -2.5);
+    if(Controls::isKeyPressed(KEY_SPACE)) {
+        jump();
     }
-    if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+    if(Controls::isKeyDown(KEY_SPACE)) {
+        fly();
+        plane();
+    }
+    else {
+        falling();
+    }
+    if(physics->onGround) {
+        currentFlightTime = maxFlightTime;
+    }
+    if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
         if(!isAttacking || !weapon->isAlive()) {
             attack();
         }
         isAttacking = true;
     }
-    if(IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+    if(Controls::isMouseReleased(MOUSE_LEFT_BUTTON)) {
         if(!weapon->isAlive()) {
             isAttacking = false;
         }

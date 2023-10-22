@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "timer.h"
 
 class Tile;
 class Projectile;
@@ -15,18 +16,21 @@ class Entity: public Object {
         bool getAttacking() const;
         virtual void attack() = 0;
         
-        /*
-        virtual void move();
-        virtual void jump();
-        virtual void dash();
-        virtual void falling();
-        virtual void takeDamage();
-        */
+       void move(Vec2 direction);
+       void jump();
+       void fly();
+       void plane();
+       void dash(Vec2 direction);
+       void falling();
+       void takeDamage() {};
 
     protected:
         Entity();
-
         bool isAttacking = false;
+        bool isFlying = false;
+        double maxFlightTime = 2;
+        double currentFlightTime = maxFlightTime;
+        std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         unsigned max_health = 100;
         unsigned health = max_health;
 };
