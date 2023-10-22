@@ -64,7 +64,7 @@ void Player::update() {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         EnemyBuilder::spawn(1, EnemyType::SLIME, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
-        .setMaxSpeeds(5, 10, 8)
+        .setMaxSpeeds(2.5, 10, 8)
         .setForces(0.5, 0.75)
         .setTarget(transform)
         .build();
@@ -89,7 +89,7 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::SWORD, true).build();
+    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::GUN, true).build();
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
     Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
     Vec2 spawnPos = worldMP - transform->pos;
@@ -98,9 +98,9 @@ void Player::attack() {
     spawnPos += transform->pos;
     facingLeft = worldMP.x < transform->pos.x;
     //simple projectiles
-    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
     //"starfury"
-    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
+    //auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
     proj->setDirection(worldMP);
 }
 
@@ -145,11 +145,21 @@ void Player::onBoard() {
 }
 
 void Player::onCollision(std::shared_ptr<Enemy> other) {
-    
+    if(damageTimer->isDone()) {
+        takeDamage(other->getContactDamage());
+        takeKnockback(other->getPos().x);
+        damageTimer->reset();
+    }
 }
 
 void Player::onCollision(std::shared_ptr<Projectile> other) {
-    
+    if(!other->getFromPlayer()) {
+        if(damageTimer->isDone()) {
+            takeDamage(other->getDamage());
+            if(other->getDamage()) takeKnockback(other->getPos().x);
+            damageTimer->reset();
+        }
+    }
 }
 
 void Player::onCollision(std::shared_ptr<Player> other) {
@@ -198,6 +208,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
     Vec2 headSize = renderer->loadTexture("head", "resources/textures/Armor_Head_" + std::to_string(player->id) + ".png");
     Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(player->id) + ".png");
 
+    player->damageTimer = Timer::getInstance(0.5);
 
     renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
         .spriteSheet({1, 20}, {0, 0}).build());

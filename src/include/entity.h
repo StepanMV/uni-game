@@ -23,6 +23,7 @@ class Entity: public Object {
        void dash(Vec2 direction);
        void falling();
        void takeDamage(unsigned damage);
+       void takeKnockback(float projPosX);
 
     protected:
         Entity();
@@ -34,8 +35,10 @@ class Entity: public Object {
         double maxFlightTime = 2;
         double currentFlightTime = maxFlightTime;
         double jumpTime = 0.3;
+        double damageTime = 0.2;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
+        std::shared_ptr<Timer> damageTimer = Timer::getInstance(damageTime);
         unsigned max_health = 100;
         unsigned health = max_health;
 };

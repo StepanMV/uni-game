@@ -70,6 +70,18 @@ void Entity::takeDamage(unsigned damage) {
     }
 }
 
+void Entity::takeKnockback(float projPosX) {
+    Vec2 knockback(1, 0);
+    if(projPosX - transform->pos.x >= 0) {
+        knockback.rotate(20);
+    }
+    else {
+        knockback.rotate(160);
+    }
+    knockback *= 20;
+    physics->speed -= knockback;
+}
+
 void Entity::onCollision(std::shared_ptr<Tile> other) {
     if(other->isPlatform && skipPlatform) {
         return;

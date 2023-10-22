@@ -50,6 +50,14 @@ void Projectile::render() {
     renderer->setRotation(transform->angle);
 }
 
+bool Projectile::getFromPlayer() const {
+    return fromPlayer;
+}
+
+unsigned Projectile::getDamage() const {
+    return damage;
+}
+
 ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     ProjectileBuilder builder;
     builder.projectile = std::shared_ptr<Projectile>(new Projectile());

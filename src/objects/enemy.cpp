@@ -1,4 +1,5 @@
 #include "enemy.h"
+#include "projectile.h"
 
 void Enemy::update() {
     switch(type) {
@@ -9,7 +10,7 @@ void Enemy::update() {
             direction.y = 0;
             if(abs(direction.x) > 1) {
                 direction.normalize();
-                direction *= 1.5;
+                direction *= 0.75;
                 move(direction);
             }
             else {
@@ -63,6 +64,24 @@ void Enemy::render() {
         renderer->setState("jump");
     }
     renderer->setFlipped(!facingLeft);
+}
+
+unsigned Enemy::getContactDamage() const {
+    return contactDamage;
+}
+
+bool Enemy::isCollideable() const {
+    return true;
+}
+
+void Enemy::onCollision(std::shared_ptr<Projectile> other) {
+    if(other->getFromPlayer()) {
+        if(damageTimer->isDone()) {
+            takeDamage(other->getDamage());
+            if(other->getDamage()) takeKnockback(other->getPos().x);
+            damageTimer->reset();
+        }
+    }
 }
 
 EnemyBuilder EnemyBuilder::spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size) {

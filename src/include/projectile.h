@@ -18,6 +18,10 @@ public:
     virtual void onCollision(std::shared_ptr<Player> other) override;
     virtual void onCollision(std::shared_ptr<Projectile> other) override;
     virtual void render() override;
+
+    bool getFromPlayer() const;
+    unsigned getDamage() const;
+
     void moveStraight();
     void moveHoming();
     void bounce();
