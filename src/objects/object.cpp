@@ -15,7 +15,7 @@ unsigned Object::getId() const {
     return id;
 }
 
-Vec2 Object::getSpeed()
+Vec2 Object::getSpeed() const
 {
     return physics->speed;
 }

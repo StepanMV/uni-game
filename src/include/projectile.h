@@ -13,10 +13,10 @@ public:
     virtual bool isCollideable() const override;
 
     virtual void update() override;
-    void onCollision(std::shared_ptr<Tile> other) override;
-    void onCollision(std::shared_ptr<Enemy> other) override;
-    void onCollision(std::shared_ptr<Player> other) override;
-    void onCollision(std::shared_ptr<Projectile> other) override;
+    virtual void onCollision(std::shared_ptr<Tile> other) override;
+    virtual void onCollision(std::shared_ptr<Enemy> other) override;
+    virtual void onCollision(std::shared_ptr<Player> other) override;
+    virtual void onCollision(std::shared_ptr<Projectile> other) override;
     virtual void render() override;
     void moveStraight();
     void moveHoming();
@@ -25,7 +25,7 @@ public:
     void hit();
     void falling();
 
-private:
+protected:
     Projectile() = default;
 
     std::shared_ptr<Timer> timer;

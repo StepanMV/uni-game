@@ -12,7 +12,7 @@ void Projectile::setDirection(Vec2 target)
     physics->speed = target - transform->pos;
     collider->calcHitbox();
     physics->speed.normalize();
-    physics->speed *= 5;
+    physics->speed *= 10;
 }
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
@@ -47,7 +47,7 @@ void Projectile::update() {
 
 void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->render();
+    renderer->setRotation(transform->angle);
 }
 
 ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
