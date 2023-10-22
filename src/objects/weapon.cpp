@@ -45,6 +45,7 @@ WeaponBuilder WeaponBuilder::spawn(std::shared_ptr<MyTransform> refTransform, Ve
     builder.weapon->renderer = std::make_shared<CoolRenderer>(builder.weapon->transform);
     builder.weapon->tileCollide = false;
     builder.weapon->physics = std::make_shared<Physics>();
+    builder.weapon->collider = std::make_shared<Collider>(builder.weapon->transform);
     return builder;
 }
 
