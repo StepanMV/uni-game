@@ -23,7 +23,9 @@ void Entity::dash(Vec2 direction) {
 
 void Entity::plane() {
     if(!onGround && !currentFlightTime) {
-        physics->speed.y = physics->maxFallSpeed / 5;
+        if(physics->speed.y > physics->maxFallSpeed / 5) {
+            physics->speed.y = physics->maxFallSpeed / 5;
+        }
     }
 }
 
@@ -50,8 +52,14 @@ void Entity::fly() {
 
 void Entity::jump() {
     if(onGround) {
+        jumpTimer->reset();
         physics->speed.y += -20;
         onGround = false;
+    }
+    else {
+        if(!jumpTimer->isDone()) {
+            physics->accel += Vec2(0, -1.5);
+        }
     }
 }
 
@@ -89,6 +97,7 @@ void Entity::onCollision(std::shared_ptr<Tile> other) {
             transform->pos.x = other->getPos().x - other->getSize().x / 2 - transform->size.x / 2 + 1;
         }
         else {
+            jumpTimer->stop();
             physics->speed.y = 0;
             transform->pos.y = other->getPos().y + other->getSize().y / 2 + transform->size.y / 2 - 1;
         }

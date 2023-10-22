@@ -33,7 +33,9 @@ class Entity: public Object {
         bool isFlying = false, onGround = false;
         double maxFlightTime = 2;
         double currentFlightTime = maxFlightTime;
+        double jumpTime = 0.3;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
+        std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
         unsigned max_health = 100;
         unsigned health = max_health;
 };

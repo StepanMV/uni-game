@@ -3,6 +3,7 @@
 #include "level.h"
 #include "controls.h"
 #include "game.h"
+#include "enemy.h"
 
 void Player::update() {
     if (id == 1) {
@@ -59,6 +60,15 @@ void Player::update() {
     collider->calcHitbox();
     onGround = false;
     if(weapon) weapon->setLeftSide(facingLeft);
+    if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
+        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+        EnemyBuilder::spawn(1, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
+        .setMaxSpeeds(5, 10, 8)
+        .setForces(0.5, 0.75)
+        .setTarget(transform)
+        .build();
+    }
 }
 
 void Player::moveEditor() {

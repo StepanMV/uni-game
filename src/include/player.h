@@ -13,7 +13,7 @@ class Player: public Entity {
         void moveEditor();
 
         void attack() override;
-        
+
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
         virtual void onCollision(std::shared_ptr<Player> other) override;
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
@@ -26,7 +26,6 @@ class Player: public Entity {
 
     private:
         std::shared_ptr<Weapon> weapon;
-        double startY = transform->pos.y;
         friend class PlayerBuilder;
 };
 
