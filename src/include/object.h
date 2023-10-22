@@ -31,22 +31,24 @@ public:
     Vec2 getPos() const;
     Vec2 getSize() const;
     float getAngle() const;
+    void setState(std::string state);
 
     static std::vector<std::shared_ptr<Object>> objects;
     static std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
     
 protected:
+    friend class UIBuilder;
 
     Object() = default;
     Object(const Object& other);
     Object& operator=(const Object& other);
 
     unsigned int id = 0;
-    std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
 
     bool tileCollide = true, objectCollide = true;
 
-    std::shared_ptr<Collider> collider = std::make_shared<Collider>(transform);
+    std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
+    std::shared_ptr<Collider> collider;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<Physics> physics;
 };

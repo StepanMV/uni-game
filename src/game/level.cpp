@@ -1,9 +1,11 @@
 #include "level.h"
 #include "tile.h"
 #include "projectile.h"
+#include "controls.h"
 #include "game.h"
 #include "player.h"
 #include "enemy.h"
+#include "particle.h"
 #include "cool_camera.h"
 #include <fstream>
 #include <filesystem>
@@ -13,6 +15,7 @@ const unsigned Level::tileSize = 16;
 const unsigned Level::width = 2100;
 const unsigned Level::height = 1100;
 const unsigned Level::borderOffset = 50;
+std::shared_ptr<CoolCamera> Level::camera = nullptr;
 
 //posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
 Level::Level() {
@@ -52,7 +55,7 @@ void Level::loadFile(std::string filepath) {
     }
 }
 
-void Level::loadGame(std::string filename)
+void Level::loadGame(std::string filename, unsigned int levelID)
 {
     loadFile(filename);
     player = PlayerBuilder::spawn(3, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
@@ -60,9 +63,12 @@ void Level::loadGame(std::string filename)
         .setForces(0.5, 0.75)
         .build();
     loaded = true;
+    camera = CoolCamera::init();
+    id = levelID;
+    this->editor = false;
 }
 
-void Level::loadEditor(std::string filename) {
+void Level::loadEditor(std::string filename, unsigned int levelID) {
     loadFile(filename);
 
     player = PlayerBuilder::spawn(1, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
@@ -70,6 +76,8 @@ void Level::loadEditor(std::string filename) {
         .setForces(0.5, 0)
         .build();
     loaded = true;
+    camera = CoolCamera::init();
+    id = levelID;
     this->editor = true;
 }
 
@@ -102,6 +110,69 @@ void Level::save() {
 
 bool Level::isTile(Vector2 pos) const {
     return Object::tiles[pos.y / tileSize][pos.x / tileSize]->getId() != 0;
+}
+
+bool Level::isLoaded() const {
+    return loaded;
+}
+
+void Level::unload() {
+    loaded = false;
+}
+
+void Level::placeTile(const Vec2 tilePos, int id) {
+    unsigned idX = tilePos.x / tileSize;
+    unsigned idY = tilePos.y / tileSize;
+
+    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    if(isTile(tilePos.toRaylib())) return;
+
+    Object::tiles[idY][idX] = TileBuilder::spawn(id, {(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).build();
+    setLocalPos(idY, idX, true);
+}
+
+void Level::breakTile(const Vec2 tilePos) {
+    unsigned idX = tilePos.x / tileSize;
+    unsigned idY = tilePos.y / tileSize;
+
+    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    if(!isTile(tilePos.toRaylib())) return;
+
+    Object::tiles[idY][idX]->destroy();
+    setLocalPos(idY, idX, false);
+}
+
+void Level::render() {
+    BeginMode2D(camera->getCamera());
+    Object::renderAll();
+    EndMode2D();
+
+    DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
+    DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
+}
+
+void Level::update() {  
+
+    if (editor) updateEditor();
+
+    Object::updateAll();
+    Vec2 playerSpeed = player->getSpeed();
+    Game::background->setSpeed(0.2 * playerSpeed);
+    camera->update(player->getPos());
+}
+
+void Level::updateEditor() {
+    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera->getCamera());
+    Vec2 mp = {mousePos.x, mousePos.y};
+    for (int i = 1; i <= 94; ++i) {
+        if (Game::ui->getSubUI("tileSelector")->isButtonHeld("tile_" + std::to_string(i))) {
+            placedBlockId = i;
+            break;
+        }
+    }
+    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
+
 }
 
 void Level::setClimb(unsigned idY, unsigned idX) {
@@ -161,58 +232,4 @@ void Level::setLocalPos(unsigned& idY, unsigned& idX, bool isAdded) {
     setClimb(idY + 3, idX);
     setClimb(idY + 3, idX - 1);
     setClimb(idY + 3, idX + 1);
-}
-
-bool Level::isLoaded() const {
-    return loaded;
-}
-
-void Level::placeTile(const Vec2 tilePos, int id) {
-    unsigned idX = tilePos.x / tileSize;
-    unsigned idY = tilePos.y / tileSize;
-
-    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
-    if(isTile(tilePos.toRaylib())) return;
-
-    Object::tiles[idY][idX] = TileBuilder::spawn(id, {(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).build();
-    setLocalPos(idY, idX, true);
-}
-
-void Level::breakTile(const Vec2 tilePos) {
-    unsigned idX = tilePos.x / tileSize;
-    unsigned idY = tilePos.y / tileSize;
-
-    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
-    if(!isTile(tilePos.toRaylib())) return;
-
-    Object::tiles[idY][idX]->destroy();
-    setLocalPos(idY, idX, false);
-}
-
-void Level::render() {
-    BeginMode2D(Game::camera->getCamera());
-    Object::renderAll();
-    EndMode2D();
-
-    DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
-    DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
-}
-
-void Level::update() {  
-
-    if (editor) updateEditor();
-
-    Object::updateAll();
-    Vec2 playerSpeed = player->getSpeed();
-    Game::background->setSpeed(0.2 * playerSpeed);
-}
-
-void Level::updateEditor() {
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Game::camera->getCamera());
-    Vec2 mp = {mousePos.x, mousePos.y};
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
-    if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
-    if (IsKeyPressed(KEY_Q)) placedBlockId++;
-    if (IsKeyPressed(KEY_E)) placedBlockId--;
-
 }

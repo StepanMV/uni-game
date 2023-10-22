@@ -4,18 +4,15 @@
 #include "raylib.h"
 #include "vec2.h"
 
-class CoolCamera{
+class CoolCamera {
 public:
-    static std::shared_ptr<CoolCamera> init(Vec2* target = nullptr);
+    static std::shared_ptr<CoolCamera> init();
 
-    void setTarget(Vec2* target);
-    void update();
+    void update(Vec2 position);
 
     Vector4 getRenderBounds() const;
     Camera2D getCamera() const;
 
-
 private:
     std::shared_ptr<Camera2D> camera;
-    Vec2* position;
 };

@@ -170,7 +170,10 @@ void CoolRenderer::render() {
         Rectangle dest = element->getDestRect();
         dest.x += transform->pos.x;
         dest.y += transform->pos.y;
-        DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, element->getRotation(), WHITE);
+        dest.width *= transform->size.x == 0 ? texture->width : transform->size.x;
+        dest.height *= transform->size.y == 0 ? texture->height : transform->size.y;
+        float rotation = transform->angle + element->getRotation();
+        DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, rotation, WHITE);
     }
 }
 
