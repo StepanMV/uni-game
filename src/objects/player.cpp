@@ -13,10 +13,10 @@ void Player::update() {
     onBoard();
     physics->accel = Vec2(0, 0);
     if(Controls::isKeyDoublePressed(KEY_D)) {
-        dash(Vec2(1, 0));
+        dash(Vec2(1, 0), 30);
     }
     if(Controls::isKeyDoublePressed(KEY_A)) {
-        dash(Vec2(-1, 0));
+        dash(Vec2(-1, 0), 30);
     }
     if (IsKeyDown(KEY_A)) {
         move(Vec2(-1.5, 0));
@@ -63,9 +63,9 @@ void Player::update() {
     if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EnemyBuilder::spawn(1, EnemyType::SLIME, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
-        .setMaxSpeeds(1.5, 10, 8)
-        .setForces(0.5, 0.75)
+        EnemyBuilder::spawn(1, EnemyType::EYE, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
+        .setMaxSpeeds(10, 10, 10)
+        .setForces(0.5, 0)
         .setTarget(transform)
         .build();
     }

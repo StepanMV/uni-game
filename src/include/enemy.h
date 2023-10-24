@@ -3,7 +3,8 @@
 
 enum class EnemyType {
     ZOMBIE = 0,
-    SLIME
+    SLIME,
+    EYE
 };
 
 class Enemy: public Entity {

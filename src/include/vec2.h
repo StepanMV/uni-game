@@ -10,6 +10,7 @@ public:
     Vector2 toRaylib() const;
 
     float dot(const Vec2& v) const;
+    float length() const;
     void normalize();
     void rotate(float angle);
 

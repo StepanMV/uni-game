@@ -15,10 +15,10 @@ void Entity::move(Vec2 direction) {
     physics->accel += direction;
 }
 
-void Entity::dash(Vec2 direction) {
+void Entity::dash(Vec2 direction, double dashSpeed) {
     physics->speed = direction;
     physics->speed.normalize();
-    physics->speed *= 30;
+    physics->speed *= dashSpeed;
 }
 
 void Entity::plane() {
@@ -73,10 +73,10 @@ void Entity::takeDamage(unsigned damage) {
 void Entity::takeKnockback(float projPosX) {
     Vec2 knockback(1, 0);
     if(projPosX - transform->pos.x >= 0) {
-        knockback.rotate(30);
+        knockback.rotate(20);
     }
     else {
-        knockback.rotate(150);
+        knockback.rotate(160);
     }
     knockback *= 20;
     physics->accel = Vec2(0, 0);

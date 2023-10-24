@@ -42,6 +42,23 @@ void Enemy::update() {
             jump();
             break;
         }
+        case EnemyType::EYE: {
+            tileCollide = false;
+            Vec2 direction = (target->pos - transform->pos);
+            if(abs(direction.x) < 5) {
+                physics->speed *= 0;
+            }
+            else {
+                physics->speed *= 0.1;
+                transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+            }
+            direction += Vec2(0, -target->size.y * 5);
+            direction.normalize();
+            move(direction);
+            physics->accel *= 0.9;
+
+            break;
+        }
     }
     onGround = false;
     collider->calcHitbox();

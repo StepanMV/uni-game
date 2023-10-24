@@ -20,7 +20,7 @@ class Entity: public Object {
        void jump();
        void fly();
        void plane();
-       void dash(Vec2 direction);
+       void dash(Vec2 direction, double dashSpeed);
        void falling();
        void takeDamage(unsigned damage);
        void takeKnockback(float projPosX);
