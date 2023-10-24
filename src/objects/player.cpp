@@ -63,11 +63,7 @@ void Player::update() {
     if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EnemyBuilder::spawn(1, EnemyType::EYE, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
-        .setMaxSpeeds(10, 10, 10)
-        .setForces(0.5, 0)
-        .setTarget(transform)
-        .build();
+        EnemyBuilder::spawn(EnemyType::KingSlime, worldMP, transform);
     }
 }
 
@@ -121,27 +117,6 @@ void Player::render() {
         renderer->setState("jump");
     }
     renderer->setFlipped(facingLeft);
-}
-
-void Player::onBoard() {
-    if(transform->pos.x - transform->size.x / 2 < Level::borderOffset * Level::tileSize) {
-        physics->speed.x = 0;
-        transform->pos.x = Level::borderOffset * Level::tileSize + transform->size.x / 2;
-    }
-    if(transform->pos.y - transform->size.y / 2 < Level::borderOffset * Level::tileSize) {
-        physics->speed.y = 0;
-        transform->pos.y = Level::borderOffset * Level::tileSize + transform->size.y / 2;
-    }
-    if(transform->pos.x + transform->size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
-        physics->speed.x = 0;
-        transform->pos.x = (Level::width - Level::borderOffset) * Level::tileSize - transform->size.x / 2;
-    }
-    if(transform->pos.y + transform->size.y / 2 > (Level::height - Level::borderOffset) * Level::tileSize)
-    {
-        physics->speed.y = 0;
-        transform->pos.y = (Level::height - Level::borderOffset) * Level::tileSize - transform->size.y / 2;
-        onGround = true;
-    }
 }
 
 void Player::onCollision(std::shared_ptr<Enemy> other) {

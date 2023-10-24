@@ -11,6 +11,27 @@ Entity::Entity() {
     this->collider = std::make_shared<Collider>(transform);
 }
 
+void Entity::onBoard() {
+    if(transform->pos.x - transform->size.x / 2 < Level::borderOffset * Level::tileSize) {
+        physics->speed.x = 0;
+        transform->pos.x = Level::borderOffset * Level::tileSize + transform->size.x / 2;
+    }
+    if(transform->pos.y - transform->size.y / 2 < Level::borderOffset * Level::tileSize) {
+        physics->speed.y = 0;
+        transform->pos.y = Level::borderOffset * Level::tileSize + transform->size.y / 2;
+    }
+    if(transform->pos.x + transform->size.x / 2 > (Level::width - Level::borderOffset) * Level::tileSize) {
+        physics->speed.x = 0;
+        transform->pos.x = (Level::width - Level::borderOffset) * Level::tileSize - transform->size.x / 2;
+    }
+    if(transform->pos.y + transform->size.y / 2 > (Level::height - Level::borderOffset) * Level::tileSize)
+    {
+        physics->speed.y = 0;
+        transform->pos.y = (Level::height - Level::borderOffset) * Level::tileSize - transform->size.y / 2;
+        onGround = true;
+    }
+}
+
 void Entity::move(Vec2 direction) {
     physics->accel += direction;
 }

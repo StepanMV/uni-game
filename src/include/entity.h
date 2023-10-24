@@ -15,6 +15,7 @@ class Entity: public Object {
         
         bool getAttacking() const;
         virtual void attack() = 0;
+        void onBoard();
         
        void move(Vec2 direction);
        void jump();
@@ -34,7 +35,7 @@ class Entity: public Object {
         bool isFlying = false, onGround = false;
         double maxFlightTime = 2;
         double currentFlightTime = maxFlightTime;
-        double jumpTime = 0.3;
+        double jumpTime = 0.2;
         double damageTime = 0.2;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);

@@ -1,5 +1,7 @@
 #include "enemy.h"
 #include "projectile.h"
+#include "ini_file.h"
+#include "bosses.h"
 
 void Enemy::update() {
     switch(type) {
@@ -21,25 +23,6 @@ void Enemy::update() {
             if(target->pos.y > transform->pos.y) {
                 skipPlatform = true;
             }
-            break;
-        }
-        case EnemyType::SLIME: {
-            physics->accel.y = 0;
-            if(onGround) {
-                if(!stayTimer->isDone()) {
-                    physics->accel.x = 0;
-                    break;
-                }
-                else {
-                    stayTimer->reset();
-                }
-                Vec2 direction = (target->pos - transform->pos);
-                direction.y = 0;
-                direction.normalize();
-                direction *= 1.5;
-                move(direction);
-            }
-            jump();
             break;
         }
         case EnemyType::EYE: {
@@ -94,23 +77,59 @@ void Enemy::onCollision(std::shared_ptr<Projectile> other) {
     if(other->getFromPlayer()) {
         if(damageTimer->isDone()) {
             takeDamage(other->getDamage());
-            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
+            //if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
             damageTimer->reset();
         }
     }
 }
 
-EnemyBuilder EnemyBuilder::spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size) {
+std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared_ptr<MyTransform> target) {
     EnemyBuilder builder;
-    builder.enemy = std::shared_ptr<Enemy>(new Enemy());
-    builder.enemy->id = id;
-    builder.enemy->type = type;
+    //auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
+
+    IniFile ini("enemies.ini");
+
+    switch(type) {
+        case EnemyType::KingSlime: {
+            builder.enemy = std::shared_ptr<Enemy>(new KingSlime());
+            auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
+            Vec2 textureSize = renderer->loadTexture("KingSlime", "resources/textures/KingSlime.png");
+            renderer->addToState("idle", "KingSlime", TextureDataBuilder::init(TextureType::ANIMATION, "KingSlime", textureSize)
+            .animation({1, 6}, {0, 0}, {0, 4}, 5).build());
+
+            renderer->addToState("jump", "KingSlime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "KingSlime", textureSize)
+            .spriteSheet({1, 6}, {0, 5}).build());
+            renderer->setState("idle");
+
+            builder.enemy->contactDamage = ini.readInt("KingSlime", "contactDamage");
+            builder.enemy->transform->size = Vec2(ini.readInt("KingSlime", "width"), ini.readInt("KingSlime", "height"));
+            builder.enemy->tileCollide = ini.readBool("KingSlime", "tileCollide");
+            builder.enemy->physics->maxMoveSpeed = ini.readDouble("KingSlime", "maxMoveSpeed");
+            builder.enemy->physics->maxFallSpeed = ini.readDouble("KingSlime", "maxFallSpeed");
+            builder.enemy->physics->maxFlySpeed = ini.readDouble("KingSlime", "maxFlySpeed");
+            builder.enemy->physics->friction = ini.readDouble("KingSlime", "friction");
+            builder.enemy->physics->gravity = ini.readDouble("KingSlime", "gravity");
+        }
+    }
+    builder.enemy->id = 1;
     builder.enemy->transform->pos = pos;
-    builder.enemy->transform->size = size;
-    builder.enemy->tileCollide = true;
     builder.enemy->collider = std::make_shared<Collider>(builder.enemy->transform);
-    return builder;
+    builder.enemy->target = target;
+    Object::objects.push_back(builder.enemy);
+    return builder.enemy;
 }
+
+// EnemyBuilder EnemyBuilder::spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size) {
+//     EnemyBuilder builder;
+//     builder.enemy = std::shared_ptr<Enemy>(new Enemy());
+//     builder.enemy->id = id;
+//     builder.enemy->type = type;
+//     builder.enemy->transform->pos = pos;
+//     builder.enemy->transform->size = size;
+//     builder.enemy->tileCollide = true;
+//     builder.enemy->collider = std::make_shared<Collider>(builder.enemy->transform);
+//     return builder;
+// }
 
 EnemyBuilder& EnemyBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
     enemy->physics->maxMoveSpeed = maxMoveSpeed;

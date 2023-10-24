@@ -20,7 +20,6 @@ class Player: public Entity {
 
         virtual bool isCollideable() const override;
 
-        void onBoard();
 
        static std::map<unsigned int, std::shared_ptr<Player>> players;
 

@@ -3,7 +3,7 @@
 
 enum class EnemyType {
     ZOMBIE = 0,
-    SLIME,
+    KingSlime,
     EYE
 };
 
@@ -19,13 +19,13 @@ class Enemy: public Entity {
         virtual void attack() override {};
 
         unsigned getContactDamage() const;
-    private:
+    protected:
         Enemy() = default;
         EnemyType type;
         unsigned contactDamage = 1;
         //slime
-        double stayTime = 2;
-        std::shared_ptr<Timer> stayTimer = Timer::getInstance(stayTime + jumpTime);
+        //double stayTime = 2;
+        //std::shared_ptr<Timer> stayTimer = Timer::getInstance(stayTime + jumpTime);
         //
         std::shared_ptr<MyTransform> target;
         friend class EnemyBuilder;
@@ -33,7 +33,8 @@ class Enemy: public Entity {
 
 class EnemyBuilder {
     public:
-        static EnemyBuilder spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size);
+        // static EnemyBuilder spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size);
+        static std::shared_ptr<Enemy> spawn(EnemyType type, Vec2 pos, std::shared_ptr<MyTransform> target);
         EnemyBuilder& setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
         EnemyBuilder& setForces(double friction, double gravity);
         EnemyBuilder& setTarget(std::shared_ptr<MyTransform> target);
