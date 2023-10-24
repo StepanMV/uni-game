@@ -64,7 +64,7 @@ void Player::update() {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         EnemyBuilder::spawn(1, EnemyType::SLIME, worldMP, Vec2(2 * Level::tileSize, 3 * Level::tileSize))
-        .setMaxSpeeds(2.5, 10, 8)
+        .setMaxSpeeds(1.5, 10, 8)
         .setForces(0.5, 0.75)
         .setTarget(transform)
         .build();
@@ -89,7 +89,7 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::GUN, true).build();
+    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::SWORD, true).build();
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
     Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
     Vec2 spawnPos = worldMP - transform->pos;
@@ -98,9 +98,9 @@ void Player::attack() {
     spawnPos += transform->pos;
     facingLeft = worldMP.x < transform->pos.x;
     //simple projectiles
-    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
     //"starfury"
-    //auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
+    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
     proj->setDirection(worldMP);
 }
 
@@ -156,7 +156,7 @@ void Player::onCollision(std::shared_ptr<Projectile> other) {
     if(!other->getFromPlayer()) {
         if(damageTimer->isDone()) {
             takeDamage(other->getDamage());
-            if(other->getDamage()) takeKnockback(other->getPos().x);
+            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
             damageTimer->reset();
         }
     }

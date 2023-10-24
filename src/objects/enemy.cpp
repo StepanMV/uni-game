@@ -28,7 +28,6 @@ void Enemy::update() {
             if(onGround) {
                 if(!stayTimer->isDone()) {
                     physics->accel.x = 0;
-                    physics->speed.x = 0;
                     break;
                 }
                 else {
@@ -78,7 +77,7 @@ void Enemy::onCollision(std::shared_ptr<Projectile> other) {
     if(other->getFromPlayer()) {
         if(damageTimer->isDone()) {
             takeDamage(other->getDamage());
-            if(other->getDamage()) takeKnockback(other->getPos().x);
+            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
             damageTimer->reset();
         }
     }

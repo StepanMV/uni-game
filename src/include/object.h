@@ -31,6 +31,7 @@ public:
     Vec2 getPos() const;
     Vec2 getSize() const;
     float getAngle() const;
+    Vec2 getCenterOffset() const;
     void setState(std::string state);
 
     static std::vector<std::shared_ptr<Object>> objects;

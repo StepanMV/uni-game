@@ -13,10 +13,12 @@ public:
     void setCenterOffset(Vec2 offset);
     void setPos(Vec2 pos);
     void calcHitbox();
+
+    Vec2 centerOffset = Vec2(0, 0);
+
 private:
     std::shared_ptr<MyTransform> transform;
     std::vector<Vec2> hitbox = std::vector<Vec2>(4);
-    Vec2 centerOffset = Vec2(0, 0);
 
     Vec2 rotatedCenter = Vec2(0, 0);
     std::vector<Vec2> rotatedHitbox = {

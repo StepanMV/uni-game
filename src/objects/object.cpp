@@ -32,6 +32,10 @@ float Object::getAngle() const {
     return transform->angle;
 }
 
+Vec2 Object::getCenterOffset() const {
+    return collider->centerOffset;
+}
+
 void Object::setState(std::string state) {
     std::dynamic_pointer_cast<CoolRenderer>(renderer)->setState(state);
 }
