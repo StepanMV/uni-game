@@ -94,9 +94,9 @@ void Player::attack() {
     spawnPos += transform->pos;
     facingLeft = worldMP.x < transform->pos.x;
     //simple projectiles
-    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 70, true).build();
+    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 70, true).build();
     //"starfury"
-    //auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 50, true).build();
+    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 50, true).build();
     proj->setDirection(worldMP);
 }
 

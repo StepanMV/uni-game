@@ -72,7 +72,6 @@ void Slime::render() {
     if (!onGround) {
         renderer->setState("jump");
     }
-    renderer->setScale(transform->scale);
 }
 
 void Slime::update() {
