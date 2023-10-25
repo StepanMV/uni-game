@@ -77,7 +77,7 @@ void Enemy::onCollision(std::shared_ptr<Projectile> other) {
     if(other->getFromPlayer()) {
         if(damageTimer->isDone()) {
             takeDamage(other->getDamage());
-            //if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
+            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
             damageTimer->reset();
         }
     }
@@ -101,6 +101,8 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
             .spriteSheet({1, 6}, {0, 5}).build());
             renderer->setState("idle");
 
+            builder.enemy->max_health = ini.readInt("KingSlime", "maxHealth");
+            builder.enemy->health = builder.enemy->max_health;
             builder.enemy->contactDamage = ini.readInt("KingSlime", "contactDamage");
             builder.enemy->transform->size = Vec2(ini.readInt("KingSlime", "width"), ini.readInt("KingSlime", "height"));
             builder.enemy->tileCollide = ini.readBool("KingSlime", "tileCollide");
@@ -109,6 +111,31 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
             builder.enemy->physics->maxFlySpeed = ini.readDouble("KingSlime", "maxFlySpeed");
             builder.enemy->physics->friction = ini.readDouble("KingSlime", "friction");
             builder.enemy->physics->gravity = ini.readDouble("KingSlime", "gravity");
+            break;
+        }
+        case EnemyType::Slime: {
+            builder.enemy = std::shared_ptr<Enemy>(new Slime());
+            auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
+            Vec2 textureSize = renderer->loadTexture("Slime", "resources/textures/KingSlime.png");
+            renderer->addToState("idle", "Slime", TextureDataBuilder::init(TextureType::ANIMATION, "Slime", textureSize)
+            .animation({1, 6}, {0, 0}, {0, 4}, 5).build());
+
+            renderer->addToState("jump", "Slime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Slime", textureSize)
+            .spriteSheet({1, 6}, {0, 5}).build());
+            renderer->setState("idle");
+
+            builder.enemy->knockbackResist = false;
+            builder.enemy->max_health = ini.readInt("Slime", "maxHealth");
+            builder.enemy->health = builder.enemy->max_health;
+            builder.enemy->contactDamage = ini.readInt("Slime", "contactDamage");
+            builder.enemy->transform->size = Vec2(ini.readInt("Slime", "width"), ini.readInt("Slime", "height"));
+            builder.enemy->tileCollide = ini.readBool("Slime", "tileCollide");
+            builder.enemy->physics->maxMoveSpeed = ini.readDouble("Slime", "maxMoveSpeed");
+            builder.enemy->physics->maxFallSpeed = ini.readDouble("Slime", "maxFallSpeed");
+            builder.enemy->physics->maxFlySpeed = ini.readDouble("Slime", "maxFlySpeed");
+            builder.enemy->physics->friction = ini.readDouble("Slime", "friction");
+            builder.enemy->physics->gravity = ini.readDouble("Slime", "gravity");
+            break;
         }
     }
     builder.enemy->id = 1;

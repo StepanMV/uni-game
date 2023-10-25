@@ -85,7 +85,7 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 1, WeaponType::SWORD, true).build();
+    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 20, WeaponType::SWORD, true).build();
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
     Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
     Vec2 spawnPos = worldMP - transform->pos;
@@ -94,9 +94,9 @@ void Player::attack() {
     spawnPos += transform->pos;
     facingLeft = worldMP.x < transform->pos.x;
     //simple projectiles
-    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 1, true).build();
+    auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 70, true).build();
     //"starfury"
-    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 1, true).build();
+    //auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 50, true).build();
     proj->setDirection(worldMP);
 }
 
@@ -184,6 +184,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
     Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(player->id) + ".png");
 
     player->damageTimer = Timer::getInstance(0.5);
+    player->knockbackResist = false;
 
     renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
         .spriteSheet({1, 20}, {0, 0}).build());

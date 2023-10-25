@@ -4,6 +4,7 @@
 enum class EnemyType {
     ZOMBIE = 0,
     KingSlime,
+    Slime,
     EYE
 };
 
@@ -23,10 +24,6 @@ class Enemy: public Entity {
         Enemy() = default;
         EnemyType type;
         unsigned contactDamage = 1;
-        //slime
-        //double stayTime = 2;
-        //std::shared_ptr<Timer> stayTimer = Timer::getInstance(stayTime + jumpTime);
-        //
         std::shared_ptr<MyTransform> target;
         friend class EnemyBuilder;
 };

@@ -34,4 +34,5 @@ struct MyTransform {
     Vec2 pos = Vec2(0, 0);
     Vec2 size = Vec2(0, 0);
     float angle = 0;
+    float scale = 1;
 };

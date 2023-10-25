@@ -92,6 +92,7 @@ void Entity::takeDamage(unsigned damage) {
 }
 
 void Entity::takeKnockback(float projPosX) {
+    if(knockbackResist) return;
     Vec2 knockback(1, 0);
     if(projPosX - transform->pos.x >= 0) {
         knockback.rotate(20);

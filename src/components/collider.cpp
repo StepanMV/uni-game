@@ -8,6 +8,12 @@ void Collider::setCenterOffset(Vec2 offset) {
     centerOffset = offset;
 }
 
+void Collider::setScale(float scale) {
+    transform->size *= (1 / this->transform->scale);
+    transform->size *= scale;
+    this->transform->scale = scale;
+}
+
 void Collider::setPos(Vec2 pos) {
     transform->pos = pos;
     transform->pos += rotatedCenter;
