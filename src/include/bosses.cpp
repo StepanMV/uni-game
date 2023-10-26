@@ -108,6 +108,10 @@ void EyeOfCtulhu::phase1() {
         return;
     }
     if(!chaseTimer->isDone()) {
+        if(eyeSpawnTimer->isDone()) {
+            EnemyBuilder::spawn(EnemyType::Eye, transform->pos, target);
+            eyeSpawnTimer->reset();
+        }
         Vec2 direction = (target->pos - transform->pos);
         if(abs(direction.x) < 5) {
             physics->speed *= 0;
@@ -186,6 +190,21 @@ void EyeOfCtulhu::switchPhase() {
 }
 
 void EyeOfCtulhu::render() {
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+    renderer->setState("idle");
+}
+
+void Eye::update() {
+    Vec2 direction = (target->pos - transform->pos);
+    physics->accel.normalize();
+    transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+    direction.normalize();
+    direction *= 0.5;
+    move(direction);
+    collider->calcHitbox();
+}
+
+void Eye::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
 }

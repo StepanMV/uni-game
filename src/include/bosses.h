@@ -24,6 +24,14 @@ class KingSlime: public Slime {
         Vec2 tpPos = Vec2(0, 0);
 };
 
+class Eye: public Enemy {
+    public:
+        virtual void update() override;
+        virtual void render() override;
+    private:
+
+};
+
 class EyeOfCtulhu: public Enemy {
     public:
         virtual void update() override;
@@ -39,6 +47,7 @@ class EyeOfCtulhu: public Enemy {
         const double switchTime = 5;
         double rotateSpeed = 0.5;
         int dashCount = 4;
+        std::shared_ptr<Timer> eyeSpawnTimer = Timer::getInstance(2);
         std::shared_ptr<Timer> chaseTimer = Timer::getInstance(chaseTime);
         std::shared_ptr<Timer> switchTimer;
         std::shared_ptr<Timer> dashTimer = Timer::getInstance(dashTime);

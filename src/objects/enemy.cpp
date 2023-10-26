@@ -129,6 +129,16 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
             .spriteSheet({1, 6}, {0, 0}).build());
             break;
         }
+        case EnemyType::Eye: {
+            builder.enemy = std::shared_ptr<Enemy>(new Eye());
+            enemyName = "Eye";
+            builder.enemy->tileCollide = false;
+            auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
+            Vec2 textureSize = renderer->loadTexture("Eye", "resources/textures/KingSlime.png");
+            renderer->addToState("idle", "Eye", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Eye", textureSize)
+            .spriteSheet({1, 6}, {0, 0}).build());
+            break;
+        }
     }
     builder.enemy->max_health = ini.readInt(enemyName, "maxHealth");
     builder.enemy->health = builder.enemy->max_health;
