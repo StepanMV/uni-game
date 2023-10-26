@@ -36,12 +36,11 @@ class EyeOfCtulhu: public Enemy {
         const double chaseTime = 5;
         const double dashTime = 0.5;
         const double timeBetweenDashes = 0.75;
-        const double switchTime = 10;
+        const double switchTime = 5;
         double rotateSpeed = 0.5;
         int dashCount = 4;
         std::shared_ptr<Timer> chaseTimer = Timer::getInstance(chaseTime);
         std::shared_ptr<Timer> switchTimer;
-        Vec2 dashDirection = Vec2(0, 0);
         std::shared_ptr<Timer> dashTimer = Timer::getInstance(dashTime);
         std::shared_ptr<Timer> betweenDashesTimer = Timer::getInstance(timeBetweenDashes);
 };

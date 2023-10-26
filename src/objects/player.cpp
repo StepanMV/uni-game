@@ -63,6 +63,11 @@ void Player::update() {
     if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+        EnemyBuilder::spawn(EnemyType::KingSlime, worldMP, transform);
+    }
+    if(Controls::isMousePressed(MOUSE_BUTTON_MIDDLE)) {
+        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
+        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         EnemyBuilder::spawn(EnemyType::EyeOfCtulhu, worldMP, transform);
     }
 }

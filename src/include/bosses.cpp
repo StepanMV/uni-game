@@ -102,6 +102,7 @@ void EyeOfCtulhu::phase1() {
         }
         else {
             phase = 2;
+            chaseTimer->reset();
             switchTimer = nullptr;
         }
         return;
@@ -132,6 +133,41 @@ void EyeOfCtulhu::phase1() {
             if(dashCount != 0) dash(direction, 30);
             transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
             betweenDashesTimer->reset();
+            dashCount--;
+        }
+    }
+}
+
+void EyeOfCtulhu::phase2() {
+    if(!chaseTimer->isDone()) {
+        Vec2 direction = (target->pos - transform->pos);
+        physics->speed *= 0.2;
+        transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+        direction += Vec2(0, -target->size.y * 5);
+        if(transform->pos.x < target->pos.x) {
+            direction -= Vec2(target->size.x * 3, 0);
+        }
+        else {
+            direction += Vec2(target->size.x * 3, 0);
+        }
+        direction.normalize();
+        direction *= 0.9;
+        move(direction);
+        physics->accel *= 0.9;
+    }
+    else {
+        physics->accel = Vec2(0, 0);
+        physics->friction = 0;
+        if(dashCount == -1) {
+            dashCount = 4;
+            chaseTimer->reset();
+            physics->friction = 0.5;
+        }
+        if(dashTimer->isDone()) {
+            Vec2 direction = target->pos - transform->pos;
+            transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+            if(dashCount != 0) dash(direction, 20);
+            dashTimer->reset();
             dashCount--;
         }
     }
