@@ -25,7 +25,7 @@ void Enemy::update() {
             }
             break;
         }
-        case EnemyType::EYE: {
+        case EnemyType::Eye: {
             tileCollide = false;
             Vec2 direction = (target->pos - transform->pos);
             if(abs(direction.x) < 5) {
@@ -88,10 +88,12 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
     //auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
 
     IniFile ini("enemies.ini");
+    std::string enemyName;
 
     switch(type) {
         case EnemyType::KingSlime: {
             builder.enemy = std::shared_ptr<Enemy>(new KingSlime());
+            enemyName = "KingSlime";
             auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
             Vec2 textureSize = renderer->loadTexture("KingSlime", "resources/textures/KingSlime.png");
             renderer->addToState("idle", "KingSlime", TextureDataBuilder::init(TextureType::ANIMATION, "KingSlime", textureSize)
@@ -100,21 +102,11 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
             renderer->addToState("jump", "KingSlime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "KingSlime", textureSize)
             .spriteSheet({1, 6}, {0, 5}).build());
             renderer->setState("idle");
-
-            builder.enemy->max_health = ini.readInt("KingSlime", "maxHealth");
-            builder.enemy->health = builder.enemy->max_health;
-            builder.enemy->contactDamage = ini.readInt("KingSlime", "contactDamage");
-            builder.enemy->transform->size = Vec2(ini.readInt("KingSlime", "width"), ini.readInt("KingSlime", "height"));
-            builder.enemy->tileCollide = ini.readBool("KingSlime", "tileCollide");
-            builder.enemy->physics->maxMoveSpeed = ini.readDouble("KingSlime", "maxMoveSpeed");
-            builder.enemy->physics->maxFallSpeed = ini.readDouble("KingSlime", "maxFallSpeed");
-            builder.enemy->physics->maxFlySpeed = ini.readDouble("KingSlime", "maxFlySpeed");
-            builder.enemy->physics->friction = ini.readDouble("KingSlime", "friction");
-            builder.enemy->physics->gravity = ini.readDouble("KingSlime", "gravity");
             break;
         }
         case EnemyType::Slime: {
             builder.enemy = std::shared_ptr<Enemy>(new Slime());
+            enemyName = "Slime";
             auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
             Vec2 textureSize = renderer->loadTexture("Slime", "resources/textures/KingSlime.png");
             renderer->addToState("idle", "Slime", TextureDataBuilder::init(TextureType::ANIMATION, "Slime", textureSize)
@@ -125,19 +117,29 @@ std::shared_ptr<Enemy> EnemyBuilder::spawn(EnemyType type, Vec2 pos, std::shared
             renderer->setState("idle");
 
             builder.enemy->knockbackResist = false;
-            builder.enemy->max_health = ini.readInt("Slime", "maxHealth");
-            builder.enemy->health = builder.enemy->max_health;
-            builder.enemy->contactDamage = ini.readInt("Slime", "contactDamage");
-            builder.enemy->transform->size = Vec2(ini.readInt("Slime", "width"), ini.readInt("Slime", "height"));
-            builder.enemy->tileCollide = ini.readBool("Slime", "tileCollide");
-            builder.enemy->physics->maxMoveSpeed = ini.readDouble("Slime", "maxMoveSpeed");
-            builder.enemy->physics->maxFallSpeed = ini.readDouble("Slime", "maxFallSpeed");
-            builder.enemy->physics->maxFlySpeed = ini.readDouble("Slime", "maxFlySpeed");
-            builder.enemy->physics->friction = ini.readDouble("Slime", "friction");
-            builder.enemy->physics->gravity = ini.readDouble("Slime", "gravity");
+            break;
+        }
+        case EnemyType::EyeOfCtulhu: {
+            builder.enemy = std::shared_ptr<Enemy>(new EyeOfCtulhu());
+            enemyName = "EyeOfCtulhu";
+            builder.enemy->tileCollide = false;
+            auto renderer = std::dynamic_pointer_cast<CoolRenderer>(builder.enemy->renderer);
+            Vec2 textureSize = renderer->loadTexture("EyeOfCtulhu", "resources/textures/KingSlime.png");
+            renderer->addToState("idle", "EyeOfCtulhu", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EyeOfCtulhu", textureSize)
+            .spriteSheet({1, 6}, {0, 0}).build());
             break;
         }
     }
+    builder.enemy->max_health = ini.readInt(enemyName, "maxHealth");
+    builder.enemy->health = builder.enemy->max_health;
+    builder.enemy->contactDamage = ini.readInt(enemyName, "contactDamage");
+    builder.enemy->transform->size = Vec2(ini.readInt(enemyName, "width"), ini.readInt(enemyName, "height"));
+    builder.enemy->tileCollide = ini.readBool(enemyName, "tileCollide");
+    builder.enemy->physics->maxMoveSpeed = ini.readDouble(enemyName, "maxMoveSpeed");
+    builder.enemy->physics->maxFallSpeed = ini.readDouble(enemyName, "maxFallSpeed");
+    builder.enemy->physics->maxFlySpeed = ini.readDouble(enemyName, "maxFlySpeed");
+    builder.enemy->physics->friction = ini.readDouble(enemyName, "friction");
+    builder.enemy->physics->gravity = ini.readDouble(enemyName, "gravity");
     builder.enemy->id = 1;
     builder.enemy->transform->pos = pos;
     builder.enemy->collider = std::make_shared<Collider>(builder.enemy->transform);

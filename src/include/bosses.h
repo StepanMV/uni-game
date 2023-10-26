@@ -23,3 +23,25 @@ class KingSlime: public Slime {
         std::shared_ptr<Timer> tpTimer = Timer::getInstance(tpTime);
         Vec2 tpPos = Vec2(0, 0);
 };
+
+class EyeOfCtulhu: public Enemy {
+    public:
+        virtual void update() override;
+        virtual void render() override;
+        void phase1();
+        void phase2();
+        void switchPhase();
+    private:
+        unsigned phase = 1;
+        const double chaseTime = 5;
+        const double dashTime = 0.5;
+        const double timeBetweenDashes = 0.75;
+        const double switchTime = 10;
+        double rotateSpeed = 0.5;
+        int dashCount = 4;
+        std::shared_ptr<Timer> chaseTimer = Timer::getInstance(chaseTime);
+        std::shared_ptr<Timer> switchTimer;
+        Vec2 dashDirection = Vec2(0, 0);
+        std::shared_ptr<Timer> dashTimer = Timer::getInstance(dashTime);
+        std::shared_ptr<Timer> betweenDashesTimer = Timer::getInstance(timeBetweenDashes);
+};

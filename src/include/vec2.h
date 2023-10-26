@@ -14,6 +14,9 @@ public:
     void normalize();
     void rotate(float angle);
 
+    bool operator==(const Vec2& v) const;
+    bool operator!=(const Vec2& v) const;
+
     Vec2& operator+=(const Vec2& v);
     Vec2& operator-=(const Vec2& v);
     Vec2& operator*=(const float& k);

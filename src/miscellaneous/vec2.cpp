@@ -29,6 +29,14 @@ void Vec2::rotate(float angle) {
     y = _y;
 }
 
+bool Vec2::operator==(const Vec2& v) const {
+    return x == v.x && y == v.y;
+}
+
+bool Vec2::operator!=(const Vec2& v) const {
+    return x != v.x || y != v.y;
+}
+
 Vec2& Vec2::operator+=(const Vec2& v) {
     x += v.x;
     y += v.y;
