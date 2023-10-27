@@ -17,6 +17,9 @@ public:
     Vec2& operator-=(const Vec2& v);
     Vec2& operator*=(const float& k);
 
+    bool operator==(const Vec2& v) const;
+    bool operator!=(const Vec2& v) const;
+
     ~Vec2() = default;
     float x = 0, y = 0;
 };

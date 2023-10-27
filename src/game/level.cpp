@@ -1,5 +1,6 @@
 #include "level.h"
 #include "tile.h"
+#include "audio.h"
 #include "projectile.h"
 #include "controls.h"
 #include "game.h"
@@ -124,10 +125,11 @@ void Level::placeTile(const Vec2 tilePos, int id) {
     unsigned idX = tilePos.x / tileSize;
     unsigned idY = tilePos.y / tileSize;
 
-    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    if(idX < 5 || idY < 5 || idX > width - 5 || idY > height - 5) return;
     if(isTile(tilePos.toRaylib())) return;
 
     Object::tiles[idY][idX] = TileBuilder::spawn(id, {(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).build();
+    Audio::playSound("Place");
     setLocalPos(idY, idX, true);
 }
 
@@ -139,6 +141,7 @@ void Level::breakTile(const Vec2 tilePos) {
     if(!isTile(tilePos.toRaylib())) return;
 
     Object::tiles[idY][idX]->destroy();
+    Audio::playSound("Dig");
     setLocalPos(idY, idX, false);
 }
 
@@ -149,20 +152,23 @@ void Level::render() {
 
     DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
     DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
+    DrawText(std::to_string(player->getSpeed().x).c_str(), 10, 100, 20, RED);
+    DrawText(std::to_string(player->getSpeed().y).c_str(), 10, 130, 20, RED);
 }
 
-void Level::update() {  
+void Level::update() {
+    Vec2 playerPos = player->getPos();
 
     if (editor) updateEditor();
 
+    camera->update(player->getPos());
     Object::updateAll();
     Vec2 playerSpeed = player->getSpeed();
-    Game::background->setSpeed(0.2 * playerSpeed);
-    camera->update(player->getPos());
+    Game::background->changePos({Level::width / 2 * tileSize - playerPos.x, 1000 * tileSize - playerPos.y});
 }
 
 void Level::updateEditor() {
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera->getCamera());
+    Vector2 mousePos = GetScreenToWorld2D(Controls::getMousePos().toRaylib(), camera->getCamera());
     Vec2 mp = {mousePos.x, mousePos.y};
     for (int i = 1; i <= 94; ++i) {
         if (Game::ui->getSubUI("tileSelector")->isButtonHeld("tile_" + std::to_string(i))) {
@@ -170,9 +176,10 @@ void Level::updateEditor() {
             break;
         }
     }
+    if (Game::ui->isInsideUI(Controls::getMousePos())) return;
     if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
     if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
-
+    camera->setZoom(Controls::getMouseScroll() * 0.1 + camera->getCamera().zoom);
 }
 
 void Level::setClimb(unsigned idY, unsigned idX) {

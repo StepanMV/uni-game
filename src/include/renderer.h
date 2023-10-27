@@ -10,6 +10,11 @@
 #include "raylib.h"
 #include "vec2.h"
 
+enum TileType {
+    DEFAULT_TILE,
+    PLATFORM_TILE
+};
+
 class Renderer {
 public:
     virtual ~Renderer() = default;
@@ -37,11 +42,12 @@ public:
     TileRenderer(std::shared_ptr<MyTransform> transform);
 
     Vec2 loadTexture(std::string filename);
-    void setSpritePos(unsigned short int state);
+    void setSpritePos(unsigned short int state, TileType type = DEFAULT_TILE);
 
     void render() override;
 private:
-    static Vec2 getSpritePos(unsigned short int state);
+    static Vec2 spritePosDefault(unsigned short int state);
+    static Vec2 spritePosPlatform(unsigned short int state);
     std::shared_ptr<Texture2D> texture;
     Vec2 spritePos;
 };

@@ -31,14 +31,17 @@ void Player::update() {
         physics->jumping = false;
     }
     if (IsKeyDown(KEY_A)) {
-        physics->accel += Vec2(-1.5, 0);
+        physics->accel += Vec2(-physics->friction - 0.1, 0);
         
     }
     if (IsKeyDown(KEY_D)) {
-        physics->accel += Vec2(1.5, 0);
+        physics->accel += Vec2(physics->friction + 0.1, 0);
     }
     if(Controls::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -2.5);
+    }
+    if (Controls::isKeyPressed(KEY_F)) {
+        physics->speed.x = facingLeft ? -300 : 300;
     }
     if(IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if(!isAttacking || !weapon->isAlive()) {
@@ -69,16 +72,16 @@ void Player::moveEditor() {
     onBoard();
     physics->accel = Vec2(0, 0);
     if (IsKeyDown(KEY_A)) {
-        physics->accel += Vec2(-1.5, 0);
+        physics->accel += Vec2(-1, 0);
     }
     if (IsKeyDown(KEY_D)) {
-        physics->accel += Vec2(1.5, 0);
+        physics->accel += Vec2(1, 0);
     }
     if (IsKeyDown(KEY_W)) {
-        physics->accel += Vec2(0, -1.5);
+        physics->accel += Vec2(0, -1);
     }
     if (IsKeyDown(KEY_S)) {
-        physics->accel += Vec2(0, 1.5);
+        physics->accel += Vec2(0, 1);
     }
 }
 
@@ -103,16 +106,17 @@ void Player::render() {
     renderer->setState("idle");
     if (physics->speed.x > 0) {
         facingLeft = false;
-        renderer->setState("move");
+        renderer->setState("moving");
         renderer->setAnimationSpeed(10 * physics->speed.x / physics->maxMoveSpeed);
     } else if (physics->speed.x < 0) {
         facingLeft = true;
-        renderer->setState("move");
+        renderer->setState("moving");
         renderer->setAnimationSpeed(10 * -physics->speed.x / physics->maxMoveSpeed);
     }
-
-    if (!physics->onGround) {
-        renderer->setState("jump");
+    if (Controls::isKeyDown(KEY_W)) {
+        renderer->setState("flying");
+    } else if (!physics->onGround) {
+        renderer->setState("inAir");
     }
     renderer->setFlipped(facingLeft);
 }
@@ -212,8 +216,7 @@ void Player::onCollision(std::shared_ptr<Player> other) {
     
 }
 
-bool Player::isCollideable() const
-{
+bool Player::isCollideable() const {
     return true;
 }
 
@@ -249,12 +252,16 @@ std::shared_ptr<Player> PlayerBuilder::build()
     if (player->id == 1) return player;
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player->renderer);
+    Vec2 size = player->transform->size;
 
-    Vec2 legsSize = renderer->loadTexture("legs", "resources/textures/Armor_Legs_" + std::to_string(player->id) + ".png");
-    Vec2 headSize = renderer->loadTexture("head", "resources/textures/Armor_Head_" + std::to_string(player->id) + ".png");
-    Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Armor_" + std::to_string(player->id) + ".png");
+    Vec2 legsSize = renderer->loadTexture("legs", "resources/textures/Player_Legs_" + std::to_string(player->id) + ".png");
+    Vec2 headSize = renderer->loadTexture("head", "resources/textures/Player_Head_" + std::to_string(player->id) + ".png");
+    Vec2 bodySize = renderer->loadTexture("body", "resources/textures/Player_Body_" + std::to_string(player->id) + ".png");
+    Vec2 wingsSize = renderer->loadTexture("wings", "resources/textures/Player_Wings_" + std::to_string(player->id) + ".png");
 
 
+    renderer->addToState("idle", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
+        .spriteSheet({1, 4}, {0, 0}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());
     renderer->addToState("idle", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
         .spriteSheet({1, 20}, {0, 0}).build());
     renderer->addToState("idle", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
@@ -268,29 +275,64 @@ std::shared_ptr<Player> PlayerBuilder::build()
     renderer->addToState("idle", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {0, 1}).build());
 
-    renderer->addToState("move", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+    renderer->addToState("moving", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
+        .spriteSheet({1, 4}, {0, 0}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());
+    renderer->addToState("moving", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
         .spriteSheet({1, 20}, {0, 0}).build());
-    renderer->addToState("move", "legs", TextureDataBuilder::init(TextureType::ANIMATION, "legs", legsSize)
+    renderer->addToState("moving", "legs", TextureDataBuilder::init(TextureType::ANIMATION, "legs", legsSize)
         .animation({1, 20}, {0, 6}, {0, 19}, 14).build());
-    renderer->addToState("move", "armBehind", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+    renderer->addToState("moving", "armBehind", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
         .animation({9, 4}, {3, 3}, {6, 3}, 4).build());
-    renderer->addToState("move", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+    renderer->addToState("moving", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {0, 0}).build());
-    renderer->addToState("move", "armFront", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
+    renderer->addToState("moving", "armFront", TextureDataBuilder::init(TextureType::ANIMATION, "body", bodySize)
         .animation({9, 4}, {3, 1}, {6, 1}, 4).build());
-    renderer->addToState("move", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+    renderer->addToState("moving", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {0, 1}).build());
-    
-    renderer->addToState("jump", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+
+    renderer->addToState("inAir", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
+        .spriteSheet({1, 4}, {0, 1}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());
+    renderer->addToState("inAir", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
         .spriteSheet({1, 20}, {0, 5}).build());
-    renderer->addToState("jump", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+    renderer->addToState("inAir", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {2, 3}).build());
-    renderer->addToState("jump", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+    renderer->addToState("inAir", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {1, 0}).build());
-    renderer->addToState("jump", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+    renderer->addToState("inAir", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
         .spriteSheet({1, 20}, {0, 0}).build());
-    renderer->addToState("jump", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+    renderer->addToState("inAir", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {2, 1}).build());
+
+    renderer->addToState("flying", "wings", TextureDataBuilder::init(TextureType::ANIMATION, "wings", wingsSize)
+        .animation({1, 4}, {0, 0}, {0, 3}, 8).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());
+    renderer->addToState("flying", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 5}).build());
+    renderer->addToState("flying", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {3, 3}).build());
+    renderer->addToState("flying", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {1, 0}).build());
+    renderer->addToState("flying", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("flying", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {3, 1}).build());
+    renderer->addToState("flying", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
+
+    renderer->addToState("slowFalling", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
+        .spriteSheet({1, 4}, {0, 2}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());
+    renderer->addToState("slowFalling", "legs", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "legs", legsSize)
+        .spriteSheet({1, 20}, {0, 5}).build());
+    renderer->addToState("slowFalling", "armBehind", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {3, 3}).build());
+    renderer->addToState("slowFalling", "body", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {1, 0}).build());
+    renderer->addToState("slowFalling", "head", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "head", headSize)
+        .spriteSheet({1, 20}, {0, 0}).build());
+    renderer->addToState("slowFalling", "armFront", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {3, 1}).build());
+    renderer->addToState("slowFalling", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
+        .spriteSheet({9, 4}, {0, 1}).build());
     renderer->setState("idle");
+
     return player;
 }

@@ -33,6 +33,12 @@ void CoolCamera::update(Vec2 position) {
     }
 }
 
+void CoolCamera::setZoom(float zoom) {
+    if (zoom < 0.25f) zoom = 0.25f;
+    if (zoom > 5.0f) zoom = 5.0f;
+    camera->zoom = zoom;
+}
+
 Camera2D CoolCamera::getCamera() const {
     return *camera;
 }
