@@ -32,7 +32,7 @@ class KingSlime: public Slime {
 class Eye: public Enemy {
     public:
         virtual void update() override;
-        virtual void render() override;
+        virtual void render() override {};
         static std::shared_ptr<Eye> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         Eye() = default;
@@ -41,7 +41,7 @@ class Eye: public Enemy {
 class EyeOfCtulhu: public Enemy {
     public:
         virtual void update() override;
-        virtual void render() override;
+        virtual void render() override {};
         void phase1();
         void phase2();
         void switchPhase();
@@ -66,8 +66,7 @@ class EyeOfCtulhu: public Enemy {
 class EowSegment: public Enemy {
     public:
         virtual void update() override;
-        virtual void render() override;
-        //void setNextSegment(std::shared_ptr<EowSegment> nextSegment);
+        virtual void render() override {};
         void setNextSegment(std::shared_ptr<EowSegment> nextSegment);
     protected:
         static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<MyTransform> target, bool isTail = false);
@@ -79,7 +78,7 @@ class EowSegment: public Enemy {
 class EowHead: public EowSegment {
     public:
         virtual void update() override;
-        virtual void render() override;
+        virtual void render() override {};
         static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         EowHead() = default;

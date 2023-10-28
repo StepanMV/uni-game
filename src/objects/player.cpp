@@ -70,6 +70,7 @@ void Player::update() {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
         EyeOfCtulhu::spawn(worldMP, transform);
+        KingSlime::spawn(worldMP, transform);
     }
 }
 

@@ -5,11 +5,11 @@ std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> targe
     std::shared_ptr<Slime> slime = std::shared_ptr<Slime>(new Slime());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(slime->renderer);
-    Vec2 textureSize = renderer->loadTexture("Slime", "resources/textures/KingSlime.png");
-    renderer->addToState("idle", "Slime", TextureDataBuilder::init(TextureType::ANIMATION, "Slime", textureSize)
-    .animation({1, 6}, {0, 0}, {0, 4}, 5).build());
+    Vec2 textureSize = renderer->loadTexture("Slime", "resources/textures/Slime.png");
+    renderer->addToState("idle", "Slime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Slime", textureSize)
+    .spriteSheet({1, 2}, {0, 0}).build());
     renderer->addToState("jump", "Slime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Slime", textureSize)
-    .spriteSheet({1, 6}, {0, 5}).build());
+    .spriteSheet({1, 2}, {0, 1}).build());
     renderer->setState("idle");
 
     slime->readStats("Slime");
@@ -45,9 +45,9 @@ std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
     std::shared_ptr<Eye> eye = std::shared_ptr<Eye>(new Eye());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eye->renderer);
-    Vec2 textureSize = renderer->loadTexture("Eye", "resources/textures/KingSlime.png");
-    renderer->addToState("idle", "Eye", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Eye", textureSize)
-    .spriteSheet({1, 6}, {0, 0}).build());
+    Vec2 textureSize = renderer->loadTexture("Eye", "resources/textures/Eye.png");
+    renderer->addToState("idle", "Eye", TextureDataBuilder::init(TextureType::ANIMATION, "Eye", textureSize)
+    .animation({1, 2}, {0, 0}, {0, 1}, 4).build());
     renderer->setState("idle");
 
     eye->readStats("Eye");
@@ -63,10 +63,12 @@ std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTran
     std::shared_ptr<EyeOfCtulhu> eyeOfCtulhu = std::shared_ptr<EyeOfCtulhu>(new EyeOfCtulhu());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eyeOfCtulhu->renderer);
-    Vec2 textureSize = renderer->loadTexture("EyeOfCtulhu", "resources/textures/KingSlime.png");
-    renderer->addToState("idle", "EyeOfCtulhu", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EyeOfCtulhu", textureSize)
-    .spriteSheet({1, 6}, {0, 0}).build());
-    renderer->setState("idle");
+    Vec2 textureSize = renderer->loadTexture("EyeOfCtulhu", "resources/textures/EyeOfCtulhu.png");
+    renderer->addToState("phase1", "EyeOfCtulhu", TextureDataBuilder::init(TextureType::ANIMATION, "EyeOfCtulhu", textureSize)
+    .animation({1, 6}, {0, 0}, {0, 2}, 4).build());
+    renderer->addToState("phase2", "EyeOfCtulhu", TextureDataBuilder::init(TextureType::ANIMATION, "EyeOfCtulhu", textureSize)
+    .animation({1, 6}, {0, 3}, {0, 5}, 4).build());
+    renderer->setState("phase1");
 
     eyeOfCtulhu->readStats("EyeOfCtulhu");
 
@@ -81,14 +83,23 @@ std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransf
     std::shared_ptr<EowSegment> eowSegment = std::shared_ptr<EowSegment>(new EowSegment());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowSegment->renderer);
-    Vec2 textureSize = renderer->loadTexture("EowSegment", "resources/textures/KingSlime.png");
-    //if(isTail) ...
-    renderer->addToState("idle", "EowSegment", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EowSegment", textureSize)
-    .spriteSheet({1, 6}, {0, 0}).build());
+    if(isTail) {
+        Vec2 textureSize = renderer->loadTexture("EowTail", "resources/textures/EowTail.png");
+        renderer->addToState("idle", "EowTail", TextureDataBuilder::init(TextureType::TEXTURE, "EowTail", textureSize).build());
+    }
+    else {
+        Vec2 textureSize = renderer->loadTexture("EowSegment", "resources/textures/EowSegment.png");
+        renderer->addToState("idle", "EowSegment", TextureDataBuilder::init(TextureType::TEXTURE, "EowSegment", textureSize)
+        .build());
+    }
     renderer->setState("idle");
 
-    eowSegment->readStats("EowSegment");
-    //if(isTail) eowSegment->readStats("EowTail")
+    if(isTail) {
+        eowSegment->readStats("EowTail");
+    }
+    else {
+        eowSegment->readStats("EowSegment");
+    }
 
     eowSegment->transform->pos = pos;
     eowSegment->target = target;
@@ -102,9 +113,9 @@ std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> t
     eowHead->nextSegment = nullptr;
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowHead->renderer);
-    Vec2 textureSize = renderer->loadTexture("EowHead", "resources/textures/KingSlime.png");
-    renderer->addToState("idle", "EowHead", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EowHead", textureSize)
-    .spriteSheet({1, 6}, {0, 0}).build());
+    Vec2 textureSize = renderer->loadTexture("EowHead", "resources/textures/EowHead.png");
+    renderer->addToState("idle", "EowHead", TextureDataBuilder::init(TextureType::TEXTURE, "EowHead", textureSize)
+    .build());
     renderer->setState("idle");
 
     eowHead->readStats("EowHead");
@@ -241,7 +252,7 @@ void EyeOfCtulhu::phase1() {
         }
         else {
             physics->speed *= 0.2;
-            transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
         }
         direction += Vec2(0, -target->size.y * 5);
         direction.normalize();
@@ -258,7 +269,7 @@ void EyeOfCtulhu::phase1() {
         if(physics->speed == Vec2(0, 0) && betweenDashesTimer->isDone()) {
             Vec2 direction = target->pos - transform->pos;
             if(dashCount != 0) dash(direction, 30);
-            transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
             betweenDashesTimer->reset();
             dashCount--;
         }
@@ -269,7 +280,7 @@ void EyeOfCtulhu::phase2() {
     if(!chaseTimer->isDone()) {
         Vec2 direction = (target->pos - transform->pos);
         physics->speed *= 0.2;
-        transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+        transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
         direction += Vec2(0, -target->size.y * 5);
         if(transform->pos.x < target->pos.x) {
             direction -= Vec2(target->size.x * 3, 0);
@@ -292,7 +303,7 @@ void EyeOfCtulhu::phase2() {
         }
         if(dashTimer->isDone()) {
             Vec2 direction = target->pos - transform->pos;
-            transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
             if(dashCount != 0) dash(direction, 20);
             dashTimer->reset();
             dashCount--;
@@ -302,48 +313,34 @@ void EyeOfCtulhu::phase2() {
 
 void EyeOfCtulhu::switchPhase() {
     physics->accel = Vec2(0, 0);
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     if(switchTimer->getTimeLeft() > switchTime / 2) {
         if(rotateSpeed < 20) rotateSpeed += 0.2;
     }
     else {
         if(rotateSpeed > 0.5) rotateSpeed -= 0.2;
-        //setTexture(phase2);
+        renderer->setState("phase2");
     }
     transform->angle += rotateSpeed;
-}
-
-void EyeOfCtulhu::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setState("idle");
 }
 
 void Eye::update() {
     Vec2 direction = (target->pos - transform->pos);
     physics->accel.normalize();
-    transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+    transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
     direction.normalize();
     direction *= 0.5;
     move(direction);
     collider->calcHitbox();
 }
 
-void Eye::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setState("idle");
-}
-
 void EowSegment::update() {
     Vec2 distance = nextSegment->transform->pos - transform->pos;
     distance.normalize();
-    transform->angle = atan(distance.y / distance.x) * 180 / M_PI;
+    transform->angle = atan2(distance.y, distance.x) * 180 / M_PI + 90;
     distance *= transform->size.x;
     collider->setPos(nextSegment->transform->pos - distance);
     collider->calcHitbox();
-}
-
-void EowSegment::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setState("idle");
 }
 
 void EowSegment::setNextSegment(std::shared_ptr<EowSegment> nextSegment) {
@@ -353,14 +350,9 @@ void EowSegment::setNextSegment(std::shared_ptr<EowSegment> nextSegment) {
 void EowHead::update() {
     Vec2 direction = (target->pos - transform->pos);
     physics->accel.normalize();
-    transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+    transform->angle = atan2(direction.y, direction.x) * 180 / M_PI + 90;
     direction.normalize();
     direction *= 0.5;
     move(direction);
     collider->calcHitbox();
-}
-
-void EowHead::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setState("idle");
 }
