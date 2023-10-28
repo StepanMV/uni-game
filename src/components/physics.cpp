@@ -1,19 +1,8 @@
 #include "physics.h"
 
-#include "cmath"
 #include "vec2.h"
-
-int sign(double a) {
-    if(a > 0) {
-        return 1;
-    }
-    else if(a < 0) {
-        return -1;
-    }
-    else {
-        return 0;
-    }
-}
+#define abs(x) (x > 0 ? x : -x)
+#define sign(x) (x > 0 ? 1 : (x < 0 ? -1 : 0))
 
 double MyAbs(double value) {
     if(value >= 0) {

@@ -21,6 +21,7 @@ public:
     TextureType getType() const;
     float getRotation() const;
     bool getFlipped() const;
+    bool isFree() const;
 
     virtual Rectangle getSourceRect() const;
     virtual Rectangle getDestRect() const;
@@ -33,6 +34,7 @@ public:
 protected:
     friend class TextureDataBuilder;
 
+    bool freeTransform = true;
     float rotation = 0;
     float scale = 1;
     bool flipped = false;
@@ -113,6 +115,7 @@ public:
     TextureDataBuilder& croppedTexture(Vec2 offset);
     TextureDataBuilder& spriteSheet(Vec2 sheetDimensions, Vec2 spritePos, Vec2 spacing = {2, 2});
     TextureDataBuilder& animation(Vec2 sheetDimensions, Vec2 startSpritePos, Vec2 endSpritePos, float fps, Vec2 spacing = {2, 2});
+    TextureDataBuilder& keepProportions();
 
     std::shared_ptr<TextureData> build();
 

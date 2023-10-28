@@ -9,6 +9,7 @@ public:
     static std::shared_ptr<CoolCamera> init();
 
     void update(Vec2 position);
+    void setZoom(float zoom);
 
     Vector4 getRenderBounds() const;
     Camera2D getCamera() const;
