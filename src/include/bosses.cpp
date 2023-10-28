@@ -1,6 +1,130 @@
 #include "bosses.h"
 #include <iostream>
 
+std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<Slime> slime = std::shared_ptr<Slime>(new Slime());
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(slime->renderer);
+    Vec2 textureSize = renderer->loadTexture("Slime", "resources/textures/KingSlime.png");
+    renderer->addToState("idle", "Slime", TextureDataBuilder::init(TextureType::ANIMATION, "Slime", textureSize)
+    .animation({1, 6}, {0, 0}, {0, 4}, 5).build());
+    renderer->addToState("jump", "Slime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Slime", textureSize)
+    .spriteSheet({1, 6}, {0, 5}).build());
+    renderer->setState("idle");
+
+    slime->readStats("Slime");
+
+    slime->transform->pos = pos;
+    slime->target = target;
+
+    Object::objects.push_back(slime);
+    return slime;
+}
+
+std::shared_ptr<KingSlime> KingSlime::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<KingSlime> kingSlime = std::shared_ptr<KingSlime>(new KingSlime());
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(kingSlime->renderer);
+    Vec2 textureSize = renderer->loadTexture("KingSlime", "resources/textures/KingSlime.png");
+    renderer->addToState("idle", "KingSlime", TextureDataBuilder::init(TextureType::ANIMATION, "KingSlime", textureSize)
+    .animation({1, 6}, {0, 0}, {0, 4}, 5).build());
+    renderer->addToState("jump", "KingSlime", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "KingSlime", textureSize)
+    .spriteSheet({1, 6}, {0, 5}).build());
+    renderer->setState("idle");
+
+    kingSlime->readStats("KingSlime");
+
+    kingSlime->transform->pos = pos;
+    kingSlime->target = target;
+
+    Object::objects.push_back(kingSlime);
+    return kingSlime;
+}
+
+std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<Eye> eye = std::shared_ptr<Eye>(new Eye());
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eye->renderer);
+    Vec2 textureSize = renderer->loadTexture("Eye", "resources/textures/KingSlime.png");
+    renderer->addToState("idle", "Eye", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "Eye", textureSize)
+    .spriteSheet({1, 6}, {0, 0}).build());
+    renderer->setState("idle");
+
+    eye->readStats("Eye");
+
+    eye->transform->pos = pos;
+    eye->target = target;
+
+    Object::objects.push_back(eye);
+    return eye;
+}
+
+std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<EyeOfCtulhu> eyeOfCtulhu = std::shared_ptr<EyeOfCtulhu>(new EyeOfCtulhu());
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eyeOfCtulhu->renderer);
+    Vec2 textureSize = renderer->loadTexture("EyeOfCtulhu", "resources/textures/KingSlime.png");
+    renderer->addToState("idle", "EyeOfCtulhu", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EyeOfCtulhu", textureSize)
+    .spriteSheet({1, 6}, {0, 0}).build());
+    renderer->setState("idle");
+
+    eyeOfCtulhu->readStats("EyeOfCtulhu");
+
+    eyeOfCtulhu->transform->pos = pos;
+    eyeOfCtulhu->target = target;
+
+    Object::objects.push_back(eyeOfCtulhu);
+    return eyeOfCtulhu;
+}
+
+std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransform> target, bool isTail) {
+    std::shared_ptr<EowSegment> eowSegment = std::shared_ptr<EowSegment>(new EowSegment());
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowSegment->renderer);
+    Vec2 textureSize = renderer->loadTexture("EowSegment", "resources/textures/KingSlime.png");
+    //if(isTail) ...
+    renderer->addToState("idle", "EowSegment", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EowSegment", textureSize)
+    .spriteSheet({1, 6}, {0, 0}).build());
+    renderer->setState("idle");
+
+    eowSegment->readStats("EowSegment");
+    //if(isTail) eowSegment->readStats("EowTail")
+
+    eowSegment->transform->pos = pos;
+    eowSegment->target = target;
+
+    Object::objects.push_back(eowSegment);
+    return eowSegment;
+}
+
+std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<EowHead> eowHead = std::shared_ptr<EowHead>(new EowHead());
+    eowHead->nextSegment = nullptr;
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowHead->renderer);
+    Vec2 textureSize = renderer->loadTexture("EowHead", "resources/textures/KingSlime.png");
+    renderer->addToState("idle", "EowHead", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "EowHead", textureSize)
+    .spriteSheet({1, 6}, {0, 0}).build());
+    renderer->setState("idle");
+
+    eowHead->readStats("EowHead");
+    std::shared_ptr<EowSegment> segment;
+    for(int i = 0; i < 20; i++) {
+        std::shared_ptr<EowSegment> eowSegment;
+        if(i < 19) eowSegment = EowSegment::spawn(pos, target);
+        else eowSegment = EowSegment::spawn(pos, target, true);
+        if(i == 0) eowSegment->setNextSegment(eowHead);
+        else eowSegment->setNextSegment(segment);
+        segment = eowSegment;
+    }
+
+    eowHead->transform->pos = pos;
+    eowHead->target = target;
+
+    Object::objects.push_back(eowHead);
+    return eowHead;
+}
+
 void Slime::slimeBehavior() {
     physics->accel.y = 0;
     if(onGround) {
@@ -56,8 +180,7 @@ void KingSlime::update() {
     if(slimeSpanwTimer->isDone()) {
         int slimeCount = GetRandomValue(1, 6);
         for(int i = 0; i < slimeCount; i++) {
-            EnemyBuilder::spawn(EnemyType::Slime, 
-            transform->pos + Vec2(GetRandomValue(-transform->size.x / 3, transform->size.x / 3), GetRandomValue(-transform->size.y / 3, transform->size.y / 3)), target);
+            Slime::spawn(transform->pos + Vec2(GetRandomValue(-transform->size.x / 3, transform->size.x / 3), GetRandomValue(-transform->size.y / 3, transform->size.y / 3)), target);
         }
         slimeSpanwTimer->reset();
     }
@@ -109,7 +232,7 @@ void EyeOfCtulhu::phase1() {
     }
     if(!chaseTimer->isDone()) {
         if(eyeSpawnTimer->isDone()) {
-            EnemyBuilder::spawn(EnemyType::Eye, transform->pos, target);
+            Eye::spawn(transform->pos, target);
             eyeSpawnTimer->reset();
         }
         Vec2 direction = (target->pos - transform->pos);
@@ -205,6 +328,39 @@ void Eye::update() {
 }
 
 void Eye::render() {
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+    renderer->setState("idle");
+}
+
+void EowSegment::update() {
+    Vec2 distance = nextSegment->transform->pos - transform->pos;
+    distance.normalize();
+    transform->angle = atan(distance.y / distance.x) * 180 / M_PI;
+    distance *= transform->size.x;
+    collider->setPos(nextSegment->transform->pos - distance);
+    collider->calcHitbox();
+}
+
+void EowSegment::render() {
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+    renderer->setState("idle");
+}
+
+void EowSegment::setNextSegment(std::shared_ptr<EowSegment> nextSegment) {
+    this->nextSegment = nextSegment;
+}
+
+void EowHead::update() {
+    Vec2 direction = (target->pos - transform->pos);
+    physics->accel.normalize();
+    transform->angle = atan(direction.y / direction.x) * 180 / M_PI;
+    direction.normalize();
+    direction *= 0.5;
+    move(direction);
+    collider->calcHitbox();
+}
+
+void EowHead::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setState("idle");
 }

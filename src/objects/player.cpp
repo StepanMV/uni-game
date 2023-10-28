@@ -4,6 +4,7 @@
 #include "controls.h"
 #include "game.h"
 #include "enemy.h"
+#include "bosses.h"
 
 void Player::update() {
     if (id == 1) {
@@ -63,12 +64,12 @@ void Player::update() {
     if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EnemyBuilder::spawn(EnemyType::KingSlime, worldMP, transform);
+        EowHead::spawn(worldMP, transform);
     }
     if(Controls::isMousePressed(MOUSE_BUTTON_MIDDLE)) {
         Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
         Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EnemyBuilder::spawn(EnemyType::EyeOfCtulhu, worldMP, transform);
+        EyeOfCtulhu::spawn(worldMP, transform);
     }
 }
 

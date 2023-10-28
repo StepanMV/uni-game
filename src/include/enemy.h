@@ -6,7 +6,8 @@ enum class EnemyType {
     KingSlime,
     Slime,
     Eye,
-    EyeOfCtulhu
+    EyeOfCtulhu,
+    Eow
 };
 
 class Enemy: public Entity {
@@ -20,24 +21,12 @@ class Enemy: public Entity {
         virtual void render() override;
         virtual void attack() override {};
 
+        void readStats(std::string enemyName);
+
         unsigned getContactDamage() const;
     protected:
         Enemy() = default;
         EnemyType type;
         unsigned contactDamage = 1;
         std::shared_ptr<MyTransform> target;
-        friend class EnemyBuilder;
-};
-
-class EnemyBuilder {
-    public:
-        // static EnemyBuilder spawn(unsigned id, EnemyType type, Vec2 pos, Vec2 size);
-        static std::shared_ptr<Enemy> spawn(EnemyType type, Vec2 pos, std::shared_ptr<MyTransform> target);
-        EnemyBuilder& setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
-        EnemyBuilder& setForces(double friction, double gravity);
-        EnemyBuilder& setTarget(std::shared_ptr<MyTransform> target);
-
-        std::shared_ptr<Enemy> build();
-    private:
-        std::shared_ptr<Enemy> enemy;
 };
