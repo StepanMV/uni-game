@@ -71,6 +71,7 @@ class EowSegment: public Enemy {
         virtual void update() override;
         virtual void render() override {};
     protected:
+        std::shared_ptr<Timer> projTimer = Timer::getInstance(1);
         static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
         EowSegment() = default;
         std::shared_ptr<EowSegment> nextSegment;
@@ -85,7 +86,7 @@ class EowHead: public EowSegment {
         static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         EowHead() = default;
-        const double rotateAngle = 3;
+        const double rotateAngle = 4;
         std::shared_ptr<Timer> chaseTimer = Timer::getInstance(5);
         std::shared_ptr<Timer> restTimer = Timer::getInstance(5);
         static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target);

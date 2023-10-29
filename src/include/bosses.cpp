@@ -1,4 +1,5 @@
 #include "bosses.h"
+#include "projectile.h"
 #include <iostream>
 
 std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
@@ -347,6 +348,11 @@ void EowSegment::update() {
     transform->angle = atan2(distance.y, distance.x) * 180 / M_PI + 90;
     distance *= 4 * transform->size.y / 10;
     collider->setPos(nextSegment->transform->pos - distance);
+    if(projTimer->isDone()) {
+        auto proj = ProjectileBuilder::spawn(transform->pos, Vec2(10, 10), 1).extra(10, 30, false).build();
+        proj->setDirection(target->pos);
+        projTimer = Timer::getInstance((float) GetRandomValue(5, 20) / 10);
+    }
     collider->calcHitbox();
 }
 
@@ -358,7 +364,9 @@ void EowHead::update() {
     Vec2 direction = (target->pos - transform->pos);
     if(chaseTimer->isDone()) {
         if(!restTimer->isDone()) {
-            direction += Vec2(0, -target->size.y * 5);
+            Vec2 restOffset = Vec2(0, target->size.y * 5);
+            restOffset.rotate(GetRandomValue(0, 360));
+            direction += restOffset;
         }
         else {
             chaseTimer->reset();
