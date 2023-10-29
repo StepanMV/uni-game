@@ -49,6 +49,7 @@ class EyeOfCtulhu: public Enemy {
         static std::shared_ptr<EyeOfCtulhu> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         EyeOfCtulhu() = default;
+        double maxFriction;
         unsigned phase = 1;
         const double chaseTime = 5;
         const double dashTime = 0.5;
@@ -63,15 +64,17 @@ class EyeOfCtulhu: public Enemy {
         std::shared_ptr<Timer> betweenDashesTimer = Timer::getInstance(timeBetweenDashes);
 };
 
+class EowHead;
+
 class EowSegment: public Enemy {
     public:
         virtual void update() override;
         virtual void render() override {};
-        void setNextSegment(std::shared_ptr<EowSegment> nextSegment);
     protected:
-        static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<MyTransform> target, bool isTail = false);
+        static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
         EowSegment() = default;
-        std::shared_ptr<EowSegment> nextSegment;  
+        std::shared_ptr<EowSegment> nextSegment;
+        std::shared_ptr<EowSegment> prevSegment;
         friend class EowHead;
 };
 
@@ -82,4 +85,6 @@ class EowHead: public EowSegment {
         static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         EowHead() = default;
+        static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target);
+        friend class EowSegment;
 };

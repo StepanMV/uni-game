@@ -74,32 +74,24 @@ std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTran
 
     eyeOfCtulhu->transform->pos = pos;
     eyeOfCtulhu->target = target;
+    eyeOfCtulhu->maxFriction = eyeOfCtulhu->physics->friction;
 
     Object::objects.push_back(eyeOfCtulhu);
     return eyeOfCtulhu;
 }
 
-std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransform> target, bool isTail) {
+std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
     std::shared_ptr<EowSegment> eowSegment = std::shared_ptr<EowSegment>(new EowSegment());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowSegment->renderer);
-    if(isTail) {
-        Vec2 textureSize = renderer->loadTexture("EowTail", "resources/textures/EowTail.png");
-        renderer->addToState("idle", "EowTail", TextureDataBuilder::init(TextureType::TEXTURE, "EowTail", textureSize).build());
-    }
-    else {
-        Vec2 textureSize = renderer->loadTexture("EowSegment", "resources/textures/EowSegment.png");
-        renderer->addToState("idle", "EowSegment", TextureDataBuilder::init(TextureType::TEXTURE, "EowSegment", textureSize)
-        .build());
-    }
-    renderer->setState("idle");
+    Vec2 textureSize = renderer->loadTexture("EowTail", "resources/textures/EowTail.png");
+    renderer->addToState("tail", "EowTail", TextureDataBuilder::init(TextureType::TEXTURE, "EowTail", textureSize).build());
+    textureSize = renderer->loadTexture("EowSegment", "resources/textures/EowSegment.png");
+    renderer->addToState("segment", "EowSegment", TextureDataBuilder::init(TextureType::TEXTURE, "EowSegment", textureSize)
+    .build());
+    renderer->setState("segment");
 
-    if(isTail) {
-        eowSegment->readStats("EowTail");
-    }
-    else {
-        eowSegment->readStats("EowSegment");
-    }
+    eowSegment->readStats("EowSegment");
 
     eowSegment->transform->pos = pos;
     eowSegment->target = target;
@@ -108,7 +100,7 @@ std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransf
     return eowSegment;
 }
 
-std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<EowHead> EowHead::spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target) {
     std::shared_ptr<EowHead> eowHead = std::shared_ptr<EowHead>(new EowHead());
     eowHead->nextSegment = nullptr;
 
@@ -117,22 +109,24 @@ std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> t
     renderer->addToState("idle", "EowHead", TextureDataBuilder::init(TextureType::TEXTURE, "EowHead", textureSize)
     .build());
     renderer->setState("idle");
-
     eowHead->readStats("EowHead");
-    std::shared_ptr<EowSegment> segment;
-    for(int i = 0; i < 20; i++) {
-        std::shared_ptr<EowSegment> eowSegment;
-        if(i < 19) eowSegment = EowSegment::spawn(pos, target);
-        else eowSegment = EowSegment::spawn(pos, target, true);
-        if(i == 0) eowSegment->setNextSegment(eowHead);
-        else eowSegment->setNextSegment(segment);
-        segment = eowSegment;
-    }
 
     eowHead->transform->pos = pos;
     eowHead->target = target;
-
     Object::objects.push_back(eowHead);
+    return eowHead;
+}
+
+std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+    std::shared_ptr<EowHead> eowHead = spawnHead(pos, target);
+    std::shared_ptr<EowSegment> segment = eowHead;
+    for(int i = 0; i < 20; i++) {
+        std::shared_ptr<EowSegment> eowSegment;
+        eowSegment = EowSegment::spawn(pos, target);
+        eowSegment->nextSegment = segment;
+        segment->prevSegment = eowSegment;
+        segment = eowSegment;
+    }
     return eowHead;
 }
 
@@ -299,7 +293,7 @@ void EyeOfCtulhu::phase2() {
         if(dashCount == -1) {
             dashCount = 4;
             chaseTimer->reset();
-            physics->friction = 0.5;
+            physics->friction = maxFriction;
         }
         if(dashTimer->isDone()) {
             Vec2 direction = target->pos - transform->pos;
@@ -335,19 +329,31 @@ void Eye::update() {
 }
 
 void EowSegment::update() {
+    if(!nextSegment || !nextSegment->isAlive()) {
+        destroy();
+        std::shared_ptr<EowHead> newHead = EowHead::spawnHead(transform->pos, target);
+        newHead->health = health;
+        if(prevSegment) prevSegment->nextSegment = newHead;
+        newHead->prevSegment = prevSegment;
+        return;
+    }
+    if(!prevSegment || !prevSegment->isAlive()) {
+        std::shared_ptr<CoolRenderer> renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+        renderer->setState("tail");
+    }
     Vec2 distance = nextSegment->transform->pos - transform->pos;
     distance.normalize();
     transform->angle = atan2(distance.y, distance.x) * 180 / M_PI + 90;
-    distance *= transform->size.x;
+    distance *= transform->size.y / 2;
     collider->setPos(nextSegment->transform->pos - distance);
     collider->calcHitbox();
 }
 
-void EowSegment::setNextSegment(std::shared_ptr<EowSegment> nextSegment) {
-    this->nextSegment = nextSegment;
-}
-
 void EowHead::update() {
+    if(!prevSegment || !prevSegment->isAlive()) {
+        destroy();
+        return;
+    }
     Vec2 direction = (target->pos - transform->pos);
     physics->accel.normalize();
     transform->angle = atan2(direction.y, direction.x) * 180 / M_PI + 90;
