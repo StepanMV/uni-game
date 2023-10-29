@@ -25,6 +25,8 @@ public:
     float x = 0, y = 0;
 };
 
+float angle(const Vec2 v1, const Vec2 v2);
+
 Vec2 operator+(const Vec2& v1, const Vec2& v2);
 Vec2 operator-(const Vec2& v1, const Vec2& v2);
 Vec2 operator*(const Vec2& v, const float& k);

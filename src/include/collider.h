@@ -11,7 +11,7 @@ public:
     bool MyCheckCollision(const std::shared_ptr<Collider> other) const;
 
     void setCenterOffset(Vec2 offset);
-    void setScale(float sclae);
+    void setScale(float scale);
     void setPos(Vec2 pos);
     void calcHitbox();
 

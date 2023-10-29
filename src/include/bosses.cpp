@@ -332,6 +332,7 @@ void EowSegment::update() {
     if(!nextSegment || !nextSegment->isAlive()) {
         destroy();
         std::shared_ptr<EowHead> newHead = EowHead::spawnHead(transform->pos, target);
+        newHead->transform->angle = transform->angle;
         newHead->health = health;
         if(prevSegment) prevSegment->nextSegment = newHead;
         newHead->prevSegment = prevSegment;
@@ -344,7 +345,7 @@ void EowSegment::update() {
     Vec2 distance = nextSegment->transform->pos - transform->pos;
     distance.normalize();
     transform->angle = atan2(distance.y, distance.x) * 180 / M_PI + 90;
-    distance *= transform->size.y / 2;
+    distance *= 4 * transform->size.y / 10;
     collider->setPos(nextSegment->transform->pos - distance);
     collider->calcHitbox();
 }
@@ -355,10 +356,29 @@ void EowHead::update() {
         return;
     }
     Vec2 direction = (target->pos - transform->pos);
-    physics->accel.normalize();
-    transform->angle = atan2(direction.y, direction.x) * 180 / M_PI + 90;
+    if(chaseTimer->isDone()) {
+        if(!restTimer->isDone()) {
+            direction += Vec2(0, -target->size.y * 5);
+        }
+        else {
+            chaseTimer->reset();
+        }
+    }
+    else {
+        restTimer->reset();
+    }
     direction.normalize();
-    direction *= 0.5;
+    Vec2 accel = physics->accel;
     move(direction);
+    double accelAngle = angle(physics->accel, accel);
+    if(accel.x * physics->accel.y - accel.y * physics->accel.x < 0) accelAngle *= -1;
+    if(accelAngle > rotateAngle) {
+        physics->accel.rotate(rotateAngle - accelAngle);    
+    }
+    if(accelAngle < -rotateAngle) {
+        physics->accel.rotate(-rotateAngle - accelAngle);
+    }
+    physics->accel.normalize();
+    transform->angle = atan2(physics->speed.y, physics->speed.x) * 180 / M_PI + 90;
     collider->calcHitbox();
 }

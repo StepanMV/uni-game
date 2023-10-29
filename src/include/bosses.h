@@ -85,6 +85,9 @@ class EowHead: public EowSegment {
         static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
     private:
         EowHead() = default;
+        const double rotateAngle = 3;
+        std::shared_ptr<Timer> chaseTimer = Timer::getInstance(5);
+        std::shared_ptr<Timer> restTimer = Timer::getInstance(5);
         static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target);
         friend class EowSegment;
 };
