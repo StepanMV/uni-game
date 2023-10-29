@@ -82,7 +82,7 @@ void Game::createUIS() {
 			.build()
 		},
 		{"game", UIBuilder()
-			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", 0, 100 })
+			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", 0, 400 })
 			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", 0, 100 })
 			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", 0, 100 })
 			.addSubUI("pauseMenu", pauseMenuUI, false)
@@ -165,8 +165,8 @@ int resToInt(Vec2 res) {
 void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
 		unsigned levelID = ui->getDropdownValue("bossDropdown");
-		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("game");
+		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		background = Background::create(1);
 		ui->update();
 	}

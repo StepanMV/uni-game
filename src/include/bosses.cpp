@@ -1,8 +1,9 @@
 #include "bosses.h"
 #include "projectile.h"
+#include "player.h"
 #include <iostream>
 
-std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<Slime> slime = std::shared_ptr<Slime>(new Slime());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(slime->renderer);
@@ -22,7 +23,7 @@ std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> targe
     return slime;
 }
 
-std::shared_ptr<KingSlime> KingSlime::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<KingSlime> KingSlime::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<KingSlime> kingSlime = std::shared_ptr<KingSlime>(new KingSlime());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(kingSlime->renderer);
@@ -42,7 +43,7 @@ std::shared_ptr<KingSlime> KingSlime::spawn(Vec2 pos, std::shared_ptr<MyTransfor
     return kingSlime;
 }
 
-std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<Eye> eye = std::shared_ptr<Eye>(new Eye());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eye->renderer);
@@ -60,7 +61,7 @@ std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
     return eye;
 }
 
-std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<EyeOfCtulhu> eyeOfCtulhu = std::shared_ptr<EyeOfCtulhu>(new EyeOfCtulhu());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eyeOfCtulhu->renderer);
@@ -81,7 +82,7 @@ std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTran
     return eyeOfCtulhu;
 }
 
-std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<EowSegment> eowSegment = std::shared_ptr<EowSegment>(new EowSegment());
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(eowSegment->renderer);
@@ -101,7 +102,7 @@ std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransf
     return eowSegment;
 }
 
-std::shared_ptr<EowHead> EowHead::spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<EowHead> EowHead::spawnHead(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<EowHead> eowHead = std::shared_ptr<EowHead>(new EowHead());
     eowHead->nextSegment = nullptr;
 
@@ -118,7 +119,7 @@ std::shared_ptr<EowHead> EowHead::spawnHead(Vec2 pos, std::shared_ptr<MyTransfor
     return eowHead;
 }
 
-std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
+std::shared_ptr<EowHead> EowHead::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<EowHead> eowHead = spawnHead(pos, target);
     std::shared_ptr<EowSegment> segment = eowHead;
     for(int i = 0; i < 20; i++) {
@@ -151,7 +152,7 @@ void Slime::slimeBehavior() {
             stayTime = (double) GetRandomValue(5 , 30) / 10;
             stayTimer = Timer::getInstance(jumpTime + stayTime);
         }
-        Vec2 direction = (target->pos - transform->pos);
+        Vec2 direction = (target->getPos() - transform->pos);
         direction.y = 0;
         direction.normalize();
         direction *= 1.5;
@@ -177,7 +178,7 @@ void KingSlime::update() {
         }
     }
     else {                                              // if can't tp
-        tpPos = target->pos;                                // update tp position
+        tpPos = target->getPos();                                // update tp position
         tpTimer->reset();                                   // reset tp timer
     }
     if(health >= max_health / 1.41) {
@@ -241,7 +242,7 @@ void EyeOfCtulhu::phase1() {
             Eye::spawn(transform->pos, target);
             eyeSpawnTimer->reset();
         }
-        Vec2 direction = (target->pos - transform->pos);
+        Vec2 direction = (target->getPos() - transform->pos);
         if(abs(direction.x) < 5) {
             physics->speed *= 0;
         }
@@ -249,7 +250,7 @@ void EyeOfCtulhu::phase1() {
             physics->speed *= 0.2;
             transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
         }
-        direction += Vec2(0, -target->size.y * 5);
+        direction += Vec2(0, -target->getSize().y * 5);
         direction.normalize();
         direction *= 0.9;
         move(direction);
@@ -262,7 +263,7 @@ void EyeOfCtulhu::phase1() {
             chaseTimer->reset();
         }
         if(physics->speed == Vec2(0, 0) && betweenDashesTimer->isDone()) {
-            Vec2 direction = target->pos - transform->pos;
+            Vec2 direction = target->getPos() - transform->pos;
             if(dashCount != 0) dash(direction, 30);
             transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
             betweenDashesTimer->reset();
@@ -273,15 +274,15 @@ void EyeOfCtulhu::phase1() {
 
 void EyeOfCtulhu::phase2() {
     if(!chaseTimer->isDone()) {
-        Vec2 direction = (target->pos - transform->pos);
+        Vec2 direction = (target->getPos() - transform->pos);
         physics->speed *= 0.2;
         transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
-        direction += Vec2(0, -target->size.y * 5);
-        if(transform->pos.x < target->pos.x) {
-            direction -= Vec2(target->size.x * 3, 0);
+        direction += Vec2(0, -target->getSize().y * 5);
+        if(transform->pos.x < target->getPos().x) {
+            direction -= Vec2(target->getSize().x * 3, 0);
         }
         else {
-            direction += Vec2(target->size.x * 3, 0);
+            direction += Vec2(target->getSize().x * 3, 0);
         }
         direction.normalize();
         direction *= 0.9;
@@ -297,7 +298,7 @@ void EyeOfCtulhu::phase2() {
             physics->friction = maxFriction;
         }
         if(dashTimer->isDone()) {
-            Vec2 direction = target->pos - transform->pos;
+            Vec2 direction = target->getPos() - transform->pos;
             transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
             if(dashCount != 0) dash(direction, 20);
             dashTimer->reset();
@@ -320,7 +321,7 @@ void EyeOfCtulhu::switchPhase() {
 }
 
 void Eye::update() {
-    Vec2 direction = (target->pos - transform->pos);
+    Vec2 direction = (target->getPos() - transform->pos);
     physics->accel.normalize();
     transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
     direction.normalize();
@@ -350,7 +351,7 @@ void EowSegment::update() {
     collider->setPos(nextSegment->transform->pos - distance);
     if(projTimer->isDone()) {
         auto proj = ProjectileBuilder::spawn(transform->pos, Vec2(10, 10), 1).extra(10, 30, false).build();
-        proj->setDirection(target->pos);
+        proj->setDirection(target->getPos());
         projTimer = Timer::getInstance((float) GetRandomValue(5, 20) / 10);
     }
     collider->calcHitbox();
@@ -361,10 +362,10 @@ void EowHead::update() {
         destroy();
         return;
     }
-    Vec2 direction = (target->pos - transform->pos);
+    Vec2 direction = (target->getPos() - transform->pos);
     if(chaseTimer->isDone()) {
         if(!restTimer->isDone()) {
-            Vec2 restOffset = Vec2(0, target->size.y * 5);
+            Vec2 restOffset = Vec2(0, target->getSize().y * 5);
             restOffset.rotate(GetRandomValue(0, 360));
             direction += restOffset;
         }

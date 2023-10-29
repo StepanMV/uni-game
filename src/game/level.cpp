@@ -4,6 +4,7 @@
 #include "projectile.h"
 #include "controls.h"
 #include "game.h"
+#include "bosses.h"
 #include "player.h"
 #include "enemy.h"
 #include "particle.h"
@@ -65,7 +66,22 @@ void Level::loadGame(std::string filename, unsigned int levelID)
         .build();
     loaded = true;
     camera = CoolCamera::init();
+    //Game::ui->setBarPointer("healthBar", &Object::player->health);
     id = levelID;
+    switch(levelID) {
+        case 0: {
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+        case 1: {
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+        case 2: {
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+    }
     this->editor = false;
 }
 

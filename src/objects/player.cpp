@@ -61,17 +61,6 @@ void Player::update() {
     collider->calcHitbox();
     onGround = false;
     if(weapon) weapon->setLeftSide(facingLeft);
-    if(Controls::isMousePressed(MOUSE_RIGHT_BUTTON)) {
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
-        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EowHead::spawn(worldMP, transform);
-    }
-    if(Controls::isMousePressed(MOUSE_BUTTON_MIDDLE)) {
-        Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
-        Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-        EyeOfCtulhu::spawn(worldMP, transform);
-        KingSlime::spawn(worldMP, transform);
-    }
 }
 
 void Player::moveEditor() {

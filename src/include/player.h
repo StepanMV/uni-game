@@ -10,20 +10,15 @@ class Player: public Entity {
         virtual void update() override;
         virtual void render() override;
 
-        void moveEditor();
-
-        void attack() override;
-
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
         virtual void onCollision(std::shared_ptr<Player> other) override {};
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
 
         virtual bool isCollideable() const override;
 
-
-       static std::map<unsigned int, std::shared_ptr<Player>> players;
-
     private:
+        void moveEditor();
+        void attack() override;
         std::shared_ptr<Weapon> weapon;
         friend class PlayerBuilder;
 };

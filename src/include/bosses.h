@@ -5,10 +5,10 @@ class Slime: public Enemy {
     public:
         virtual void update() override;
         virtual void render() override;
-        void slimeBehavior();
 
-        static std::shared_ptr<Slime> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<Slime> spawn(Vec2 pos, std::shared_ptr<Player> target);
     protected:
+        void slimeBehavior();
         Slime() = default;
         double stayTime = 1.5;
         unsigned jumpCount = 1;
@@ -18,7 +18,7 @@ class Slime: public Enemy {
 class KingSlime: public Slime {
     public:
         virtual void update() override;
-        static std::shared_ptr<KingSlime> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<KingSlime> spawn(Vec2 pos, std::shared_ptr<Player> target);
     private:
         KingSlime() = default;
         double currentScale = 1;
@@ -33,7 +33,7 @@ class Eye: public Enemy {
     public:
         virtual void update() override;
         virtual void render() override {};
-        static std::shared_ptr<Eye> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<Eye> spawn(Vec2 pos, std::shared_ptr<Player> target);
     private:
         Eye() = default;
 };
@@ -42,13 +42,15 @@ class EyeOfCtulhu: public Enemy {
     public:
         virtual void update() override;
         virtual void render() override {};
+
+        static std::shared_ptr<EyeOfCtulhu> spawn(Vec2 pos, std::shared_ptr<Player> target);
+    private:
+        EyeOfCtulhu() = default;
+
         void phase1();
         void phase2();
         void switchPhase();
 
-        static std::shared_ptr<EyeOfCtulhu> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
-    private:
-        EyeOfCtulhu() = default;
         double maxFriction;
         unsigned phase = 1;
         const double chaseTime = 5;
@@ -72,7 +74,7 @@ class EowSegment: public Enemy {
         virtual void render() override {};
     protected:
         std::shared_ptr<Timer> projTimer = Timer::getInstance(1);
-        static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<EowSegment> spawn(Vec2 pos, std::shared_ptr<Player> target);
         EowSegment() = default;
         std::shared_ptr<EowSegment> nextSegment;
         std::shared_ptr<EowSegment> prevSegment;
@@ -83,12 +85,12 @@ class EowHead: public EowSegment {
     public:
         virtual void update() override;
         virtual void render() override {};
-        static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<Player> target);
     private:
         EowHead() = default;
         const double rotateAngle = 4;
         std::shared_ptr<Timer> chaseTimer = Timer::getInstance(5);
         std::shared_ptr<Timer> restTimer = Timer::getInstance(5);
-        static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<MyTransform> target);
+        static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<Player> target);
         friend class EowSegment;
 };
