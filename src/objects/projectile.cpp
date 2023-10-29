@@ -25,10 +25,6 @@ void Projectile::onCollision(std::shared_ptr<Enemy> other) {
     if(fromPlayer) destroy();
 }
 
-void Projectile::onCollision(std::shared_ptr<Projectile> other) {
-    
-}
-
 void Projectile::onCollision(std::shared_ptr<Player> other) {
     if(!fromPlayer) destroy();
 }
@@ -88,6 +84,6 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         projectile->physics->maxFallSpeed = 0;
         projectile->physics->maxFlySpeed = 100;
     }
-    Object::objects.push_back(projectile);
+    Object::addProjectile(projectile);
     return projectile;
 }

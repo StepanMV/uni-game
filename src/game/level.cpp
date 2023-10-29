@@ -83,7 +83,7 @@ void Level::loadEditor(std::string filename, unsigned int levelID) {
 }
 
 void Level::save() {
-    Object::objects.clear();
+    Object::clearObjects();
     std::string dirpath = filepath.substr(0, filepath.rfind('/'));
     std::filesystem::create_directories(dirpath);
     std::ofstream outf(filepath);

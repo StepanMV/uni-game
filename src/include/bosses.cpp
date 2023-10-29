@@ -18,7 +18,7 @@ std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<MyTransform> targe
     slime->transform->pos = pos;
     slime->target = target;
 
-    Object::objects.push_back(slime);
+    Object::addEnemy(slime);
     return slime;
 }
 
@@ -38,7 +38,7 @@ std::shared_ptr<KingSlime> KingSlime::spawn(Vec2 pos, std::shared_ptr<MyTransfor
     kingSlime->transform->pos = pos;
     kingSlime->target = target;
 
-    Object::objects.push_back(kingSlime);
+    Object::addEnemy(kingSlime);
     return kingSlime;
 }
 
@@ -56,7 +56,7 @@ std::shared_ptr<Eye> Eye::spawn(Vec2 pos, std::shared_ptr<MyTransform> target) {
     eye->transform->pos = pos;
     eye->target = target;
 
-    Object::objects.push_back(eye);
+    Object::addEnemy(eye);
     return eye;
 }
 
@@ -77,7 +77,7 @@ std::shared_ptr<EyeOfCtulhu> EyeOfCtulhu::spawn(Vec2 pos, std::shared_ptr<MyTran
     eyeOfCtulhu->target = target;
     eyeOfCtulhu->maxFriction = eyeOfCtulhu->physics->friction;
 
-    Object::objects.push_back(eyeOfCtulhu);
+    Object::addEnemy(eyeOfCtulhu);
     return eyeOfCtulhu;
 }
 
@@ -97,7 +97,7 @@ std::shared_ptr<EowSegment> EowSegment::spawn(Vec2 pos, std::shared_ptr<MyTransf
     eowSegment->transform->pos = pos;
     eowSegment->target = target;
 
-    Object::objects.push_back(eowSegment);
+    Object::addEnemy(eowSegment);
     return eowSegment;
 }
 
@@ -114,7 +114,7 @@ std::shared_ptr<EowHead> EowHead::spawnHead(Vec2 pos, std::shared_ptr<MyTransfor
 
     eowHead->transform->pos = pos;
     eowHead->target = target;
-    Object::objects.push_back(eowHead);
+    Object::addEnemy(eowHead);
     return eowHead;
 }
 

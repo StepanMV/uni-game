@@ -15,7 +15,7 @@ class Player: public Entity {
         void attack() override;
 
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
-        virtual void onCollision(std::shared_ptr<Player> other) override;
+        virtual void onCollision(std::shared_ptr<Player> other) override {};
         virtual void onCollision(std::shared_ptr<Projectile> other) override;
 
         virtual bool isCollideable() const override;

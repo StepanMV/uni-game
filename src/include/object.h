@@ -11,6 +11,20 @@ class Object {
 public:
     static void updateAll();
     static void renderAll();
+
+    static void updateEnemies();
+    static void renderEnemies();
+
+    static void updateParticles();
+    static void renderParticles();
+
+    static void updateProjectiles();
+    static void renderProjectiles();
+    
+    static void updatePlayer();
+    static void renderPlayer();
+
+    static void clearObjects();
     virtual void destroy();
 
     virtual void onCollision(std::shared_ptr<Tile> other) = 0;
@@ -34,12 +48,19 @@ public:
     Vec2 getCenterOffset() const;
     void setState(std::string state);
 
-    static std::vector<std::shared_ptr<Object>> objects;
-    static std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
+    static void addProjectile(std::shared_ptr<Projectile> projectile);
+    static void addEnemy(std::shared_ptr<Enemy> enemy);
+    static void addPlayer(std::shared_ptr<Player> player);
+    static void addParticle(std::shared_ptr<Particle> particle);
     
 protected:
     friend class UIBuilder;
-
+    friend class Level;
+    static std::vector<std::shared_ptr<Projectile>> projectiles;
+    static std::vector<std::shared_ptr<Enemy>> enemies;
+    static std::vector<std::shared_ptr<Particle>> particles;
+    static std::vector<std::vector<std::shared_ptr<Tile>>> tiles;
+    static std::shared_ptr<Player> player;
     Object() = default;
     Object(const Object& other);
     Object& operator=(const Object& other);

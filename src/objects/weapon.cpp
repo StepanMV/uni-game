@@ -73,6 +73,6 @@ std::shared_ptr<Weapon> WeaponBuilder::build() {
         renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
         renderer->setState("attack");
     }
-    Object::objects.push_back(weapon);
+    Object::addProjectile(weapon);
     return weapon;
 }

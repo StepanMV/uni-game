@@ -150,10 +150,6 @@ void Player::onCollision(std::shared_ptr<Projectile> other) {
     }
 }
 
-void Player::onCollision(std::shared_ptr<Player> other) {
-    
-}
-
 bool Player::isCollideable() const {
     return true;
 }
@@ -185,7 +181,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
 {
     if (player->id == 0) return player;
 
-    Object::objects.push_back(player);
+    Object::addPlayer(player);
 
     if (player->id == 1) return player;
 
