@@ -2,6 +2,7 @@
 #include <cmath>
 #include "tile.h"
 #include <iostream>
+#include "audio.h"
 
 bool Projectile::isCollideable() const {
     return id != 0;
@@ -17,6 +18,7 @@ void Projectile::setDirection(Vec2 target)
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
     if(!other->isPlatform) {
+        Audio::playSound(destroySound, 0.5);
         destroy();
     }
 }
@@ -63,6 +65,8 @@ ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     builder.projectile->renderer = std::make_shared<CoolRenderer>(builder.projectile->transform);
     builder.projectile->physics = std::make_shared<Physics>();
     builder.projectile->collider = std::make_shared<Collider>(builder.projectile->transform);
+    builder.projectile->destroySound = "BulletDestroy";
+    builder.projectile->spawnSound = "StarFalling";
     return builder;
 }
 
@@ -83,6 +87,7 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         projectile->physics->gravity = 0;
         projectile->physics->maxFallSpeed = 0;
         projectile->physics->maxFlySpeed = 100;
+        Audio::playSound(projectile->spawnSound, 0.25);
     }
     Object::addProjectile(projectile);
     return projectile;

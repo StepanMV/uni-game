@@ -81,6 +81,19 @@ void Level::loadGame(std::string filename, unsigned int levelID)
             EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
             break;
         }
+        case 3: {
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
     }
     this->editor = false;
 }
@@ -154,6 +167,7 @@ void Level::breakTile(const Vec2 tilePos) {
     unsigned idY = tilePos.y / tileSize;
 
     if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    
     if(!isTile(tilePos.toRaylib())) return;
 
     Object::tiles[idY][idX]->destroy();

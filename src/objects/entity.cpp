@@ -1,8 +1,14 @@
 #include "entity.h"
 #include "tile.h"
+#include "audio.h"
 
 bool Entity::getAttacking() const {
     return isAttacking;
+}
+
+void Entity::destroy() {
+    Object::destroy();
+    Audio::playSound(destroySound);
 }
 
 Entity::Entity() {
@@ -85,6 +91,7 @@ void Entity::jump() {
 }
 
 void Entity::takeDamage(unsigned damage) {
+    Audio::playSound(damageSound);
     health -= damage;
     if(health <= 0) {
         this->destroy();

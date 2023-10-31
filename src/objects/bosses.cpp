@@ -2,6 +2,7 @@
 #include "projectile.h"
 #include "player.h"
 #include <iostream>
+#include "audio.h"
 
 std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<Slime> slime = std::shared_ptr<Slime>(new Slime());
@@ -178,7 +179,7 @@ void KingSlime::update() {
         }
     }
     else {                                              // if can't tp
-        tpPos = target->getPos();                                // update tp position
+        tpPos = target->getPos() - Vec2(0, transform->size.y / 2);                                // update tp position
         tpTimer->reset();                                   // reset tp timer
     }
     if(health >= max_health / 1.41) {
@@ -234,6 +235,7 @@ void EyeOfCtulhu::phase1() {
             phase = 2;
             chaseTimer->reset();
             switchTimer = nullptr;
+            Audio::playSound("RawrXD");
         }
         return;
     }
@@ -255,7 +257,7 @@ void EyeOfCtulhu::phase1() {
         direction *= 0.9;
         move(direction);
         physics->accel *= 0.9;
-    }
+    }       
     else {
         physics->accel = Vec2(0, 0);
         if(dashCount == -1) {
@@ -264,7 +266,10 @@ void EyeOfCtulhu::phase1() {
         }
         if(physics->speed == Vec2(0, 0) && betweenDashesTimer->isDone()) {
             Vec2 direction = target->getPos() - transform->pos;
-            if(dashCount != 0) dash(direction, 30);
+            if(dashCount != 0) {
+                dash(direction, 30);
+                Audio::playSound("RawrXD");
+            }
             transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
             betweenDashesTimer->reset();
             dashCount--;
@@ -300,7 +305,10 @@ void EyeOfCtulhu::phase2() {
         if(dashTimer->isDone()) {
             Vec2 direction = target->getPos() - transform->pos;
             transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
-            if(dashCount != 0) dash(direction, 20);
+            if(dashCount != 0) {
+                dash(direction, 20);
+                Audio::playSound("RawrXD", 1, 1.5);
+            }
             dashTimer->reset();
             dashCount--;
         }
@@ -365,7 +373,7 @@ void EowHead::update() {
     Vec2 direction = (target->getPos() - transform->pos);
     if(chaseTimer->isDone()) {
         if(!restTimer->isDone()) {
-            Vec2 restOffset = Vec2(0, target->getSize().y * 5);
+            Vec2 restOffset = Vec2(0, target->getSize().y * 10);
             restOffset.rotate(GetRandomValue(0, 360));
             direction += restOffset;
         }
@@ -374,6 +382,13 @@ void EowHead::update() {
         }
     }
     else {
+        if (moveSoundTimer->isDone()) {
+            Audio::playSound("WormMove");
+            float timerVal = (target->getPos() - transform->pos).length() / 1000;
+            if (timerVal > 1) timerVal = 1;
+            if (timerVal < 0.15) timerVal = 0.15;
+            moveSoundTimer = Timer::getInstance(timerVal);
+        }
         restTimer->reset();
     }
     direction.normalize();

@@ -1,5 +1,6 @@
 #include "weapon.h"
 #include "game.h"
+#include "audio.h"
 
 void Weapon::update() {
     switch(type) {
@@ -67,6 +68,7 @@ std::shared_ptr<Weapon> WeaponBuilder::build() {
         Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");
         renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
         renderer->setState("attack");
+        Audio::playSound("Swing");
     }
     if(weapon->id == 2) {
         Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");

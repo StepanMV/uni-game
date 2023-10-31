@@ -46,6 +46,9 @@ void Game::load() {
 	Game::settings->writeDouble("Runtime", "screenCoefH", GetScreenHeight() / 1080.0);
 	Renderer::loadTextures("resources/textures");
 	Audio::init("resources/audio");
+	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
+	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));
+	Audio::setSoundVolume(settings->readDouble("Sound", "soundVolume", 1.0));
 	Controls::init();
 	createUIS();
 
@@ -78,11 +81,11 @@ void Game::createUIS() {
 			.addButton("editor", ButtonData{ Rectangle{ 840, 504, 240, 48 }, "EDITOR" })
 			.addButton("settings", ButtonData{ Rectangle{ 840, 696, 240, 48 }, "SETTINGS" })
 			.addDummyRect("enemySelector", DummyRectData{ Rectangle{ 840, 600, 240, 24 }, "ENEMY SELECTOR" })
-			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS" })
+			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS;NIGHTMARE" })
 			.build()
 		},
 		{"game", UIBuilder()
-			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", 0, 400 })
+			.addSliderBar("healthBar", SliderBarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", "", 0, 400 })
 			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", 0, 100 })
 			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", 0, 100 })
 			.addSubUI("pauseMenu", pauseMenuUI, false)
@@ -117,9 +120,6 @@ void Game::update()
     Controls::update();
 	Timer::updateAll();
 	Audio::update();
-	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
-	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));
-	Audio::setSoundVolume(settings->readDouble("Sound", "soundVolume", 1.0));
 	if(level.isLoaded()) level.update();
 	checkUI();
 }
@@ -168,6 +168,7 @@ void Game::checkUI() {
 		ui = uis.at("game");
 		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		background = Background::create(1);
+		Audio::setMusic("BossRushTier2");
 		ui->update();
 	}
 	if (ui->isButtonPressed("editor")) {
@@ -226,6 +227,7 @@ void Game::checkUI() {
 			ui->update();
 			pauseMenu->setEnabled(false);
 			background = Background::create(2, 0.25);
+			Audio::setMusic("CalamityTitle");
 		}
 		if (pauseMenu->isButtonPressed("continue")) {
 			pauseMenu->setEnabled(false);

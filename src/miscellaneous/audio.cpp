@@ -38,7 +38,10 @@ void Audio::setMusic(std::string ID) {
     currentMusic->play();
 }
 
-void Audio::playSound(std::string ID) {
+void Audio::playSound(std::string ID, float volume, float pitch) {
+    if (ID.empty()) return;
+    SetSoundVolume(sounds[ID], volume);
+    SetSoundPitch(sounds[ID], pitch);
     PlaySound(sounds[ID]);
 }
 

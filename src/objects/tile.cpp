@@ -1,4 +1,5 @@
 #include "tile.h"
+#include "audio.h"
 
 unsigned Tile::getForm() const {
     return form;
@@ -38,6 +39,7 @@ void Tile::updateState() {
 void Tile::destroy() {
     id = 0;
     collider = nullptr;
+    
 }
 
 TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
@@ -47,6 +49,8 @@ TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     builder.tile->transform->pos = pos;
     builder.tile->transform->size = size;
     builder.tile->renderer = std::make_shared<TileRenderer>(builder.tile->transform);
+    builder.tile->destroySound = "Dig";
+    builder.tile->spawnSound = "Place";
     return builder;
 }
 

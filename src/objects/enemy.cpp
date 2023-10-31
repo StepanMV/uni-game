@@ -2,6 +2,7 @@
 #include "projectile.h"
 #include "ini_file.h"
 #include "bosses.h"
+#include "audio.h"
 
 unsigned Enemy::getContactDamage() const {
     return contactDamage;
@@ -24,6 +25,10 @@ void Enemy::onCollision(std::shared_ptr<Projectile> other) {
 void Enemy::readStats(std::string enemyName) {
     IniFile ini("enemies.ini");
     max_health = ini.readInt(enemyName, "maxHealth");
+    damageSound = ini.readString(enemyName, "damageSound");
+    spawnSound = ini.readString(enemyName, "spawnSound");
+    destroySound = ini.readString(enemyName, "destroySound");
+    Audio::playSound(spawnSound);
     health = max_health;
     contactDamage = ini.readInt(enemyName, "contactDamage");
     transform->size = Vec2(ini.readInt(enemyName, "width"), ini.readInt(enemyName, "height"));

@@ -68,6 +68,8 @@ protected:
     unsigned int id = 0;
 
     bool tileCollide = true, objectCollide = true;
+    std::string destroySound = "";
+    std::string spawnSound = "";
 
     std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
     std::shared_ptr<Collider> collider;

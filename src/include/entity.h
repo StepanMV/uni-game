@@ -13,6 +13,7 @@ class Entity: public Object {
         virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
         virtual void onCollision(std::shared_ptr<Player> other) = 0;
         bool getAttacking() const;
+        virtual void destroy() override;
 
     protected:
         Entity();
@@ -28,6 +29,7 @@ class Entity: public Object {
         void onBoard();
         bool facingLeft = false;
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
+        std::string damageSound = "";
         bool isAttacking = false;
         bool skipPlatform = false;
         bool isFlying = false, onGround = false;

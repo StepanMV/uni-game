@@ -27,7 +27,7 @@ public:
     static void update();
     static void unload();
     static void setMusic(std::string ID);
-    static void playSound(std::string ID);
+    static void playSound(std::string ID, float volume = 1.0f, float pitch = 1.0f);
     static void setMasterVolume(float volume);
     static void setMusicVolume(float volume);
     static void setSoundVolume(float volume);

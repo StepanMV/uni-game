@@ -53,7 +53,7 @@ class EyeOfCtulhu: public Enemy {
 
         double maxFriction;
         unsigned phase = 1;
-        const double chaseTime = 5;
+        const double chaseTime = 3;
         const double dashTime = 0.5;
         const double timeBetweenDashes = 0.75;
         const double switchTime = 5;
@@ -89,8 +89,9 @@ class EowHead: public EowSegment {
     private:
         EowHead() = default;
         const double rotateAngle = 4;
-        std::shared_ptr<Timer> chaseTimer = Timer::getInstance(5);
-        std::shared_ptr<Timer> restTimer = Timer::getInstance(5);
+        std::shared_ptr<Timer> chaseTimer = Timer::getInstance(10);
+        std::shared_ptr<Timer> restTimer = Timer::getInstance(10);
+        std::shared_ptr<Timer> moveSoundTimer = Timer::getInstance(0.25);
         static std::shared_ptr<EowHead> spawnHead(Vec2 pos, std::shared_ptr<Player> target);
         friend class EowSegment;
 };

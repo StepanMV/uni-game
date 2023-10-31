@@ -151,6 +151,8 @@ PlayerBuilder PlayerBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     builder.player->transform->size = size;
     builder.player->renderer = std::make_shared<CoolRenderer>(builder.player->transform);
     builder.player->physics = std::make_shared<Physics>();
+    builder.player->destroySound = "Player_Killed";
+    builder.player->damageSound = "Player_Hit_0";
     return builder;
 }
 
