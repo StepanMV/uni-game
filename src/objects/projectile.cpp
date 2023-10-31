@@ -2,6 +2,7 @@
 #include <cmath>
 #include "tile.h"
 #include <iostream>
+#include "audio.h"
 
 bool Projectile::isCollideable() const {
     return id != 0;
@@ -17,16 +18,13 @@ void Projectile::setDirection(Vec2 target)
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
     if(!other->isPlatform) {
+        Audio::playSound(destroySound, 0.5);
         destroy();
     }
 }
 
 void Projectile::onCollision(std::shared_ptr<Enemy> other) {
     if(fromPlayer) destroy();
-}
-
-void Projectile::onCollision(std::shared_ptr<Projectile> other) {
-    
 }
 
 void Projectile::onCollision(std::shared_ptr<Player> other) {
@@ -50,6 +48,14 @@ void Projectile::render() {
     renderer->setRotation(transform->angle);
 }
 
+bool Projectile::getFromPlayer() const {
+    return fromPlayer;
+}
+
+unsigned Projectile::getDamage() const {
+    return damage;
+}
+
 ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     ProjectileBuilder builder;
     builder.projectile = std::shared_ptr<Projectile>(new Projectile());
@@ -59,6 +65,8 @@ ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
     builder.projectile->renderer = std::make_shared<CoolRenderer>(builder.projectile->transform);
     builder.projectile->physics = std::make_shared<Physics>();
     builder.projectile->collider = std::make_shared<Collider>(builder.projectile->transform);
+    builder.projectile->destroySound = "BulletDestroy";
+    builder.projectile->spawnSound = "StarFalling";
     return builder;
 }
 
@@ -79,7 +87,8 @@ std::shared_ptr<Projectile> ProjectileBuilder::build() {
         projectile->physics->gravity = 0;
         projectile->physics->maxFallSpeed = 0;
         projectile->physics->maxFlySpeed = 100;
+        Audio::playSound(projectile->spawnSound, 0.25);
     }
-    Object::objects.push_back(projectile);
+    Object::addProjectile(projectile);
     return projectile;
 }

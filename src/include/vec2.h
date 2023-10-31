@@ -10,8 +10,12 @@ public:
     Vector2 toRaylib() const;
 
     float dot(const Vec2& v) const;
+    float length() const;
     void normalize();
     void rotate(float angle);
+
+    bool operator==(const Vec2& v) const;
+    bool operator!=(const Vec2& v) const;
 
     Vec2& operator+=(const Vec2& v);
     Vec2& operator-=(const Vec2& v);
@@ -20,6 +24,8 @@ public:
     ~Vec2() = default;
     float x = 0, y = 0;
 };
+
+float angle(const Vec2 v1, const Vec2 v2);
 
 Vec2 operator+(const Vec2& v1, const Vec2& v2);
 Vec2 operator-(const Vec2& v1, const Vec2& v2);
@@ -33,4 +39,5 @@ struct MyTransform {
     Vec2 pos = Vec2(0, 0);
     Vec2 size = Vec2(0, 0);
     float angle = 0;
+    float scale = 1;
 };

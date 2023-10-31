@@ -17,12 +17,24 @@ void Vec2::normalize() {
     y /= length;
 }
 
+float Vec2::length() const {
+    return sqrt(x * x + y * y);
+}
+
 void Vec2::rotate(float angle) {
     float rad = angle * M_PI / 180;
     float _x = x * cos(rad) - y * sin(rad);
     float _y = x * sin(rad) + y * cos(rad);
     x = _x;
     y = _y;
+}
+
+bool Vec2::operator==(const Vec2& v) const {
+    return x == v.x && y == v.y;
+}
+
+bool Vec2::operator!=(const Vec2& v) const {
+    return x != v.x || y != v.y;
 }
 
 Vec2& Vec2::operator+=(const Vec2& v) {
@@ -43,7 +55,12 @@ Vec2& Vec2::operator*=(const float& k) {
     return *this;
 }
 
-Vec2 operator+(const Vec2& v1, const Vec2& v2) {
+float angle(const Vec2 v1, const Vec2 v2) {
+    return acos(v1.dot(v2) / (v1.length() * v2.length())) * 180 / M_PI;
+}
+
+Vec2 operator+(const Vec2 &v1, const Vec2 &v2)
+{
     return Vec2(v1.x + v2.x, v1.y + v2.y);
 }
 

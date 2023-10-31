@@ -1,4 +1,5 @@
 #include "tile.h"
+#include "audio.h"
 
 unsigned Tile::getForm() const {
     return form;
@@ -31,12 +32,14 @@ void Tile::updateState() {
     if (isDown) state += 4;
     if (isLeft) state += 2;
     if (isRight) state += 1;
-    renderer->setSpritePos(state);
+    if (isPlatform) renderer->setSpritePos(state, PLATFORM_TILE);
+    else renderer->setSpritePos(state, DEFAULT_TILE);
 }
 
 void Tile::destroy() {
     id = 0;
     collider = nullptr;
+    
 }
 
 TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
@@ -46,6 +49,8 @@ TileBuilder TileBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     builder.tile->transform->pos = pos;
     builder.tile->transform->size = size;
     builder.tile->renderer = std::make_shared<TileRenderer>(builder.tile->transform);
+    builder.tile->destroySound = "Dig";
+    builder.tile->spawnSound = "Place";
     return builder;
 }
 
@@ -71,7 +76,7 @@ TileBuilder &TileBuilder::setForm(unsigned form) {
 std::shared_ptr<Tile> TileBuilder::build() {
     if (tile->id == 0) return tile;
     tile->collider = std::make_shared<Collider>(tile->transform);
-    tile->isPlatform = tile->id == 1;
+    tile->isPlatform = tile->id == 2;
     auto renderer = std::dynamic_pointer_cast<TileRenderer>(tile->renderer);
 
     renderer->loadTexture("resources/textures/Tiles_" + std::to_string(tile->id) + ".png");

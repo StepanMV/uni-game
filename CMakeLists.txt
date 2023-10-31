@@ -38,5 +38,5 @@ target_include_directories(game PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
 file(COPY resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-file(COPY extra/saves DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-file(COPY extra/settings.ini DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+file(GLOB_RECURSE extra extra/*)
+file(COPY ${extra} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

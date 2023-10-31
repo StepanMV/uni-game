@@ -10,7 +10,7 @@ std::shared_ptr<Particle> Particle::create(unsigned id, Vec2 pos, Vec2 size) {
     Vec2 textureSize = renderer->loadTexture("texture", "resources/textures/Particle_" + std::to_string(id) + ".png");
     renderer->addToState("main", "texture", TextureDataBuilder::init(TextureType::TEXTURE, "texture", textureSize).build());
     renderer->setState("main");
-    Object::objects.push_back(particle);
+    Object::addParticle(particle);
     return particle;
 }
 
@@ -20,7 +20,7 @@ std::shared_ptr<Particle> Particle::createFromObject(std::shared_ptr<Object> obj
     particle->physics = std::make_shared<Physics>();
     particle->collider = nullptr;
     particle->id = 999;
-    Object::objects.push_back(particle);
+    Object::addParticle(particle);
     return particle;
 }
 

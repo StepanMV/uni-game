@@ -24,6 +24,7 @@ public:
     static std::shared_ptr<Background> create(int id, float spf = 1);
 
     void setSpeed(Vec2 speedMultiplier);
+    virtual void changePos(Vec2 pos) = 0;
 
     Color getColor() const;
 
@@ -48,12 +49,14 @@ public:
     void setAnimSpeed(int spf);
 
     void update() override;
+    void changePos(Vec2 pos) override;
 
 protected:
     void changeFrame();
 
     std::shared_ptr<Timer> timer;
     Vec2 offset;
+    Vec2 startOffset;
     int currentFrame;
 };
 
@@ -62,7 +65,9 @@ public:
     LayeredBackground(int id);
 
     void update() override;
+    void changePos(Vec2 pos) override;
 
 protected:
     std::vector<Vec2> offsets;
+    std::vector<Vec2> startOffsets;
 };

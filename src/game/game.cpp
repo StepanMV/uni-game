@@ -7,6 +7,7 @@
 #include "controls.h"
 #include "ui.h"
 #include "particle.h"
+#include "audio.h"
 
 #include <vector>
 #include <iostream>
@@ -17,8 +18,10 @@ std::shared_ptr<Background> Game::background = nullptr;
 
 Game::Game(std::string title) {	
 	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
+	SetConfigFlags(FLAG_VSYNC_HINT);
 	InitWindow(settings->readInt("Screen", "screenWidth", 1920), settings->readInt("Screen", "screenHeight", 1080), title.c_str());
 	if(settings->readBool("Screen", "fullscreen")) ToggleFullscreen();
+
 }
 
 Game::~Game() noexcept
@@ -42,11 +45,16 @@ void Game::load() {
 	Game::settings->writeDouble("Runtime", "screenCoefW", GetScreenWidth() / 1920.0);
 	Game::settings->writeDouble("Runtime", "screenCoefH", GetScreenHeight() / 1080.0);
 	Renderer::loadTextures("resources/textures");
+	Audio::init("resources/audio");
+	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
+	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));
+	Audio::setSoundVolume(settings->readDouble("Sound", "soundVolume", 1.0));
 	Controls::init();
 	createUIS();
 
 	ui = uis.at("startMenu");
-	background = Background::create(1, 0.25);
+	background = Background::create(2, 0.25);
+	Audio::setMusic("CalamityTitle");
 }
 
 void Game::createUIS() {
@@ -73,13 +81,13 @@ void Game::createUIS() {
 			.addButton("editor", ButtonData{ Rectangle{ 840, 504, 240, 48 }, "EDITOR" })
 			.addButton("settings", ButtonData{ Rectangle{ 840, 696, 240, 48 }, "SETTINGS" })
 			.addDummyRect("enemySelector", DummyRectData{ Rectangle{ 840, 600, 240, 24 }, "ENEMY SELECTOR" })
-			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS" })
+			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS;NIGHTMARE" })
 			.build()
 		},
 		{"game", UIBuilder()
-			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", nullptr, 0, 100 })
-			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", nullptr, 0, 100 })
-			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", nullptr, 0, 100 })
+			.addSliderBar("healthBar", SliderBarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", "", 0, 400 })
+			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", 0, 100 })
+			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", 0, 100 })
 			.addSubUI("pauseMenu", pauseMenuUI, false)
 			.build()
 		},
@@ -90,12 +98,18 @@ void Game::createUIS() {
 		},
 		{"settings" , UIBuilder()
 			.addGroupBox("settings", GroupBoxData{ Rectangle{ 640, 120, 640, 600 }, "SETTINGS" })
-			.addButton("cancel", ButtonData{ Rectangle{ 640, 744, 312, 72 }, "CANCEL" })
-			.addButton("confirm", ButtonData{ Rectangle{ 968, 744, 312, 72 }, "CONFIRM (RESTART)" })
+			.addButton("cancel", ButtonData{ Rectangle{ 640, 744, 312, 72 }, "BACK" })
+			.addButton("confirm", ButtonData{ Rectangle{ 968, 744, 312, 72 }, "CONFIRM" })
 			.addDummyRect("resolution", DummyRectData{ Rectangle{ 688, 168, 192, 40 }, "RESOLUTION" })
 			.addDropdown("resolutionDropdown", DropdownData{ Rectangle{ 960, 168, 288, 40 }, "1920x1080;1600x1200;1440x1080;1600x900;1366x768;1280x960;1280x720;1024x768;800x600" })
 			.addDummyRect("fullscreen", DummyRectData{ Rectangle{ 688, 248, 192, 40 }, "FULLSCREEN" })
 			.addDropdown("fullscreenDropdown", DropdownData{ Rectangle{ 960, 248, 288, 40 }, "OFF;ON" })
+			.addDummyRect("masterVolume", DummyRectData{ Rectangle{ 688, 328, 192, 40 }, "MASTER" })
+			.addSliderBar("masterVolumeSlider", SliderBarData{ Rectangle{ 960, 328, 288, 40 }, "", "", 0, 1 })
+			.addDummyRect("musicVolume", DummyRectData{ Rectangle{ 688, 408, 192, 40 }, "MUSIC" })
+			.addSliderBar("musicVolumeSlider", SliderBarData{ Rectangle{ 960, 408, 288, 40 }, "", "", 0, 1 })
+			.addDummyRect("soundVolume", DummyRectData{ Rectangle{ 688, 488, 192, 40 }, "SOUND" })
+			.addSliderBar("soundVolumeSlider", SliderBarData{ Rectangle{ 960, 488, 288, 40 }, "", "", 0, 1 })
 			.build()
 		}
 	};
@@ -105,11 +119,12 @@ void Game::update()
 {
     Controls::update();
 	Timer::updateAll();
+	Audio::update();
 	if(level.isLoaded()) level.update();
 	checkUI();
 }
 
-Vec2 resSwitch(int dropdown) {
+Vec2 intToRes(int dropdown) {
 	switch (dropdown) {
 	case 0:
 		return { 1920, 1080 };
@@ -134,21 +149,44 @@ Vec2 resSwitch(int dropdown) {
 	}
 }
 
+int resToInt(Vec2 res) {
+	if (res == Vec2{ 1920, 1080 }) return 0;
+	if (res == Vec2{ 1600, 1200 }) return 1;
+	if (res == Vec2{ 1440, 1080 }) return 2;
+	if (res == Vec2{ 1600, 900 }) return 3;
+	if (res == Vec2{ 1366, 768 }) return 4;
+	if (res == Vec2{ 1280, 960 }) return 5;
+	if (res == Vec2{ 1280, 720 }) return 6;
+	if (res == Vec2{ 1024, 768 }) return 7;
+	if (res == Vec2{ 800, 600 }) return 8;
+	return 0;
+}
+
 void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
 		unsigned levelID = ui->getDropdownValue("bossDropdown");
-		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("game");
+		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
+		background = Background::create(1);
+		Audio::setMusic("BossRushTier2");
 		ui->update();
 	}
 	if (ui->isButtonPressed("editor")) {
 		unsigned levelID = ui->getDropdownValue("bossDropdown");
 		level.loadEditor("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("editor");
+		background = Background::create(1);
 		ui->update();
 	}
 	if (ui->isButtonPressed("settings")) {
+		Vec2 currentRes = { (float) settings->readInt("Screen", "screenWidth"), (float) settings->readInt("Screen", "screenHeight") };
 		ui = uis.at("settings");
+		ui->setSliderValue("masterVolumeSlider", Audio::getMasterVolume());
+		ui->setSliderValue("musicVolumeSlider", Audio::getMusicVolume());
+		ui->setSliderValue("soundVolumeSlider", Audio::getSoundVolume());
+		ui->setDropdownValue("fullscreenDropdown", settings->readBool("Screen", "fullscreen"));
+		ui->setDropdownValue("resolutionDropdown", resToInt(currentRes));
+
 		ui->update();
 	}
 	if (ui->isButtonPressed("exit")) {
@@ -160,16 +198,26 @@ void Game::checkUI() {
 	}
 
 	if (ui->isButtonPressed("confirm")) {
-		Vec2 res = resSwitch(ui->getDropdownValue("resolutionDropdown"));
-		std::cout << ui->getDropdownValue("resolutionDropdown") << " " << res.x << " " << res.y << std::endl;
+		Vec2 res = intToRes(ui->getDropdownValue("resolutionDropdown"));
+		if (ui->getDropdownValue("fullscreenDropdown") != Game::settings->readBool("Screen", "fullscreen")) {
+			ToggleFullscreen();
+			Game::settings->writeBool("Screen", "fullscreen", ui->getDropdownValue("fullscreenDropdown"));
+		}
 		Game::settings->writeInt("Screen", "screenWidth", res.x);
 		Game::settings->writeInt("Screen", "screenHeight", res.y);
-		Game::settings->writeBool("Screen", "fullscreen", ui->getDropdownValue("fullscreenDropdown"));
-		close = true;
+		Audio::setMasterVolume(ui->getSliderValue("masterVolumeSlider"));
+		Audio::setMusicVolume(ui->getSliderValue("musicVolumeSlider"));
+		Audio::setSoundVolume(ui->getSliderValue("soundVolumeSlider"));
+		settings->writeDouble("Sound", "masterVolume", ui->getSliderValue("masterVolumeSlider"));
+		settings->writeDouble("Sound", "musicVolume", ui->getSliderValue("musicVolumeSlider"));
+		settings->writeDouble("Sound", "soundVolume", ui->getSliderValue("soundVolumeSlider"));
 	}
 
 	if (Controls::isKeyPressed(KEY_ESCAPE)) {
-		if (auto pauseMenu = ui->getSubUI("pauseMenu")) pauseMenu->setEnabled(true);
+		if (auto pauseMenu = ui->getSubUI("pauseMenu")) {
+			Audio::playSound("Menu_Tick");
+			pauseMenu->setEnabled(true);
+		}
 	}
 	if (auto pauseMenu = ui->getSubUI("pauseMenu")) {
 		if (pauseMenu->isButtonPressed("exitMenu")) {
@@ -178,7 +226,8 @@ void Game::checkUI() {
 			ui = uis.at("startMenu");
 			ui->update();
 			pauseMenu->setEnabled(false);
-			background->setSpeed({1, 0});
+			background = Background::create(2, 0.25);
+			Audio::setMusic("CalamityTitle");
 		}
 		if (pauseMenu->isButtonPressed("continue")) {
 			pauseMenu->setEnabled(false);

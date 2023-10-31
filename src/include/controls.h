@@ -14,12 +14,14 @@ public:
     static bool isKeyPressed(int key);
     static bool isKeyDown(int key);
     static bool isKeyUp(int key);
+    static bool isKeyReleased(int key);
     static bool isKeyDoublePressed(int key);
     static double getKeyTimePressed(int key);
 
     static bool isMousePressed(int key);
     static bool isMouseDown(int key);
     static bool isMouseUp(int key);
+    static bool isMouseReleased(int key);
     static bool isMouseDoublePressed(int key);
     static double getMouseTimePressed(int key);
     static float getMouseScroll();

@@ -171,7 +171,7 @@ void CoolRenderer::render() {
         dest.x += transform->pos.x;
         dest.y += transform->pos.y;
         dest.width *= transform->size.x == 0 ? texture->width : transform->size.x;
-        dest.height *= transform->size.y == 0 ? texture->height : transform->size.y;
+        dest.height *= transform->size.y == 0 ? texture->height : (element->isFree() ? transform->size.y : transform->size.x);
         float rotation = transform->angle + element->getRotation();
         DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, rotation, WHITE);
     }
@@ -184,8 +184,20 @@ Vec2 TileRenderer::loadTexture(std::string filename) {
     return {(float) texture->width, (float) texture->height};
 }
 
-void TileRenderer::setSpritePos(unsigned short int state) {
-    spritePos = getSpritePos(state);
+void TileRenderer::setSpritePos(unsigned short int state, TileType type) {
+    switch (type) {
+    case DEFAULT_TILE:
+        spritePos = spritePosDefault(state);
+        break;
+    
+    case PLATFORM_TILE:
+        spritePos = spritePosPlatform(state);
+        break;
+
+    default:
+        spritePos = {0, 0};
+        break;
+    }
 }
 
 void TileRenderer::render() {
@@ -194,7 +206,7 @@ void TileRenderer::render() {
     DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, 0, WHITE);
 }
 
-Vec2 TileRenderer::getSpritePos(unsigned short int state) {
+Vec2 TileRenderer::spritePosDefault(unsigned short int state) {
     switch(state) {
         case 0b0000: return {(float) GetRandomValue(9, 11), 3};
         case 0b0001: return {9, (float) GetRandomValue(0, 2)};
@@ -213,5 +225,15 @@ Vec2 TileRenderer::getSpritePos(unsigned short int state) {
         case 0b1110: return {4, (float) GetRandomValue(0, 2)};
         case 0b1111: return {(float) GetRandomValue(1, 3), 1};
         default: return {(float) GetRandomValue(9, 11), 3};
+    }
+}
+
+Vec2 TileRenderer::spritePosPlatform(unsigned short int state) {
+    switch(state) {
+        case 0b0000: return {5.0f, 0.0f};
+        case 0b0001: return {2.0f, 0.0f};
+        case 0b0010: return {1.0f, 0.0f};
+        case 0b0011: return {0.0f, 0.0f};
+        default: return {5.0f, 0.0f};
     }
 }

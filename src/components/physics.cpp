@@ -1,34 +1,32 @@
 #include "physics.h"
 
-#include "cmath"
 #include "vec2.h"
+#define abs(x) (x > 0 ? x : -x)
+#define sign(x) (x > 0 ? 1 : (x < 0 ? -1 : 0))
 
-int sign(double a) {
-    if(a > 0) {
-        return 1;
-    }
-    else if(a < 0) {
-        return -1;
+double MyAbs(double value) {
+    if(value >= 0) {
+        return value;
     }
     else {
-        return 0;
+        return -value;
     }
 }
 
 Vec2 Physics::frictionVec() const {
     double fricX = -sign(speed.x) * friction;
-    if (abs(fricX) > abs(speed.x)) {
+    if (MyAbs(fricX) > MyAbs(speed.x)) {
         fricX = -speed.x;
-    } else if (abs(speed.x) > maxMoveSpeed) {
-        fricX = abs(speed.x) - maxMoveSpeed > abs(fricX) * 10 ? fricX * 10 : -sign(speed.x) * (abs(speed.x) - maxMoveSpeed);
+    } else if (MyAbs(speed.x) > maxMoveSpeed) {
+        fricX = MyAbs(speed.x) - maxMoveSpeed > MyAbs(fricX) * 10 ? fricX * 10 : -sign(speed.x) * (MyAbs(speed.x) - maxMoveSpeed);
     }
     double fricY = -sign(speed.y) * friction;
-    if (abs(fricY) > abs(speed.y)) {
+    if (MyAbs(fricY) > MyAbs(speed.y)) {
         fricY = -speed.y;
     } else if (speed.y > maxFallSpeed) {
-        fricY = speed.y - maxFallSpeed > abs(fricY) * 10 ? fricY * 10 : -(speed.y - maxFallSpeed);
+        fricY = speed.y - maxFallSpeed > MyAbs(fricY) * 10 ? fricY * 10 : -(speed.y - maxFallSpeed);
     } else if (speed.y < -maxFlySpeed) {
-        fricY = abs(speed.y) - maxFlySpeed > abs(fricY) * 10 ? fricY * 10 : -(speed.y + maxFlySpeed);
+        fricY = MyAbs(speed.y) - maxFlySpeed > MyAbs(fricY) * 10 ? fricY * 10 : -(speed.y + maxFlySpeed);
     }
     
     return Vec2(fricX, fricY);

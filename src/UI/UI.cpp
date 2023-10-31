@@ -6,6 +6,7 @@
 #include <iostream>
 #include "game.h"
 #include "particle.h"
+#include "audio.h"
 
 UIBuilder &UIBuilder::addButton(std::string ID, ButtonData buttonData, std::function<void()> callback) {
     buttonData.rect.x *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
@@ -62,6 +63,7 @@ UIBuilder &UIBuilder::addSliderBar(std::string ID, SliderBarData sliderBarData) 
     sliderBarData.rect.width *= Game::settings->readDouble("Runtime", "screenCoefW", 1);
     sliderBarData.rect.height *= Game::settings->readDouble("Runtime", "screenCoefH", 1);
     ui->sliderBars[ID] = sliderBarData;
+    ui->sliderValues[ID] = 0;
     return *this;
 }
 
@@ -126,7 +128,10 @@ void UI::update()
         if (!button.second.enabled) continue;
         prevButtonStates[button.first] = buttonStates[button.first];
         buttonStates[button.first] = GuiButton(button.second.rect, button.second.text.c_str());
-        if (buttonStates[button.first] && !prevButtonStates[button.first]) buttonCallbacks[button.first]();
+        if (buttonStates[button.first] && !prevButtonStates[button.first]) {
+            buttonCallbacks[button.first]();
+            Audio::playSound("Menu_Tick");
+        }
     }
 
     for (auto &dummyRect : dummyRects) {
@@ -141,7 +146,7 @@ void UI::update()
 
     for (auto &sliderBar : sliderBars) {
         if (!sliderBar.second.enabled) continue;
-        GuiSliderBar(sliderBar.second.rect, sliderBar.second.textL.c_str(), sliderBar.second.textR.c_str(), sliderBar.second.value, sliderBar.second.minValue, sliderBar.second.maxValue);
+        GuiSliderBar(sliderBar.second.rect, sliderBar.second.textL.c_str(), sliderBar.second.textR.c_str(), &sliderValues.at(sliderBar.first), sliderBar.second.minValue, sliderBar.second.maxValue);
     }
 
     for (auto &bar : bars) {
@@ -164,9 +169,9 @@ void UI::update()
 
     for (auto &dropdown : dropdowns) {
         if (!dropdown.second.enabled) continue;
-        if(GuiDropdownBox(dropdown.second.rect, dropdown.second.text.c_str(), &dropdown.second.active, dropdown.second.editMode)) {
-            dropdownStates[dropdown.first] = dropdown.second.active;
+        if(GuiDropdownBox(dropdown.second.rect, dropdown.second.text.c_str(), &dropdownStates[dropdown.first], dropdown.second.editMode)) {
             dropdown.second.editMode = !dropdown.second.editMode;
+            Audio::playSound("Menu_Tick");
         }
     }
 
@@ -199,6 +204,50 @@ Color UI::getBackgroundColor() const {
     return GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
 }
 
+bool UI::isInsideUI(Vec2 point) const {
+    for (auto &button : buttons) {
+        if (!button.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), button.second.rect)) return true;
+    }
+
+    for (auto &dummyRect : dummyRects) {
+        if (!dummyRect.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), dummyRect.second.rect)) return true;
+    }
+
+    for (auto &groupBox : groupBoxes) {
+        if (!groupBox.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), groupBox.second.rect)) return true;
+    }
+
+    for (auto &sliderBar : sliderBars) {
+        if (!sliderBar.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), sliderBar.second.rect)) return true;
+    }
+
+    for (auto &bar : bars) {
+        if (!bar.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), bar.second.rect)) return true;
+    }
+
+    for (auto &scrollMenu : scrollMenus) {
+        if (!scrollMenu.second->enabled) continue;
+        if (scrollMenu.second->isInside(point)) return true;
+    }
+
+    for (auto &subUI : subUIs) {
+        if (!subUI.second->enabled) continue;
+        if (subUI.second->isInsideUI(point)) return true;
+    }
+
+    for (auto &dropdown : dropdowns) {
+        if (!dropdown.second.enabled) continue;
+        if (CheckCollisionPointRec(point.toRaylib(), dropdown.second.rect)) return true;
+    }
+
+    return false;
+}
+
 bool UI::isButtonPressed(std::string ID) const
 {
     if (buttonStates.find(ID) == buttonStates.end()) return false;
@@ -215,12 +264,18 @@ bool UI::isButtonHeld(std::string ID) const {
     return buttonStates.at(ID);
 }
 
-void UI::setBarValue(std::string ID, float *value) {
+void UI::setBarPointer(std::string ID, float* value) {
     if (bars.find(ID) == bars.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
     bars.at(ID).value = value;
 }
 
-int UI::getDropdownValue(std::string ID) const {
+void UI::setDropdownValue(std::string ID, int value) {
+    if (dropdownStates.find(ID) == dropdownStates.end()) throw std::runtime_error("Dropdown with ID " + ID + " does not exist");
+    dropdownStates.at(ID) = value;
+}
+
+int UI::getDropdownValue(std::string ID) const
+{
     if (dropdownStates.find(ID) == dropdownStates.end()) throw std::runtime_error("Dropdown with ID " + ID + " does not exist");
     return dropdownStates.at(ID);
 }
@@ -230,9 +285,14 @@ int UI::getBarPercentage(std::string ID) const {
     return barPercentages.at(ID);
 }
 
+void UI::setSliderValue(std::string ID, float value) {
+    if (sliderBars.find(ID) == sliderBars.end()) throw std::runtime_error("Slider bar with ID " + ID + " does not exist");
+    sliderValues.at(ID) = value;
+}
+
 float UI::getSliderValue(std::string ID) const {
     if (sliderBars.find(ID) == sliderBars.end()) throw std::runtime_error("Slider bar with ID " + ID + " does not exist");
-    return *sliderBars.at(ID).value;
+    return sliderValues.at(ID);
 }
 
 std::shared_ptr<Particle> UI::getObject(std::string ID) const {

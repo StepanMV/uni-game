@@ -12,6 +12,7 @@ class Weapon: public Projectile {
         virtual void update() override;
         virtual void render() override;
         void setLeftSide(bool _leftSide);
+        virtual void onCollision(std::shared_ptr<Enemy> other) override {};
     private:
         Weapon() = default;
         std::shared_ptr<MyTransform> refTransform;

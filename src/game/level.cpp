@@ -1,8 +1,10 @@
 #include "level.h"
 #include "tile.h"
+#include "audio.h"
 #include "projectile.h"
 #include "controls.h"
 #include "game.h"
+#include "bosses.h"
 #include "player.h"
 #include "enemy.h"
 #include "particle.h"
@@ -64,7 +66,35 @@ void Level::loadGame(std::string filename, unsigned int levelID)
         .build();
     loaded = true;
     camera = CoolCamera::init();
+    //Game::ui->setBarPointer("healthBar", &Object::player->health);
     id = levelID;
+    switch(levelID) {
+        case 0: {
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+        case 1: {
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+        case 2: {
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+        case 3: {
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
+            break;
+        }
+    }
     this->editor = false;
 }
 
@@ -82,7 +112,7 @@ void Level::loadEditor(std::string filename, unsigned int levelID) {
 }
 
 void Level::save() {
-    Object::objects.clear();
+    Object::clearObjects();
     std::string dirpath = filepath.substr(0, filepath.rfind('/'));
     std::filesystem::create_directories(dirpath);
     std::ofstream outf(filepath);
@@ -124,10 +154,11 @@ void Level::placeTile(const Vec2 tilePos, int id) {
     unsigned idX = tilePos.x / tileSize;
     unsigned idY = tilePos.y / tileSize;
 
-    if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    if(idX < 5 || idY < 5 || idX > width - 5 || idY > height - 5) return;
     if(isTile(tilePos.toRaylib())) return;
 
     Object::tiles[idY][idX] = TileBuilder::spawn(id, {(idX + 0.5f) * tileSize, (idY + 0.5f) * tileSize}, {tileSize, tileSize}).build();
+    Audio::playSound("Place");
     setLocalPos(idY, idX, true);
 }
 
@@ -136,9 +167,11 @@ void Level::breakTile(const Vec2 tilePos) {
     unsigned idY = tilePos.y / tileSize;
 
     if(idX < 1 || idY < 1 || idX > width - 1 || idY > height - 1) return;
+    
     if(!isTile(tilePos.toRaylib())) return;
 
     Object::tiles[idY][idX]->destroy();
+    Audio::playSound("Dig");
     setLocalPos(idY, idX, false);
 }
 
@@ -149,20 +182,23 @@ void Level::render() {
 
     DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
     DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
+    DrawText(std::to_string(player->getSpeed().x).c_str(), 10, 100, 20, RED);
+    DrawText(std::to_string(player->getSpeed().y).c_str(), 10, 130, 20, RED);
 }
 
-void Level::update() {  
+void Level::update() {
+    Vec2 playerPos = player->getPos();
 
     if (editor) updateEditor();
 
+    camera->update(player->getPos());
     Object::updateAll();
     Vec2 playerSpeed = player->getSpeed();
-    Game::background->setSpeed(0.2 * playerSpeed);
-    camera->update(player->getPos());
+    Game::background->changePos({Level::width / 2 * tileSize - playerPos.x, 1000 * tileSize - playerPos.y});
 }
 
 void Level::updateEditor() {
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, camera->getCamera());
+    Vector2 mousePos = GetScreenToWorld2D(Controls::getMousePos().toRaylib(), camera->getCamera());
     Vec2 mp = {mousePos.x, mousePos.y};
     for (int i = 1; i <= 94; ++i) {
         if (Game::ui->getSubUI("tileSelector")->isButtonHeld("tile_" + std::to_string(i))) {
@@ -170,9 +206,10 @@ void Level::updateEditor() {
             break;
         }
     }
+    if (Game::ui->isInsideUI(Controls::getMousePos())) return;
     if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
     if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
-
+    camera->setZoom(Controls::getMouseScroll() * 0.1 + camera->getCamera().zoom);
 }
 
 void Level::setClimb(unsigned idY, unsigned idX) {

@@ -20,6 +20,10 @@ bool TextureData::getFlipped() const {
     return flipped;
 }
 
+bool TextureData::isFree() const {
+    return freeTransform;
+}
+
 Rectangle TextureData::getSourceRect() const {
     return Rectangle{0, 0, textureSize.x, textureSize.y};
 }
@@ -52,6 +56,7 @@ void CroppedTexture::setOffset(Vec2 offset)
 void CroppedTexture::setFlipped(bool flipped) {
     this->flipped = flipped;
     offset.x = textureSize.x - offset.x;
+    destOffset.x = -destOffset.x;
 }
 
 Rectangle CroppedTexture::getSourceRect() const {
@@ -60,7 +65,6 @@ Rectangle CroppedTexture::getSourceRect() const {
 
 Rectangle SpriteSheet::getSourceRect() const {
     Vec2 textureSize = {this->textureSize.x / sheetDimensions.x, this->textureSize.y / sheetDimensions.y};
-    //std::cout << textureSize.x << " " << textureSize.y << std::endl;
     return Rectangle{
         spritePos.x * textureSize.x + flipOffset,
         spritePos.y * textureSize.y,
@@ -82,6 +86,7 @@ void SpriteSheet::setFlipped(bool flipped) {
     if (this->flipped == flipped) return;
     this->flipped = flipped;
     spritePos.x = sheetDimensions.x - 1 - spritePos.x;
+    destOffset.x = -destOffset.x;
     flipOffset = -flipOffset + spacing.x;
 }
 
@@ -94,7 +99,8 @@ void Animation::setFlipped(bool flipped) {
     this->flipped = flipped;
     startSpritePos.x = sheetDimensions.x - 1 - startSpritePos.x;
     endSpritePos.x = sheetDimensions.x - 1 - endSpritePos.x;
-    frame = animSize - 1 - frame;
+    destOffset.x = -destOffset.x;
+    if (startSpritePos.x != endSpritePos.x) frame = -frame;
     flipOffset = -flipOffset + spacing.x;
 }
 
@@ -103,7 +109,7 @@ void Animation::update() {
     deltaTime += GetFrameTime();
     if (deltaTime >= 1.0 / fps) {
         deltaTime -= 1.0 / fps;
-        frame += flipped ? -1 : 1;
+        frame += flipped && startSpritePos.x != endSpritePos.x ? -1 : 1;
         frame %= animSize;
     }
 }
@@ -213,6 +219,11 @@ TextureDataBuilder &TextureDataBuilder::animation(Vec2 sheetDimensions, Vec2 sta
     const_cast<Vec2&>(std::dynamic_pointer_cast<Animation>(textureData)->endSpritePos) = endSpritePos;
     const_cast<float&>(std::dynamic_pointer_cast<Animation>(textureData)->fps) = fps;
     const_cast<int&>(std::dynamic_pointer_cast<Animation>(textureData)->animSize) = std::abs(startSpritePos.x - endSpritePos.x) + std::abs(startSpritePos.y - endSpritePos.y) + 1;
+    return *this;
+}
+
+TextureDataBuilder &TextureDataBuilder::keepProportions() {
+    textureData->freeTransform = false;
     return *this;
 }
 
