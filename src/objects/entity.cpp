@@ -91,7 +91,7 @@ void Entity::jump() {
 }
 
 void Entity::takeDamage(unsigned damage) {
-    Audio::playSound(damageSound);
+    if(damage) Audio::playSound(damageSound);
     health -= damage;
     if(health <= 0) {
         this->destroy();
@@ -146,7 +146,7 @@ void Entity::onCollision(std::shared_ptr<Tile> other) {
         collider->calcHitbox();
     }
     if(!other->isLeft && (physics->speed.x > 0) && (transform->pos.x + transform->size.x / 2 < other->getPos().x + other->getSize().x / 2)) {
-        if((other->canClimbLeft) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+        if(canClimb && (other->canClimbLeft) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
             transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
         }
         else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {
@@ -159,7 +159,7 @@ void Entity::onCollision(std::shared_ptr<Tile> other) {
         collider->calcHitbox();
     }
     if(!other->isRight && (physics->speed.x < 0) && (transform->pos.x - transform->size.x / 2 > other->getPos().x - other->getSize().x / 2)) {
-        if((other->canClimbRight) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
+        if(canClimb && (other->canClimbRight) && (transform->pos.y <= other->getPos().y - other->getSize().y / 2)) {
             transform->pos.y = other->getPos().y - other->getSize().y / 2 - transform->size.y / 2 + 1;
         }
         else if(other->getPos().y + other->getSize().y / 2 - transform->pos.y + transform->size.y / 2 <= 2) {

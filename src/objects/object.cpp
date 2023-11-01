@@ -199,10 +199,10 @@ void Object::renderPlayer() {
 }
 
 void Object::updateAll() {
+    updatePlayer();
     updateEnemies();
     updateProjectiles();
     updateParticles();
-    updatePlayer();
 
     for(auto& enemy : enemies) {
         if(!enemy->collider || !enemy->objectCollide) continue;

@@ -60,7 +60,7 @@ void Player::update() {
     }
     collider->calcHitbox();
     onGround = false;
-    if(weapon) weapon->setLeftSide(facingLeft);
+    //if(weapon) weapon->setLeftSide(facingLeft);
 }
 
 void Player::moveEditor() {
@@ -81,7 +81,7 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 20, WeaponType::SWORD, true).build();
+    weapon = Weapon::spawn(WeaponType::GUN, 1, transform, true);
     Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
     Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
     Vec2 spawnPos = worldMP - transform->pos;
@@ -89,10 +89,8 @@ void Player::attack() {
     spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
     spawnPos += transform->pos;
     facingLeft = worldMP.x < transform->pos.x;
-    //simple projectiles
-    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 70, true).build();
-    //"starfury"
-    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 50, true).build();
+    auto proj = Projectile::spawn(1, spawnPos, true);
+    //auto proj = Projectile::spawn(1, Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), true);
     proj->setDirection(worldMP);
 }
 
@@ -186,6 +184,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
 
     player->damageTimer = Timer::getInstance(0.5);
     player->knockbackResist = false;
+    player->canClimb = true;
 
     renderer->addToState("idle", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
         .spriteSheet({1, 4}, {0, 0}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());

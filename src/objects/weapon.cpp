@@ -2,6 +2,54 @@
 #include "game.h"
 #include "audio.h"
 
+std::shared_ptr<Weapon> Weapon::spawn(WeaponType type, unsigned id, std::shared_ptr<MyTransform> refTransform, bool fromPlayer) {
+    std::shared_ptr<Weapon> weapon = std::shared_ptr<Weapon>(new Weapon());
+    weapon->renderer = std::make_shared<CoolRenderer>(weapon->transform);
+    weapon->tileCollide = false;
+    weapon->physics = std::make_shared<Physics>();
+    weapon->collider = std::make_shared<Collider>(weapon->transform);
+
+    weapon->refTransform = refTransform;
+    weapon->id = id;
+    weapon->fromPlayer = fromPlayer;
+    weapon->type = type;
+
+    std::string strId = "";
+    if(type == WeaponType::SWORD) {
+        strId = "Sword_";
+    }
+    else if(type == WeaponType::GUN) {
+        strId = "Gun_";
+    }
+    strId += std::to_string(id);
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(weapon->renderer);
+    Vec2 textureSize = renderer->loadTexture(strId, "resources/textures/" + strId + ".png");
+    renderer->addToState("attack", strId, TextureDataBuilder::init(TextureType::TEXTURE, strId, textureSize).build());
+    renderer->setState("attack");
+
+    IniFile ini("weapons.ini");
+
+    weapon->damage = ini.readInt(strId, "damage");
+    weapon->timer = Timer::getInstance(ini.readDouble(strId, "attacktime"));
+    weapon->attackSpeed = 180 / (ini.readDouble(strId, "attacktime") * 60);
+    weapon->destroySound = ini.readString(strId, "destroySound");
+    weapon->spawnSound = ini.readString(strId, "spawnSound");
+    Audio::playSound(weapon->spawnSound);
+    weapon->physics->friction = 0;
+    weapon->physics->gravity = 0;
+    weapon->physics->maxMoveSpeed = 0;
+    weapon->physics->maxFallSpeed = weapon->physics->maxFlySpeed = weapon->physics->maxMoveSpeed;
+    weapon->transform->size = Vec2(ini.readInt(strId, "width"), ini.readInt(strId, "height"));
+
+    weapon->collider->setCenterOffset(Vec2(0, refTransform->size.y / 2 + weapon->transform->size.y / 2));
+    weapon->collider->setPos(Vec2(refTransform->pos.x, refTransform->pos.y - refTransform->size.y / 2 - weapon->transform->size.y / 2));
+    weapon->collider->calcHitbox();
+
+    Object::addProjectile(weapon);
+    return weapon;
+}
+
 void Weapon::update() {
     switch(type) {
         case WeaponType::SWORD: {
@@ -34,47 +82,4 @@ void Weapon::setLeftSide(bool _leftSide) {
         attackSpeed = -attackSpeed;
     }
     leftSide = _leftSide;
-}
-
-WeaponBuilder WeaponBuilder::spawn(std::shared_ptr<MyTransform> refTransform, Vec2 size, unsigned id) {
-    WeaponBuilder builder;
-    builder.weapon = std::shared_ptr<Weapon>(new Weapon());
-    builder.weapon->refTransform = refTransform;
-    builder.weapon->id = id;
-    builder.weapon->transform->size = size;
-    builder.weapon->renderer = std::make_shared<CoolRenderer>(builder.weapon->transform);
-    builder.weapon->tileCollide = false;
-    builder.weapon->physics = std::make_shared<Physics>();
-    builder.weapon->collider = std::make_shared<Collider>(builder.weapon->transform);
-    return builder;
-}
-
-WeaponBuilder& WeaponBuilder::extra(double _attackTime, unsigned _damage, WeaponType type, bool _fromPlayer) {
-    weapon->type = type;
-    if(weapon->type == WeaponType::SWORD) weapon->damage = _damage;
-    else weapon->damage = 0;
-    weapon->attackSpeed = 180 / (_attackTime * 60);
-    weapon->timer = Timer::getInstance(_attackTime);
-    weapon->fromPlayer = _fromPlayer;
-    return *this;
-}
-
-std::shared_ptr<Weapon> WeaponBuilder::build() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(weapon->renderer);
-    weapon->collider->setCenterOffset(Vec2(0, weapon->refTransform->size.y / 2 + weapon->transform->size.y / 2));
-    if(weapon->type == WeaponType::SWORD) weapon->transform->angle = -45;
-    if(weapon->id == 1) {
-        weapon->transform->angle = -45;
-        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");
-        renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
-        renderer->setState("attack");
-        Audio::playSound("Swing");
-    }
-    if(weapon->id == 2) {
-        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");
-        renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
-        renderer->setState("attack");
-    }
-    Object::addProjectile(weapon);
-    return weapon;
 }

@@ -28,6 +28,7 @@ class Entity: public Object {
         virtual void attack() = 0;
         void onBoard();
         bool facingLeft = false;
+        bool canClimb = false;
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         std::string damageSound = "";
         bool isAttacking = false;
