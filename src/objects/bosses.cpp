@@ -358,7 +358,7 @@ void EowSegment::update() {
     distance *= 4 * transform->size.y / 10;
     collider->setPos(nextSegment->transform->pos - distance);
     if(projTimer->isDone()) {
-        auto proj = Projectile::spawn(1, transform->pos, false);
+        auto proj = Projectile::spawn(9, transform->pos, false);
         proj->setDirection(target->getPos() - transform->pos);
         projTimer = Timer::getInstance((float) GetRandomValue(5, 20) / 10);
     }

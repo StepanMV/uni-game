@@ -25,7 +25,6 @@ class Entity: public Object {
         void falling();
         void takeDamage(unsigned damage);
         void takeKnockback(float projPosX);
-        virtual void attack() = 0;
         void onBoard();
         bool facingLeft = false;
         bool canClimb = false;

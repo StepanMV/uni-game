@@ -18,7 +18,7 @@ class Player: public Entity {
 
     private:
         void moveEditor();
-        void attack() override;
+        int weaponId = 1;
         std::shared_ptr<Weapon> weapon;
         friend class PlayerBuilder;
 };

@@ -17,24 +17,18 @@ class Projectile: public Object {
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
         virtual void onCollision(std::shared_ptr<Player> other) override;
         virtual void onCollision(std::shared_ptr<Projectile> other) override {};
-        virtual void render() override;
+        virtual void render() override {};
 
         bool getFromPlayer() const;
         unsigned getDamage() const;
 
         static std::shared_ptr<Projectile> spawn(unsigned id, Vec2 pos, bool fromPlayer, unsigned weaponDamage = 0);
 
-        void moveStraight();
-        void moveHoming();
-        void bounce();
-        void redirect();
-        void hit();
-        void falling();
-
     protected:
         Projectile() = default;
         unsigned damage;
         bool fromPlayer;
-        bool toLeft = false;
+        int hitCount = 0;
+        std::shared_ptr<Timer> hitTimer = Timer::getInstance(0.1);
         std::shared_ptr<Timer> timer;
 };

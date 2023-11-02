@@ -12,11 +12,8 @@ class Enemy: public Entity {
 
         unsigned getContactDamage() const;
     protected:
-        virtual void attack() override {};
-
         void readStats(std::string enemyName);
         Enemy() = default;
         unsigned contactDamage = 1;
-        // std::shared_ptr<MyTransform> target;
         std::shared_ptr<Player> target;
 };

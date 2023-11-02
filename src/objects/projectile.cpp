@@ -25,14 +25,18 @@ std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPl
 
     proj->damage = ini.readInt(strId, "damage") + weaponDamage;
     proj->timer = Timer::getInstance(ini.readDouble(strId, "lifetime"));
-    proj->destroySound = ini.readString(strId, "destroySound");
-    proj->spawnSound = ini.readString(strId, "spawnSound");
+    proj->hitCount = ini.readInt(strId, "hitcount");
+    // proj->destroySound = ini.readString(strId, "destroySound");
+    // proj->spawnSound = ini.readString(strId, "spawnSound");
+    proj->destroySound = "BulletDestroy";
+    proj->spawnSound = "StarFalling";
     Audio::playSound(proj->spawnSound, 0.25);
     proj->physics->friction = ini.readDouble(strId, "friction");
     proj->physics->gravity = ini.readDouble(strId, "gravity");
     proj->physics->maxMoveSpeed = ini.readDouble(strId, "maxMoveSpeed");
     proj->physics->maxFallSpeed = proj->physics->maxFlySpeed = proj->physics->maxMoveSpeed;
     proj->transform->size = Vec2(ini.readInt(strId, "width"), ini.readInt(strId, "height"));
+    proj->hitTimer->stop();
 
     Object::addProjectile(proj);
     return proj;
@@ -44,7 +48,6 @@ bool Projectile::isCollideable() const {
 
 void Projectile::setDirection(Vec2 direction) {
     physics->speed = direction;
-    collider->calcHitbox();
     physics->speed.normalize();
     physics->speed *= physics->maxMoveSpeed;
 }
@@ -57,11 +60,23 @@ void Projectile::onCollision(std::shared_ptr<Tile> other) {
 }
 
 void Projectile::onCollision(std::shared_ptr<Enemy> other) {
-    if(fromPlayer) destroy();
+    if(fromPlayer) {
+        if(hitTimer->isDone()) {
+            hitCount--;
+            hitTimer->reset();
+        }
+        if(hitCount <= 0) destroy();
+    }
 }
 
 void Projectile::onCollision(std::shared_ptr<Player> other) {
-    if(!fromPlayer) destroy();
+    if(!fromPlayer) {
+        if(hitTimer->isDone()) {
+            hitCount--;
+            hitTimer->reset();
+        }
+        if(hitCount <= 0) destroy();
+    }
 }
 
 void Projectile::setId(unsigned id) {
@@ -70,23 +85,21 @@ void Projectile::setId(unsigned id) {
 
 void Projectile::update() {
     transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
-    toLeft = physics->speed.x < 0;
     collider->calcHitbox();
     if(timer->isDone()) {
         destroy();
     }
 }  
 
-void Projectile::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setRotation(transform->angle);
-    renderer->setFlipped(toLeft);
-}
-
 bool Projectile::getFromPlayer() const {
     return fromPlayer;
 }
 
 unsigned Projectile::getDamage() const {
-    return damage;
+    if(hitTimer->isDone()) {
+        return damage;
+    }
+    else {
+        return 0;
+    }
 }

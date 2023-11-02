@@ -13,10 +13,11 @@ class Weapon: public Projectile {
         virtual void render() override;
         void setLeftSide(bool _leftSide);
         virtual void onCollision(std::shared_ptr<Enemy> other) override;
-        static std::shared_ptr<Weapon> spawn(WeaponType type, unsigned id, std::shared_ptr<MyTransform> refTransform, bool fromPlayer);
+        static std::shared_ptr<Weapon> spawn(unsigned id, std::shared_ptr<MyTransform> refTransform, bool fromPlayer);
     private:
         Weapon() = default;
         std::shared_ptr<MyTransform> refTransform;
         double attackSpeed = 0;
+        bool toLeft = false;
         WeaponType type;
 };

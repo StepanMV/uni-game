@@ -40,7 +40,7 @@ void Player::update() {
     }
     if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
         if(!isAttacking || !weapon->isAlive()) {
-            attack();
+            weapon = Weapon::spawn(weaponId, transform, true);
         }
         isAttacking = true;
     }
@@ -61,36 +61,31 @@ void Player::update() {
     collider->calcHitbox();
     onGround = false;
     if(weapon) weapon->setLeftSide(facingLeft);
+    if(Controls::isKeyPressed(KEY_E)) {
+        weaponId++;
+    }
+    if(Controls::isKeyPressed(KEY_Q)) {
+        weaponId--;
+    }
+    if(weaponId < 1) weaponId = 1;
+    if(weaponId > 12) weaponId = 12;
 }
 
 void Player::moveEditor() {
     onBoard();
     physics->accel = Vec2(0, 0);
-    if (IsKeyDown(KEY_A)) {
+    if (Controls::isKeyDown(KEY_A)) {
         physics->accel += Vec2(-1, 0);
     }
-    if (IsKeyDown(KEY_D)) {
+    if (Controls::isKeyDown(KEY_D)) {
         physics->accel += Vec2(1, 0);
     }
-    if (IsKeyDown(KEY_W)) {
+    if (Controls::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -1);
     }
-    if (IsKeyDown(KEY_S)) {
+    if (Controls::isKeyDown(KEY_S)) {
         physics->accel += Vec2(0, 1);
     }
-}
-
-void Player::attack() {
-    weapon = Weapon::spawn(WeaponType::SWORD, 1, transform, true);
-    // Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
-    // Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-    // Vec2 spawnPos = worldMP - transform->pos;
-    // spawnPos.normalize();
-    // spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
-    // spawnPos += transform->pos;
-    // auto proj = Projectile::spawn(1, spawnPos, true);
-    // //auto proj = Projectile::spawn(1, Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), true);
-    // proj->setDirection(worldMP - transform->pos);
 }
 
 void Player::render() {
