@@ -60,7 +60,7 @@ void Player::update() {
     }
     collider->calcHitbox();
     onGround = false;
-    //if(weapon) weapon->setLeftSide(facingLeft);
+    if(weapon) weapon->setLeftSide(facingLeft);
 }
 
 void Player::moveEditor() {
@@ -81,17 +81,16 @@ void Player::moveEditor() {
 }
 
 void Player::attack() {
-    weapon = Weapon::spawn(WeaponType::GUN, 1, transform, true);
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
-    Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-    Vec2 spawnPos = worldMP - transform->pos;
-    spawnPos.normalize();
-    spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
-    spawnPos += transform->pos;
-    facingLeft = worldMP.x < transform->pos.x;
-    auto proj = Projectile::spawn(1, spawnPos, true);
-    //auto proj = Projectile::spawn(1, Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), true);
-    proj->setDirection(worldMP);
+    weapon = Weapon::spawn(WeaponType::SWORD, 1, transform, true);
+    // Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
+    // Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+    // Vec2 spawnPos = worldMP - transform->pos;
+    // spawnPos.normalize();
+    // spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
+    // spawnPos += transform->pos;
+    // auto proj = Projectile::spawn(1, spawnPos, true);
+    // //auto proj = Projectile::spawn(1, Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), true);
+    // proj->setDirection(worldMP - transform->pos);
 }
 
 void Player::render() {

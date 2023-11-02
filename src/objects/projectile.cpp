@@ -5,7 +5,7 @@
 #include "ini_file.h"
 #include "audio.h"
 
-std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPlayer) {
+std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPlayer, unsigned weaponDamage) {
     std::shared_ptr<Projectile> proj = std::shared_ptr<Projectile>(new Projectile());
     proj->renderer = std::make_shared<CoolRenderer>(proj->transform);
     proj->physics = std::make_shared<Physics>();
@@ -23,7 +23,7 @@ std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPl
 
     IniFile ini("projectiles.ini");
 
-    proj->damage = ini.readInt(strId, "damage");
+    proj->damage = ini.readInt(strId, "damage") + weaponDamage;
     proj->timer = Timer::getInstance(ini.readDouble(strId, "lifetime"));
     proj->destroySound = ini.readString(strId, "destroySound");
     proj->spawnSound = ini.readString(strId, "spawnSound");
@@ -42,11 +42,11 @@ bool Projectile::isCollideable() const {
     return id != 0;
 }
 
-void Projectile::setDirection(Vec2 target) {
-    physics->speed = target - transform->pos;
+void Projectile::setDirection(Vec2 direction) {
+    physics->speed = direction;
     collider->calcHitbox();
     physics->speed.normalize();
-    physics->speed *= 10;
+    physics->speed *= physics->maxMoveSpeed;
 }
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
@@ -70,6 +70,7 @@ void Projectile::setId(unsigned id) {
 
 void Projectile::update() {
     transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
+    toLeft = physics->speed.x < 0;
     collider->calcHitbox();
     if(timer->isDone()) {
         destroy();
@@ -79,6 +80,7 @@ void Projectile::update() {
 void Projectile::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
     renderer->setRotation(transform->angle);
+    renderer->setFlipped(toLeft);
 }
 
 bool Projectile::getFromPlayer() const {

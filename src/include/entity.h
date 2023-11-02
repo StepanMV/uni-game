@@ -38,7 +38,7 @@ class Entity: public Object {
         double currentFlightTime = maxFlightTime;
         bool knockbackResist = true;
         double jumpTime = 0.2;
-        double damageTime = 0.2;
+        double damageTime = 0;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
         std::shared_ptr<Timer> damageTimer = Timer::getInstance(damageTime);

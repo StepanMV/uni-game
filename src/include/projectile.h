@@ -22,7 +22,7 @@ class Projectile: public Object {
         bool getFromPlayer() const;
         unsigned getDamage() const;
 
-        static std::shared_ptr<Projectile> spawn(unsigned id, Vec2 pos, bool fromPlayer);
+        static std::shared_ptr<Projectile> spawn(unsigned id, Vec2 pos, bool fromPlayer, unsigned weaponDamage = 0);
 
         void moveStraight();
         void moveHoming();
@@ -35,5 +35,6 @@ class Projectile: public Object {
         Projectile() = default;
         unsigned damage;
         bool fromPlayer;
+        bool toLeft = false;
         std::shared_ptr<Timer> timer;
 };

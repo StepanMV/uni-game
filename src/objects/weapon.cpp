@@ -17,9 +17,11 @@ std::shared_ptr<Weapon> Weapon::spawn(WeaponType type, unsigned id, std::shared_
     std::string strId = "";
     if(type == WeaponType::SWORD) {
         strId = "Sword_";
+        weapon->transform->angle = -45;
     }
     else if(type == WeaponType::GUN) {
         strId = "Gun_";
+        weapon->objectCollide = false;
     }
     strId += std::to_string(id);
 
@@ -46,6 +48,33 @@ std::shared_ptr<Weapon> Weapon::spawn(WeaponType type, unsigned id, std::shared_
     weapon->collider->setPos(Vec2(refTransform->pos.x, refTransform->pos.y - refTransform->size.y / 2 - weapon->transform->size.y / 2));
     weapon->collider->calcHitbox();
 
+    unsigned projDamage = ini.readInt(strId, "projdamage");
+    std::string projType = ini.readString(strId, "projtype", "Default");
+    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
+    Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
+    Vec2 spawnPos = worldMP - refTransform->pos;
+    spawnPos.normalize();
+    spawnPos *= (refTransform->size.x / 2 + weapon->getSize().y / 2);
+    spawnPos += refTransform->pos;
+    Vec2 projDirection = worldMP - refTransform->pos;
+    if(projType == "Default") {
+        auto proj = Projectile::spawn(weapon->id, spawnPos, weapon->fromPlayer, projDamage);
+        proj->setDirection(projDirection);
+    }
+    else if(projType == "Shotgun") {
+        int projCount = GetRandomValue(4, 7);
+        for(int i = 0; i < projCount; i++) {
+            auto proj = Projectile::spawn(weapon->id, spawnPos, weapon->fromPlayer, projDamage);
+            Vec2 randomProjDirection = projDirection;
+            randomProjDirection.rotate(GetRandomValue(-15, 15));
+            proj->setDirection(randomProjDirection);
+        }
+    }
+    else if(projType == "SkyFalling") {
+        auto proj = Projectile::spawn(weapon->id, Vec2(worldMP.x + GetRandomValue(-100, 100), refTransform->pos.y - GetScreenHeight()), weapon->fromPlayer, projDamage);
+        proj->setDirection(worldMP - proj->getPos());
+    }
+
     Object::addProjectile(weapon);
     return weapon;
 }
@@ -60,7 +89,7 @@ void Weapon::update() {
             Vector2 mousePos = GetMousePosition();
             mousePos = GetScreenToWorld2D(mousePos, Level::camera->getCamera());
             transform->angle = atan2(mousePos.y - refTransform->pos.y, mousePos.x - refTransform->pos.x) * 180 / M_PI + 90;
-            leftSide = transform->angle < 0 || transform->angle > 180;
+            toLeft = transform->angle < 0 || transform->angle > 180;
             break;
         }
     }
@@ -73,13 +102,17 @@ void Weapon::update() {
 
 void Weapon::render() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setFlipped(leftSide);
+    renderer->setFlipped(toLeft);
 }
 
 void Weapon::setLeftSide(bool _leftSide) {
-    if(_leftSide != leftSide) {
+    if(_leftSide != toLeft) {
         transform->angle = -transform->angle;
         attackSpeed = -attackSpeed;
     }
-    leftSide = _leftSide;
+    toLeft = _leftSide;
+}
+
+void Weapon::onCollision(std::shared_ptr<Enemy> other) {
+    if(objectCollide) objectCollide = false;
 }

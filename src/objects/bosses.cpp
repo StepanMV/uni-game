@@ -359,7 +359,7 @@ void EowSegment::update() {
     collider->setPos(nextSegment->transform->pos - distance);
     if(projTimer->isDone()) {
         auto proj = Projectile::spawn(1, transform->pos, false);
-        proj->setDirection(target->getPos());
+        proj->setDirection(target->getPos() - transform->pos);
         projTimer = Timer::getInstance((float) GetRandomValue(5, 20) / 10);
     }
     collider->calcHitbox();
