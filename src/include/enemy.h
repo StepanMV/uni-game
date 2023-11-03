@@ -10,12 +10,10 @@ public:
     virtual void update() = 0;
     virtual void render() = 0;
 
-    unsigned getContactDamage() const;
-protected:
-    virtual void readStats(std::string enemyName);
-    virtual void attack() override {};
-    Enemy() = default;
-    unsigned contactDamage = 1;
-    // std::shared_ptr<MyTransform> target;
-    std::shared_ptr<Player> target;
+        unsigned getContactDamage() const;
+    protected:
+        void readStats(std::string enemyName);
+        Enemy() = default;
+        unsigned contactDamage = 1;
+        std::shared_ptr<Player> target;
 };

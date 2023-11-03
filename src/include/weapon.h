@@ -2,7 +2,7 @@
 
 #include "projectile.h"
 
-enum WeaponType {
+enum class WeaponType {
     SWORD = 0,
     GUN
 };
@@ -12,21 +12,12 @@ class Weapon: public Projectile {
         virtual void update() override;
         virtual void render() override;
         void setLeftSide(bool _leftSide);
-        virtual void onCollision(std::shared_ptr<Enemy> other) override {};
+        virtual void onCollision(std::shared_ptr<Enemy> other) override;
+        static std::shared_ptr<Weapon> spawn(unsigned id, std::shared_ptr<MyTransform> refTransform, bool fromPlayer);
     private:
         Weapon() = default;
         std::shared_ptr<MyTransform> refTransform;
         double attackSpeed = 0;
-        bool leftSide = false;
+        bool toLeft = false;
         WeaponType type;
-        friend class WeaponBuilder;
-};
-
-class WeaponBuilder {
-    public:
-        static WeaponBuilder spawn(std::shared_ptr<MyTransform> refTransform, Vec2 size, unsigned id);
-        WeaponBuilder& extra(double _attackTime, unsigned _damage, WeaponType type, bool _fromPlayer);
-        std::shared_ptr<Weapon> build();
-    private:
-        std::shared_ptr<Weapon> weapon;
 };

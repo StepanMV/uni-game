@@ -2,18 +2,53 @@
 #include <cmath>
 #include "tile.h"
 #include <iostream>
+#include "ini_file.h"
 #include "audio.h"
+
+std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPlayer, unsigned weaponDamage) {
+    std::shared_ptr<Projectile> proj = std::shared_ptr<Projectile>(new Projectile());
+    proj->renderer = std::make_shared<CoolRenderer>(proj->transform);
+    proj->physics = std::make_shared<Physics>();
+    proj->collider = std::make_shared<Collider>(proj->transform);
+    proj->transform->pos = pos;
+    proj->id = id;
+    proj->fromPlayer = fromPlayer;
+
+    std::string strId = "Projectile_" + std::to_string(id);
+
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(proj->renderer);
+    Vec2 textureSize = renderer->loadTexture(strId, "resources/textures/" + strId + ".png");
+    renderer->addToState("fly", strId, TextureDataBuilder::init(TextureType::TEXTURE, strId, textureSize).build());
+    renderer->setState("fly");
+
+    IniFile ini("projectiles.ini");
+
+    proj->damage = ini.readInt(strId, "damage") + weaponDamage;
+    proj->timer = Timer::getInstance(ini.readDouble(strId, "lifetime"));
+    proj->hitCount = ini.readInt(strId, "hitcount");
+    // proj->destroySound = ini.readString(strId, "destroySound");
+    // proj->spawnSound = ini.readString(strId, "spawnSound");
+    proj->destroySound = "BulletDestroy";
+    Audio::playSound("StarFalling", 0.25);
+    proj->physics->friction = ini.readDouble(strId, "friction");
+    proj->physics->gravity = ini.readDouble(strId, "gravity");
+    proj->physics->maxMoveSpeed = ini.readDouble(strId, "maxMoveSpeed");
+    proj->physics->maxFallSpeed = proj->physics->maxFlySpeed = proj->physics->maxMoveSpeed;
+    proj->transform->size = Vec2(ini.readInt(strId, "width"), ini.readInt(strId, "height"));
+    proj->hitTimer->stop();
+
+    Object::addProjectile(proj);
+    return proj;
+}
 
 bool Projectile::isCollideable() const {
     return id != 0;
 }
 
-void Projectile::setDirection(Vec2 target)
-{
-    physics->speed = target - transform->pos;
-    collider->calcHitbox();
+void Projectile::setDirection(Vec2 direction) {
+    physics->speed = direction;
     physics->speed.normalize();
-    physics->speed *= 10;
+    physics->speed *= physics->maxMoveSpeed;
 }
 
 void Projectile::onCollision(std::shared_ptr<Tile> other) {
@@ -24,11 +59,23 @@ void Projectile::onCollision(std::shared_ptr<Tile> other) {
 }
 
 void Projectile::onCollision(std::shared_ptr<Enemy> other) {
-    if(fromPlayer) destroy();
+    if(fromPlayer) {
+        if(hitTimer->isDone()) {
+            hitCount--;
+            hitTimer->reset();
+        }
+        if(hitCount <= 0) destroy();
+    }
 }
 
 void Projectile::onCollision(std::shared_ptr<Player> other) {
-    if(!fromPlayer) destroy();
+    if(!fromPlayer) {
+        if(hitTimer->isDone()) {
+            hitCount--;
+            hitTimer->reset();
+        }
+        if(hitCount <= 0) destroy();
+    }
 }
 
 void Projectile::setId(unsigned id) {
@@ -43,52 +90,15 @@ void Projectile::update() {
     }
 }  
 
-void Projectile::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setRotation(transform->angle);
-}
-
 bool Projectile::getFromPlayer() const {
     return fromPlayer;
 }
 
 unsigned Projectile::getDamage() const {
-    return damage;
-}
-
-ProjectileBuilder ProjectileBuilder::spawn(Vec2 pos, Vec2 size, unsigned _id) {
-    ProjectileBuilder builder;
-    builder.projectile = std::shared_ptr<Projectile>(new Projectile());
-    builder.projectile->transform->pos = pos;
-    builder.projectile->transform->size = size;
-    builder.projectile->id = _id;
-    builder.projectile->renderer = std::make_shared<CoolRenderer>(builder.projectile->transform);
-    builder.projectile->physics = std::make_shared<Physics>();
-    builder.projectile->collider = std::make_shared<Collider>(builder.projectile->transform);
-    builder.projectile->destroySound = "BulletDestroy";
-    builder.projectile->spawnSound = "StarFalling";
-    return builder;
-}
-
-ProjectileBuilder &ProjectileBuilder::extra(double lifetime, unsigned _damage, bool _fromPlayer) {
-    projectile->timer = Timer::getInstance(lifetime);
-    projectile->damage = _damage;
-    projectile->fromPlayer = _fromPlayer;
-    return *this;
-}
-
-std::shared_ptr<Projectile> ProjectileBuilder::build() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(projectile->renderer);
-    if(projectile->id == 1) {
-        Vec2 textureSize = renderer->loadTexture("star", "resources/textures/Projectile_9.png");
-        renderer->addToState("fly", "star", TextureDataBuilder::init(TextureType::TEXTURE, "star", textureSize).build());
-        renderer->setState("fly");
-        projectile->physics->friction = 0;
-        projectile->physics->gravity = 0;
-        projectile->physics->maxFallSpeed = 0;
-        projectile->physics->maxFlySpeed = 100;
-        Audio::playSound(projectile->spawnSound, 0.25);
+    if(hitTimer->isDone()) {
+        return damage;
     }
-    Object::addProjectile(projectile);
-    return projectile;
+    else {
+        return 0;
+    }
 }

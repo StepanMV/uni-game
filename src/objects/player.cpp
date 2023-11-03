@@ -39,7 +39,7 @@ void Player::update() {
     }
     if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
         if(!isAttacking || !weapon->isAlive()) {
-            attack();
+            weapon = Weapon::spawn(weaponId, transform, true);
         }
         isAttacking = true;
     }
@@ -61,6 +61,14 @@ void Player::update() {
     onGround = false;
     onBoard();
     if(weapon) weapon->setLeftSide(facingLeft);
+    if(Controls::isKeyPressed(KEY_E)) {
+        weaponId++;
+    }
+    if(Controls::isKeyPressed(KEY_Q)) {
+        weaponId--;
+    }
+    if(weaponId < 1) weaponId = 1;
+    if(weaponId > 12) weaponId = 12;
 }
 
 void Player::readStats(std::string playerName) {
@@ -71,34 +79,18 @@ void Player::moveEditor()
 {
     onBoard();
     physics->accel = Vec2(0, 0);
-    if (IsKeyDown(KEY_A)) {
+    if (Controls::isKeyDown(KEY_A)) {
         physics->accel += Vec2(-1, 0);
     }
-    if (IsKeyDown(KEY_D)) {
+    if (Controls::isKeyDown(KEY_D)) {
         physics->accel += Vec2(1, 0);
     }
-    if (IsKeyDown(KEY_W)) {
+    if (Controls::isKeyDown(KEY_W)) {
         physics->accel += Vec2(0, -1);
     }
-    if (IsKeyDown(KEY_S)) {
+    if (Controls::isKeyDown(KEY_S)) {
         physics->accel += Vec2(0, 1);
     }
-}
-
-void Player::attack() {
-    weapon = WeaponBuilder::spawn(transform, Vec2(40, 100), 1).extra(0.3, 20, WeaponType::SWORD, true).build();
-    Vector2 mousePos = GetScreenToWorld2D({(float) GetMouseX(), (float) GetMouseY()}, Level::camera->getCamera());
-    Vec2 worldMP = Vec2(mousePos.x, mousePos.y);
-    Vec2 spawnPos = worldMP - transform->pos;
-    spawnPos.normalize();
-    spawnPos *= (transform->size.x / 2 + weapon->getSize().x);
-    spawnPos += transform->pos;
-    facingLeft = worldMP.x < transform->pos.x;
-    //simple projectiles
-    //auto proj = ProjectileBuilder::spawn(spawnPos, Vec2(22, 24), 1).extra(10, 70, true).build();
-    //"starfury"
-    auto proj = ProjectileBuilder::spawn(Vec2(worldMP.x + GetRandomValue(-100, 100), transform->pos.y - GetScreenHeight()), Vec2(22, 24), 1).extra(10, 50, true).build();
-    proj->setDirection(worldMP);
 }
 
 void Player::render() {
@@ -191,6 +183,7 @@ std::shared_ptr<Player> PlayerBuilder::build()
 
     player->damageTimer = Timer::getInstance(0.5);
     player->knockbackResist = false;
+    player->canClimb = true;
 
     renderer->addToState("idle", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
         .spriteSheet({1, 4}, {0, 0}).setExtra(false, 0, 1.75).setDestOffset({-0.125f * size.x, 0.125f * size.y}).keepProportions().build());

@@ -27,10 +27,10 @@ class Entity: public Object {
         void falling();
         void takeDamage(unsigned damage);
         void takeKnockback(float projPosX);
-        virtual void attack() = 0;
         void onBoard();
 
         bool facingLeft = false;
+        bool canClimb = false;
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         std::string damageSound = "";
         bool isAttacking = false;
@@ -40,7 +40,7 @@ class Entity: public Object {
         double currentFlightTime = maxFlightTime;
         bool knockbackResist = true;
         double jumpTime = 0.2;
-        double damageTime = 0.2;
+        double damageTime = 0;
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
         std::shared_ptr<Timer> damageTimer = Timer::getInstance(damageTime);
