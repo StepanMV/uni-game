@@ -29,12 +29,14 @@ public:
 	const static std::shared_ptr<IniFile> settings;
 	static std::shared_ptr<UI> ui;
 	static std::shared_ptr<Background> background;
+	static unsigned int unlockedLevel;
 
 private:
 	bool close = false;
 	unsigned int levelID = 0;
 	void createUIS();
 	std::shared_ptr<UI> createKitSelector();
+	std::shared_ptr<UI> createLevelSelector();
 
 	void update();
 	void checkUI();
