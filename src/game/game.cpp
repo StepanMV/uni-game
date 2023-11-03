@@ -85,10 +85,13 @@ void Game::createUIS() {
 			.build()
 		},
 		{"game", UIBuilder()
-			.addSliderBar("healthBar", SliderBarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH", "", 0, 400 })
-			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA", 0, 100 })
-			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH", 0, 100 })
+			.addBar("healthBar", BarData{ Rectangle{ 120, 960, 216, 24 }, "HEALTH" })
+			.addBar("staminaBar", BarData{ Rectangle{ 120, 1008, 216, 24 }, "STAMINA" })
+			.addBar("bossHealthBar", BarData{ Rectangle{ 720, 984, 480, 24 }, "BOSS HEALTH" })
 			.addSubUI("pauseMenu", pauseMenuUI, false)
+			.build()
+		},
+		{"kitSelection", UIBuilder()
 			.build()
 		},
 		{"editor", UIBuilder()
@@ -113,6 +116,26 @@ void Game::createUIS() {
 			.build()
 		}
 	};
+}
+
+std::shared_ptr<UI> Game::createKitSelector() {
+	std::shared_ptr<UI> ui = UIBuilder()
+		.addObject("kit1", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 1, { 480, 400 }, { 96, 144 }).build()))
+		.addObject("kit2", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 2, { 800, 400 }, { 96, 144 }).build()))
+		.addObject("kit3", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 3, { 1120, 400 }, { 96, 144 }).build()))
+		.addObject("kit4", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 4, { 1440, 400 }, { 96, 144 }).build()))
+		.addButton("kit1Button", ButtonData{ Rectangle{ 432, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(1); })
+		.addButton("kit2Button", ButtonData{ Rectangle{ 752, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(2); })
+		.addButton("kit3Button", ButtonData{ Rectangle{ 1072, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(3); })
+		.addButton("kit4Button", ButtonData{ Rectangle{ 1392, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(4); })
+		.addDummyRect("chooseLabel", DummyRectData{Rectangle{712, 200, 500, 50}, "Choose class"})
+		.addDummyRect("kit1Label", DummyRectData{Rectangle{432, 528, 96, 30}, "Warrior"})
+		.addDummyRect("kit2Label", DummyRectData{Rectangle{752, 528, 96, 30}, "Ranger"})
+		.addDummyRect("kit3Label", DummyRectData{Rectangle{1072, 528, 96, 30}, "Shooter"})
+		.addDummyRect("kit4Label", DummyRectData{Rectangle{1392, 528, 96, 30}, "Mage"})
+		.build();
+	const_cast<std::map<std::string, std::shared_ptr<UI>>&>(uis)["kitSelection"] = ui;
+	return ui;
 }
 
 void Game::update()
@@ -164,15 +187,12 @@ int resToInt(Vec2 res) {
 
 void Game::checkUI() {
 	if (ui->isButtonPressed("start")) {
-		unsigned levelID = ui->getDropdownValue("bossDropdown");
-		ui = uis.at("game");
-		level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID);
-		background = Background::create(1);
-		Audio::setMusic("BossRushTier2");
+		levelID = ui->getDropdownValue("bossDropdown");
+		ui = createKitSelector();
 		ui->update();
 	}
 	if (ui->isButtonPressed("editor")) {
-		unsigned levelID = ui->getDropdownValue("bossDropdown");
+		levelID = ui->getDropdownValue("bossDropdown");
 		level.loadEditor("saves/level" + std::to_string(levelID) + ".txt", levelID);
 		ui = uis.at("editor");
 		background = Background::create(1);
@@ -217,6 +237,10 @@ void Game::checkUI() {
 		if (auto pauseMenu = ui->getSubUI("pauseMenu")) {
 			Audio::playSound("Menu_Tick");
 			pauseMenu->setEnabled(true);
+		} else if (ui == uis.at("kitSelection")) {
+			Audio::playSound("Menu_Tick");
+			ui = uis.at("startMenu");
+			ui->update();
 		}
 	}
 	if (auto pauseMenu = ui->getSubUI("pauseMenu")) {
@@ -236,6 +260,18 @@ void Game::checkUI() {
 			close = true;
 		}
 	}
+	if (ui == uis.at("kitSelection")) {
+		for (int i = 1; i <= 4; ++i) {
+			std::string kitName = "kit" + std::to_string(i);
+			if (ui->isInsideElement(Controls::getMousePos(), kitName)) {
+				auto obj = ui->getObjectRenderer(kitName);
+				obj->setState("moving");
+			} else {
+				auto obj = ui->getObjectRenderer(kitName);
+				obj->setState("idle");
+			}
+		}
+	}
 }
 
 void Game::draw() {
@@ -249,4 +285,13 @@ void Game::draw() {
         DrawFPS(10, 10);
         
 	EndDrawing();
+}
+
+void Game::kitButtonCallback(unsigned id) {
+	unsigned kitID = (levelID + 1) * 10 + id;
+	level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID, kitID);
+	background = Background::create(1);
+	Audio::setMusic("BossRushTier2");
+	ui = uis.at("game");
+	ui->update();
 }

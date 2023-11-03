@@ -11,7 +11,6 @@ void Player::update() {
         moveEditor();
         return;
     }
-    onBoard();
     physics->accel = Vec2(0, 0);
     if(Controls::isKeyDoublePressed(KEY_D)) {
         dash(Vec2(1, 0), 30);
@@ -60,10 +59,16 @@ void Player::update() {
     }
     collider->calcHitbox();
     onGround = false;
+    onBoard();
     if(weapon) weapon->setLeftSide(facingLeft);
 }
 
-void Player::moveEditor() {
+void Player::readStats(std::string playerName) {
+    
+}
+
+void Player::moveEditor()
+{
     onBoard();
     physics->accel = Vec2(0, 0);
     if (IsKeyDown(KEY_A)) {

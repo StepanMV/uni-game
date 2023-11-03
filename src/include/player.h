@@ -17,6 +17,7 @@ class Player: public Entity {
         virtual bool isCollideable() const override;
 
     private:
+        virtual void readStats(std::string playerName);
         void moveEditor();
         void attack() override;
         std::shared_ptr<Weapon> weapon;

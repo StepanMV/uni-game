@@ -80,7 +80,7 @@ ProjectileBuilder &ProjectileBuilder::extra(double lifetime, unsigned _damage, b
 std::shared_ptr<Projectile> ProjectileBuilder::build() {
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(projectile->renderer);
     if(projectile->id == 1) {
-        Vec2 textureSize = renderer->loadTexture("star", "resources/textures/Gore_16.png");
+        Vec2 textureSize = renderer->loadTexture("star", "resources/textures/Projectile_9.png");
         renderer->addToState("fly", "star", TextureDataBuilder::init(TextureType::TEXTURE, "star", textureSize).build());
         renderer->setState("fly");
         projectile->physics->friction = 0;

@@ -17,7 +17,7 @@ public:
     Level();
     ~Level();
 
-    void loadGame(std::string filepath, unsigned int levelID);
+    void loadGame(std::string filepath, unsigned int levelID, unsigned int kitID);
     void loadEditor(std::string filepath, unsigned int levelID);
     void save();
 
@@ -40,6 +40,7 @@ public:
 private:
     void loadFile(std::string filepath);
     void updateEditor();
+    void updateGame();
 
     void setLocalPos(unsigned& idY, unsigned& idX, bool isAdded);
     void setClimb(unsigned idY, unsigned idX);
@@ -50,6 +51,7 @@ private:
     bool editor = false;
     int placedBlockId = 1;
     unsigned int id = 0;
+    unsigned totalEnemiesMaxHealth = 0;
 
     std::string filepath;
 };

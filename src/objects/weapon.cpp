@@ -65,13 +65,15 @@ std::shared_ptr<Weapon> WeaponBuilder::build() {
     if(weapon->type == WeaponType::SWORD) weapon->transform->angle = -45;
     if(weapon->id == 1) {
         weapon->transform->angle = -45;
-        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");
+        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/Sword_11.png");
+        weapon->transform->size = textureSize;
         renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
         renderer->setState("attack");
         Audio::playSound("Swing");
     }
     if(weapon->id == 2) {
-        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/sword.png");
+        Vec2 textureSize = renderer->loadTexture("sword", "resources/textures/Sword_11.png");
+        weapon->transform->size = textureSize;
         renderer->addToState("attack", "sword", TextureDataBuilder::init(TextureType::TEXTURE, "sword", textureSize).build());
         renderer->setState("attack");
     }

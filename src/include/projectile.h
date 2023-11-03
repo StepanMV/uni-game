@@ -33,6 +33,7 @@ protected:
     Projectile() = default;
 
     std::shared_ptr<Timer> timer;
+    std::string spawnSound = "";
     unsigned damage;
     bool fromPlayer;
 

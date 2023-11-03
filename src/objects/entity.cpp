@@ -68,13 +68,16 @@ void Entity::fly() {
     if(!isFlying && !onGround) {
         isFlying = true;
         flyTimer = Timer::getInstance(currentFlightTime);
-    }
+    } else {
+
+    
     if(!flyTimer->isDone()) {
+        currentFlightTime = flyTimer->getTimeLeft();
         physics->accel += Vec2(0, -1.5);
     }
     else {
         currentFlightTime = 0;
-    }
+    }}
 }
 
 void Entity::jump() {

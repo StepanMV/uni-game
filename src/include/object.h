@@ -56,6 +56,7 @@ public:
 protected:
     friend class UIBuilder;
     friend class Level;
+    friend class Particle;
     static std::vector<std::shared_ptr<Projectile>> projectiles;
     static std::vector<std::shared_ptr<Enemy>> enemies;
     static std::vector<std::shared_ptr<Particle>> particles;
@@ -69,7 +70,6 @@ protected:
 
     bool tileCollide = true, objectCollide = true;
     std::string destroySound = "";
-    std::string spawnSound = "";
 
     std::shared_ptr<MyTransform> transform = std::make_shared<MyTransform>();
     std::shared_ptr<Collider> collider;

@@ -17,6 +17,8 @@ class Entity: public Object {
 
     protected:
         Entity();
+        virtual void readStats(std::string entityName) = 0;
+
         void move(Vec2 direction);
         void jump();
         void fly();
@@ -27,6 +29,7 @@ class Entity: public Object {
         void takeKnockback(float projPosX);
         virtual void attack() = 0;
         void onBoard();
+
         bool facingLeft = false;
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
         std::string damageSound = "";

@@ -103,6 +103,10 @@ std::shared_ptr<UI> UIBuilder::build()  {
         ui->buttonStates[button.first] = false;
     }
 
+    for (auto &bar : ui->bars) {
+        ui->barValues[bar.first] = 0;
+    }
+
     return ui;
 }
 
@@ -127,7 +131,8 @@ void UI::update()
     for (auto &button : buttons) {
         if (!button.second.enabled) continue;
         prevButtonStates[button.first] = buttonStates[button.first];
-        buttonStates[button.first] = GuiButton(button.second.rect, button.second.text.c_str());
+        if (button.second.visible) buttonStates[button.first] = GuiButton(button.second.rect, button.second.text.c_str());
+        else buttonStates[button.first] = GuiLabelButton(button.second.rect, button.second.text.c_str());
         if (buttonStates[button.first] && !prevButtonStates[button.first]) {
             buttonCallbacks[button.first]();
             Audio::playSound("Menu_Tick");
@@ -151,7 +156,7 @@ void UI::update()
 
     for (auto &bar : bars) {
         if (!bar.second.enabled) continue;
-        barPercentages[bar.first] = GuiProgressBar(bar.second.rect, bar.second.text.c_str(), nullptr, bar.second.value, bar.second.minValue, bar.second.maxValue);
+        GuiProgressBar(bar.second.rect, bar.second.text.c_str(), nullptr, &barValues.at(bar.first), 0, 1);
     }
 
     for (auto &object : objects) {
@@ -248,6 +253,42 @@ bool UI::isInsideUI(Vec2 point) const {
     return false;
 }
 
+bool UI::isInsideElement(Vec2 point, std::string ID) const {
+    if (buttons.find(ID) != buttons.end()) {
+        if (!buttons.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), buttons.at(ID).rect);
+    } else if (dummyRects.find(ID) != dummyRects.end()) {
+        if (!dummyRects.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), dummyRects.at(ID).rect);
+    } else if (groupBoxes.find(ID) != groupBoxes.end()) {
+        if (!groupBoxes.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), groupBoxes.at(ID).rect);
+    } else if (sliderBars.find(ID) != sliderBars.end()) {
+        if (!sliderBars.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), sliderBars.at(ID).rect);
+    } else if (bars.find(ID) != bars.end()) {
+        if (!bars.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), bars.at(ID).rect);
+    } else if (scrollMenus.find(ID) != scrollMenus.end()) {
+        if (!scrollMenus.at(ID)->enabled) return false;
+        return scrollMenus.at(ID)->isInside(point);
+    } else if (subUIs.find(ID) != subUIs.end()) {
+        if (!subUIs.at(ID)->enabled) return false;
+        return subUIs.at(ID)->isInsideElement(point, ID);
+    } else if (dropdowns.find(ID) != dropdowns.end()) {
+        if (!dropdowns.at(ID).enabled) return false;
+        return CheckCollisionPointRec(point.toRaylib(), dropdowns.at(ID).rect);
+    } else if (objects.find(ID) != objects.end()) {
+        if (!objects.at(ID).first) return false;
+        Vec2 size = objects.at(ID).second->transform->size;
+        Vec2 pos = objects.at(ID).second->transform->pos;
+        Rectangle hitbox = {pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y};
+        return CheckCollisionPointRec(point.toRaylib(), hitbox);
+    } else {
+        throw std::runtime_error("Element with ID " + ID + " does not exist");
+    }
+}
+
 bool UI::isButtonPressed(std::string ID) const
 {
     if (buttonStates.find(ID) == buttonStates.end()) return false;
@@ -264,11 +305,6 @@ bool UI::isButtonHeld(std::string ID) const {
     return buttonStates.at(ID);
 }
 
-void UI::setBarPointer(std::string ID, float* value) {
-    if (bars.find(ID) == bars.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
-    bars.at(ID).value = value;
-}
-
 void UI::setDropdownValue(std::string ID, int value) {
     if (dropdownStates.find(ID) == dropdownStates.end()) throw std::runtime_error("Dropdown with ID " + ID + " does not exist");
     dropdownStates.at(ID) = value;
@@ -280,9 +316,14 @@ int UI::getDropdownValue(std::string ID) const
     return dropdownStates.at(ID);
 }
 
-int UI::getBarPercentage(std::string ID) const {
-    if (barPercentages.find(ID) == barPercentages.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
-    return barPercentages.at(ID);
+void UI::setBarValue(std::string ID, float value) {
+    if (bars.find(ID) == bars.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
+    barValues.at(ID) = value;
+}
+
+int UI::getBarValue(std::string ID) const {
+    if (bars.find(ID) == bars.end()) throw std::runtime_error("Bar with ID " + ID + " does not exist");
+    return barValues.at(ID);
 }
 
 void UI::setSliderValue(std::string ID, float value) {
@@ -295,8 +336,8 @@ float UI::getSliderValue(std::string ID) const {
     return sliderValues.at(ID);
 }
 
-std::shared_ptr<Particle> UI::getObject(std::string ID) const {
-    if (objects.find(ID) != objects.end()) return objects.at(ID).second;
+std::shared_ptr<CoolRenderer> UI::getObjectRenderer(std::string ID) const {
+    if (objects.find(ID) != objects.end()) return std::dynamic_pointer_cast<CoolRenderer>(objects.at(ID).second->renderer);
     return nullptr;
 }
 

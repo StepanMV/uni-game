@@ -57,16 +57,15 @@ void Level::loadFile(std::string filepath) {
     }
 }
 
-void Level::loadGame(std::string filename, unsigned int levelID)
+void Level::loadGame(std::string filename, unsigned int levelID, unsigned int kitID)
 {
     loadFile(filename);
-    player = PlayerBuilder::spawn(3, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
+    player = PlayerBuilder::spawn(kitID, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
         .setMaxSpeeds(10, 10, 8)
         .setForces(0.5, 0.75)
         .build();
     loaded = true;
     camera = CoolCamera::init();
-    //Game::ui->setBarPointer("healthBar", &Object::player->health);
     id = levelID;
     switch(levelID) {
         case 0: {
@@ -95,6 +94,7 @@ void Level::loadGame(std::string filename, unsigned int levelID)
             break;
         }
     }
+    Audio::playSound("RawrXD");
     this->editor = false;
 }
 
@@ -190,6 +190,7 @@ void Level::update() {
     Vec2 playerPos = player->getPos();
 
     if (editor) updateEditor();
+    else updateGame();
 
     camera->update(player->getPos());
     Object::updateAll();
@@ -210,6 +211,19 @@ void Level::updateEditor() {
     if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
     if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     camera->setZoom(Controls::getMouseScroll() * 0.1 + camera->getCamera().zoom);
+}
+
+void Level::updateGame() {
+    Game::ui->setBarValue("healthBar", player->health / player->max_health);
+    Game::ui->setBarValue("staminaBar", player->currentFlightTime / player->maxFlightTime);
+    float totalEnemiesHealth = 0;
+    float temp = 0;
+    for(auto& enemy : Object::enemies) {
+        totalEnemiesHealth += enemy->health;
+        temp += enemy->max_health;
+    }
+    totalEnemiesMaxHealth = temp > totalEnemiesMaxHealth ? temp : totalEnemiesMaxHealth;
+    Game::ui->setBarValue("bossHealthBar", totalEnemiesHealth / totalEnemiesMaxHealth);
 }
 
 void Level::setClimb(unsigned idY, unsigned idX) {
