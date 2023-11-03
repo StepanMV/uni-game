@@ -26,11 +26,8 @@ std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPl
     proj->damage = ini.readInt(strId, "damage") + weaponDamage;
     proj->timer = Timer::getInstance(ini.readDouble(strId, "lifetime"));
     proj->hitCount = ini.readInt(strId, "hitcount");
-    // proj->destroySound = ini.readString(strId, "destroySound");
-    // proj->spawnSound = ini.readString(strId, "spawnSound");
-    proj->destroySound = "BulletDestroy";
-    proj->spawnSound = "StarFalling";
-    Audio::playSound(proj->spawnSound, 0.25);
+    proj->destroySound = ini.readString(strId, "destroySound");
+    Audio::playSound(ini.readString(strId, "spawnSound"), 0.25);
     proj->physics->friction = ini.readDouble(strId, "friction");
     proj->physics->gravity = ini.readDouble(strId, "gravity");
     proj->physics->maxMoveSpeed = ini.readDouble(strId, "maxMoveSpeed");

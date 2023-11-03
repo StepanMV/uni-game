@@ -17,9 +17,11 @@ class Player: public Entity {
         virtual bool isCollideable() const override;
 
     private:
+        virtual void readStats(std::string playerName);
         void moveEditor();
         int weaponId = 1;
         std::shared_ptr<Weapon> weapon;
+        std::shared_ptr<Timer> runSoundTimer;
         friend class PlayerBuilder;
 };
 

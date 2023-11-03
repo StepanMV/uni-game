@@ -2,6 +2,7 @@
 
 #include "object.h"
 #include "timer.h"
+#include "audio.h"
 
 class Tile;
 class Projectile;
@@ -17,6 +18,8 @@ class Entity: public Object {
 
     protected:
         Entity();
+        virtual void readStats(std::string entityName) = 0;
+
         void move(Vec2 direction);
         void jump();
         void fly();
@@ -26,6 +29,7 @@ class Entity: public Object {
         void takeDamage(unsigned damage);
         void takeKnockback(float projPosX);
         void onBoard();
+
         bool facingLeft = false;
         bool canClimb = false;
         std::shared_ptr<Timer> platformTimer = Timer::getInstance(0.15);
@@ -41,6 +45,7 @@ class Entity: public Object {
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
         std::shared_ptr<Timer> damageTimer = Timer::getInstance(damageTime);
+        std::shared_ptr<Timer> flySoundTimer;
         unsigned max_health = 400;
         float health = max_health;
         friend class Level;

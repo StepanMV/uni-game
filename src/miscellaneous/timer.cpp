@@ -4,8 +4,9 @@
 
 std::vector<std::weak_ptr<Timer>> Timer::globalTimers;
 
-Timer::Timer(double duration, std::function<void()> callback) {
+Timer::Timer(double duration, bool autoReset, std::function<void()> callback) {
     this->duration = duration;
+    this->autoReset = autoReset;
     this->callback = callback;
     this->startTime = GetTime();
 }
@@ -16,11 +17,12 @@ void Timer::update() {
     if (currentTime - startTime > duration) {
         done = true;
         callback();
+        if (autoReset) reset();
     }
 }
 
-std::shared_ptr<Timer> Timer::getInstance(double duration, std::function<void()> callback) {
-    auto timer = std::shared_ptr<Timer>(new Timer(duration, callback));
+std::shared_ptr<Timer> Timer::getInstance(double duration, bool autoReset, std::function<void()> callback) {
+    auto timer = std::shared_ptr<Timer>(new Timer(duration, autoReset, callback));
     globalTimers.push_back(timer);
     return timer;
 }

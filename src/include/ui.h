@@ -7,10 +7,10 @@
 #include <string>
 #include <functional>
 
-struct ButtonData { Rectangle rect; std::string text; bool enabled = true; };
+struct ButtonData { Rectangle rect; std::string text; bool visible = true; bool enabled = true; };
 struct DummyRectData { Rectangle rect; std::string text; bool enabled = true; };
 struct DropdownData { Rectangle rect; std::string text; int active; bool editMode; bool enabled = true; };
-struct BarData { Rectangle rect; std::string text; float* value; float minValue; float maxValue; bool enabled = true; };
+struct BarData { Rectangle rect; std::string text; bool enabled = true; };
 struct SliderBarData { Rectangle rect; std::string textL; std::string textR; float minValue; float maxValue; bool enabled = true; };
 struct GroupBoxData { Rectangle rect; std::string text; bool enabled = true; };
 class Particle;
@@ -24,6 +24,7 @@ public:
 
     Color getBackgroundColor() const;
     bool isInsideUI(Vec2 point) const;
+    bool isInsideElement(Vec2 point, std::string ID) const;
 
     bool isButtonPressed(std::string ID) const;
     bool isButtonReleased(std::string ID) const;
@@ -31,11 +32,11 @@ public:
 
     void setDropdownValue(std::string ID, int value);
     int getDropdownValue(std::string ID) const;
-    void setBarPointer(std::string ID, float* value);
-    int getBarPercentage(std::string ID) const;
+    void setBarValue(std::string ID, float value);
+    int getBarValue(std::string ID) const;
     void setSliderValue(std::string ID, float value);
     float getSliderValue(std::string ID) const;
-    std::shared_ptr<Particle> getObject(std::string ID) const;
+    std::shared_ptr<CoolRenderer> getObjectRenderer(std::string ID) const;
     std::shared_ptr<UI> getSubUI(std::string ID) const;
 
 private:
@@ -46,7 +47,7 @@ private:
     std::unordered_map<std::string, bool> prevButtonStates;
     std::unordered_map<std::string, bool> buttonStates;
     std::unordered_map<std::string, int> dropdownStates;
-    std::unordered_map<std::string, int> barPercentages;
+    std::unordered_map<std::string, float> barValues;
     std::unordered_map<std::string, float> sliderValues;
 
 

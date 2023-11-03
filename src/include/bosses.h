@@ -88,7 +88,7 @@ class EowHead: public EowSegment {
         static std::shared_ptr<EowHead> spawn(Vec2 pos, std::shared_ptr<Player> target);
     private:
         EowHead() = default;
-        const double rotateAngle = 4;
+        const double rotateAngle = 5;
         std::shared_ptr<Timer> chaseTimer = Timer::getInstance(10);
         std::shared_ptr<Timer> restTimer = Timer::getInstance(10);
         std::shared_ptr<Timer> moveSoundTimer = Timer::getInstance(0.25);

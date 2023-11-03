@@ -12,7 +12,7 @@ void Controls::init() {
     for (int i = 0; i < 348 + 7; i++) {
         keyStatesDouble[i] = false;
         keyStatesDelayed[i] = false;
-        keyTimers[i] = Timer::getInstance(0.2, std::bind(&Controls::resetDelayed, i));
+        keyTimers[i] = Timer::getInstance(0.2, false, std::bind(&Controls::resetDelayed, i));
         keyTimes[i] = 0;
     }
 }

@@ -34,8 +34,7 @@ std::shared_ptr<Weapon> Weapon::spawn(unsigned id, std::shared_ptr<MyTransform> 
     weapon->timer = Timer::getInstance(ini.readDouble(strId, "attacktime"));
     weapon->attackSpeed = 180 / (ini.readDouble(strId, "attacktime") * 60);
     weapon->destroySound = ini.readString(strId, "destroySound");
-    weapon->spawnSound = ini.readString(strId, "spawnSound");
-    Audio::playSound(weapon->spawnSound);
+    Audio::playSound(ini.readString(strId, "spawnSound"));
     weapon->physics->friction = 0;
     weapon->physics->gravity = 0;
     weapon->physics->maxMoveSpeed = 0;

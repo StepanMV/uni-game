@@ -32,11 +32,15 @@ public:
 
 private:
 	bool close = false;
+	unsigned int levelID = 0;
 	void createUIS();
+	std::shared_ptr<UI> createKitSelector();
 
 	void update();
 	void checkUI();
 	void draw();
+
+	void kitButtonCallback(unsigned id);
 
 	Level level;
 };

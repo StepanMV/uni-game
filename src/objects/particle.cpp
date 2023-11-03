@@ -15,7 +15,7 @@ std::shared_ptr<Particle> Particle::create(unsigned id, Vec2 pos, Vec2 size) {
 }
 
 std::shared_ptr<Particle> Particle::createFromObject(std::shared_ptr<Object> object) {
-    object->destroy();
+    object->id = 0;
     auto particle = std::shared_ptr<Particle>(new Particle(*object));
     particle->physics = std::make_shared<Physics>();
     particle->collider = nullptr;
