@@ -60,10 +60,7 @@ void Level::loadFile(std::string filepath) {
 void Level::loadGame(std::string filename, unsigned int levelID, unsigned int kitID)
 {
     loadFile(filename);
-    player = PlayerBuilder::spawn(kitID, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
-        .setMaxSpeeds(10, 10, 8)
-        .setForces(0.5, 0.75)
-        .build();
+    player = Player::spawn(kitID, Vec2(500 * tileSize, (height - 100) * tileSize));
     loaded = true;
     camera = CoolCamera::init();
     id = levelID;
@@ -88,11 +85,7 @@ void Level::loadGame(std::string filename, unsigned int levelID, unsigned int ki
 
 void Level::loadEditor(std::string filename, unsigned int levelID) {
     loadFile(filename);
-
-    player = PlayerBuilder::spawn(1, Vec2(500 * tileSize, (height - 100) * tileSize), Vec2(tileSize * 2, tileSize * 3))
-        .setMaxSpeeds(10, 10, 8)
-        .setForces(0.5, 0)
-        .build();
+    player = Player::spawn(1, Vec2(500 * tileSize, (height - 100) * tileSize));
     loaded = true;
     camera = CoolCamera::init();
     id = levelID;

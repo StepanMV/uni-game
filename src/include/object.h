@@ -31,7 +31,6 @@ public:
     virtual void onCollision(std::shared_ptr<Player> other) = 0;
     virtual void onCollision(std::shared_ptr<Enemy> other) = 0;
     virtual void onCollision(std::shared_ptr<Projectile> other) = 0;
-    //virtual void onCollision(const std::shared_ptr<Object> other) = 0;
     
     bool isAlive() const;
     virtual bool isCollideable() const = 0;

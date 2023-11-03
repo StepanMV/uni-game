@@ -114,12 +114,12 @@ void Game::createUIS() {
 	};
 }
 
-std::shared_ptr<UI> Game::createKitSelector() {
+std::shared_ptr<UI> Game::createKitSelector() { 
 	std::shared_ptr<UI> ui = UIBuilder()
-		.addObject("kit1", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 1, { 480, 400 }, { 96, 144 }).build()))
-		.addObject("kit2", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 2, { 800, 400 }, { 96, 144 }).build()))
-		.addObject("kit3", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 3, { 1120, 400 }, { 96, 144 }).build()))
-		.addObject("kit4", Particle::createFromObject(PlayerBuilder::spawn((levelID + 1) * 10 + 4, { 1440, 400 }, { 96, 144 }).build()))
+		.addObject("kit1", Particle::createFromObject(Player::spawn((levelID + 1) * 10 + 1, Vec2(480, 400), Vec2(96, 144))))
+		.addObject("kit2", Particle::createFromObject(Player::spawn((levelID + 1) * 10 + 2, Vec2(800, 400), Vec2(96, 144))))
+		.addObject("kit3", Particle::createFromObject(Player::spawn((levelID + 1) * 10 + 3, Vec2(1120, 400), Vec2(96, 144))))
+		.addObject("kit4", Particle::createFromObject(Player::spawn((levelID + 1) * 10 + 4, Vec2(1440, 400), Vec2(96, 144))))
 		.addButton("kit1Button", ButtonData{ Rectangle{ 432, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(1); })
 		.addButton("kit2Button", ButtonData{ Rectangle{ 752, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(2); })
 		.addButton("kit3Button", ButtonData{ Rectangle{ 1072, 328, 96, 144 }, "", false }, [this]() { kitButtonCallback(3); })

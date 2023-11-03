@@ -16,23 +16,13 @@ class Player: public Entity {
 
         virtual bool isCollideable() const override;
 
+        static std::shared_ptr<Player> spawn(unsigned id, Vec2 pos, Vec2 size = Vec2(0, 0));
+
     private:
         virtual void readStats(std::string playerName);
         void moveEditor();
         int weaponId = 1;
         std::shared_ptr<Weapon> weapon;
         std::shared_ptr<Timer> runSoundTimer;
-        friend class PlayerBuilder;
-};
-
-class PlayerBuilder {
-public:
-    static PlayerBuilder spawn(unsigned id, Vec2 pos, Vec2 size);
-    PlayerBuilder& setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed);
-    PlayerBuilder& setForces(double friction, double gravity);
-
-    std::shared_ptr<Player> build();
-
-private:
-    std::shared_ptr<Player> player;
+        std::shared_ptr<Timer> regenerateTimer = Timer::getInstance(1, true, [this](){health++;});
 };

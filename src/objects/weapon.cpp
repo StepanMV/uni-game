@@ -40,6 +40,8 @@ std::shared_ptr<Weapon> Weapon::spawn(unsigned id, std::shared_ptr<MyTransform> 
     weapon->physics->maxMoveSpeed = 0;
     weapon->physics->maxFallSpeed = weapon->physics->maxFlySpeed = weapon->physics->maxMoveSpeed;
     weapon->transform->size = Vec2(ini.readInt(strId, "width"), ini.readInt(strId, "height"));
+    weapon->hitTimer = Timer::getInstance(0.5);
+    weapon->hitTimer->stop();
 
     weapon->collider->setCenterOffset(Vec2(0, refTransform->size.y / 4 + weapon->transform->size.y / 2));
     weapon->collider->setPos(Vec2(refTransform->pos.x, refTransform->pos.y - refTransform->size.y / 4 - weapon->transform->size.y / 2));
@@ -112,5 +114,9 @@ void Weapon::setLeftSide(bool _leftSide) {
 }
 
 void Weapon::onCollision(std::shared_ptr<Enemy> other) {
-    if(objectCollide) objectCollide = false;
+    if(fromPlayer) {
+        if(hitTimer->isDone()) {
+            hitTimer->reset();
+        }
+    }
 }
