@@ -81,12 +81,6 @@ void Level::loadGame(std::string filename, unsigned int levelID, unsigned int ki
             EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
             break;
         }
-        case 3: {
-            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            break;
-        }
     }
     Audio::playSound("RawrXD");
     this->editor = false;
@@ -218,6 +212,14 @@ void Level::updateGame() {
     }
     totalEnemiesMaxHealth = temp > totalEnemiesMaxHealth ? temp : totalEnemiesMaxHealth;
     Game::ui->setBarValue("bossHealthBar", totalEnemiesHealth / totalEnemiesMaxHealth);
+
+    if (totalEnemiesHealth == 0 && totalEnemiesMaxHealth != 0) {
+        totalEnemiesMaxHealth = 0;
+	    Audio::setMusic("CalamityTitle");
+        Game::unlockedLevel = id + 1 > Game::unlockedLevel ? id + 1 : Game::unlockedLevel;
+        Game::unlockedLevel = Game::unlockedLevel > 2 ? 2 : Game::unlockedLevel;
+        Game::settings->writeInt("Runtime", "unlockedLevel", Game::unlockedLevel);
+    }
 }
 
 void Level::setClimb(unsigned idY, unsigned idX) {

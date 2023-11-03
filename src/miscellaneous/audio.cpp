@@ -33,7 +33,7 @@ void Audio::unload() {
 }
 
 void Audio::setMusic(std::string ID) {
-    if (currentMusic) currentMusic->stop();
+    if (currentMusic) currentMusic->seek(0);
     currentMusic = musics.at(ID);
     currentMusic->play();
 }
@@ -72,8 +72,7 @@ float Audio::getSoundVolume() {
     return soundVolume;
 }
 
-CppMusic::CppMusic(std::string filepath) {
-    data = LoadMusicStream(filepath.c_str());
+CppMusic::CppMusic(std::string filepath) : data(LoadMusicStream(filepath.c_str())) {
     this->filepath = filepath;
 }
 

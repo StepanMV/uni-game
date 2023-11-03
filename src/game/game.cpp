@@ -15,6 +15,7 @@
 const std::shared_ptr<IniFile> Game::settings = std::make_shared<IniFile>("settings.ini");
 std::shared_ptr<UI> Game::ui = nullptr;
 std::shared_ptr<Background> Game::background = nullptr;
+ unsigned int Game::unlockedLevel = 0;
 
 Game::Game(std::string title) {	
 	SetTargetFPS(settings->readInt("Screen", "screenRefreshRate", 60));
@@ -49,10 +50,11 @@ void Game::load() {
 	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
 	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));
 	Audio::setSoundVolume(settings->readDouble("Sound", "soundVolume", 1.0));
+	unlockedLevel = settings->readInt("Runtime", "unlockedLevel", 0);
 	Controls::init();
 	createUIS();
 
-	ui = uis.at("startMenu");
+	ui = createLevelSelector();
 	background = Background::create(2, 0.25);
 	Audio::setMusic("CalamityTitle");
 }
@@ -76,12 +78,6 @@ void Game::createUIS() {
 		.build();
 	const_cast<std::map<std::string, std::shared_ptr<UI>>&>(uis) = {
 		{"startMenu", UIBuilder()
-			.addButton("start", ButtonData{ Rectangle{ 840, 432, 240, 48 }, "START" })
-			.addButton("exit", ButtonData{ Rectangle{ 840, 768, 240, 48 }, "EXIT" })
-			.addButton("editor", ButtonData{ Rectangle{ 840, 504, 240, 48 }, "EDITOR" })
-			.addButton("settings", ButtonData{ Rectangle{ 840, 696, 240, 48 }, "SETTINGS" })
-			.addDummyRect("enemySelector", DummyRectData{ Rectangle{ 840, 600, 240, 24 }, "ENEMY SELECTOR" })
-			.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS;NIGHTMARE" })
 			.build()
 		},
 		{"game", UIBuilder()
@@ -136,6 +132,28 @@ std::shared_ptr<UI> Game::createKitSelector() {
 		.build();
 	const_cast<std::map<std::string, std::shared_ptr<UI>>&>(uis)["kitSelection"] = ui;
 	return ui;
+}
+
+std::shared_ptr<UI> Game::createLevelSelector() {
+    auto builder = UIBuilder()
+		.addButton("start", ButtonData{ Rectangle{ 840, 432, 240, 48 }, "START" })
+		.addButton("exit", ButtonData{ Rectangle{ 840, 768, 240, 48 }, "EXIT" })
+		.addButton("editor", ButtonData{ Rectangle{ 840, 504, 240, 48 }, "EDITOR" })
+		.addButton("settings", ButtonData{ Rectangle{ 840, 696, 240, 48 }, "SETTINGS" })
+		.addDummyRect("enemySelector", DummyRectData{ Rectangle{ 840, 600, 240, 24 }, "ENEMY SELECTOR" });
+	switch (unlockedLevel) {
+	case 0:
+		builder.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME" });
+		break;
+	case 1:
+		builder.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU" });
+		break;
+	case 2:
+		builder.addDropdown("bossDropdown", DropdownData{ Rectangle{ 840, 624, 240, 48 }, "KING SLIME;EYE OF CTHULHU;EATER OF WORLDS" });
+		break;
+	}
+	const_cast<std::map<std::string, std::shared_ptr<UI>>&>(uis)["startMenu"] = builder.build();
+	return uis.at("startMenu");
 }
 
 void Game::update()
@@ -193,7 +211,7 @@ void Game::checkUI() {
 	}
 	if (ui->isButtonPressed("editor")) {
 		levelID = ui->getDropdownValue("bossDropdown");
-		level.loadEditor("saves/level" + std::to_string(levelID) + ".txt", levelID);
+		level.loadEditor("saves/level.txt", levelID);
 		ui = uis.at("editor");
 		background = Background::create(1);
 		ui->update();
@@ -213,7 +231,7 @@ void Game::checkUI() {
 		close = true;
 	}
 	if (ui->isButtonPressed("cancel")) {
-		ui = uis.at("startMenu");
+		ui = createLevelSelector();
 		ui->update();
 	}
 
@@ -239,7 +257,7 @@ void Game::checkUI() {
 			pauseMenu->setEnabled(true);
 		} else if (ui == uis.at("kitSelection")) {
 			Audio::playSound("Menu_Tick");
-			ui = uis.at("startMenu");
+			ui = createLevelSelector();
 			ui->update();
 		}
 	}
@@ -247,7 +265,7 @@ void Game::checkUI() {
 		if (pauseMenu->isButtonPressed("exitMenu")) {
 			level.save();
 			level.unload();
-			ui = uis.at("startMenu");
+			ui = createLevelSelector();
 			ui->update();
 			pauseMenu->setEnabled(false);
 			background = Background::create(2, 0.25);
