@@ -57,18 +57,28 @@ void Player::update() {
     if(platformTimer->isDone()) {
         skipPlatform = false;
     }
+
+    if (abs(physics->speed.x) > 7 && onGround) {
+        if(!runSoundTimer) runSoundTimer = Timer::getInstance(0.15, true, [](){Audio::playSound("Run");});
+    } else {
+        runSoundTimer = nullptr;
+    }
+
     collider->calcHitbox();
     onGround = false;
     onBoard();
+
     if(weapon) weapon->setLeftSide(facingLeft);
-    if(Controls::isKeyPressed(KEY_E)) {
-        weaponId++;
-    }
-    if(Controls::isKeyPressed(KEY_Q)) {
-        weaponId--;
-    }
-    if(weaponId < 1) weaponId = 1;
-    if(weaponId > 12) weaponId = 12;
+
+    // if(Controls::isKeyPressed(KEY_E)) {
+    //     weaponId++;
+    // }
+    // if(Controls::isKeyPressed(KEY_Q)) {
+    //     weaponId--;
+    // }
+
+    // if(weaponId < 1) weaponId = 1;
+    // if(weaponId > 12) weaponId = 12;
 }
 
 void Player::readStats(std::string playerName) {
@@ -144,6 +154,7 @@ PlayerBuilder PlayerBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
     PlayerBuilder builder;
     builder.player = std::make_shared<Player>();
     builder.player->id = id;
+    builder.player->weaponId = id;
     builder.player->transform->pos = pos;
     builder.player->transform->size = size;
     builder.player->renderer = std::make_shared<CoolRenderer>(builder.player->transform);

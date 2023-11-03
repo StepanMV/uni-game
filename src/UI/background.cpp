@@ -41,7 +41,7 @@ Color Background::getColor() const {
 
 AnimatedBackground::AnimatedBackground(int id, float spf) : Background(id) {
     if (bgData.at(id).type != ANIMATED) throw std::runtime_error("Wrong background type");
-    timer = Timer::getInstance(spf, [this]() { changeFrame(); });
+    timer = Timer::getInstance(spf, false, [this]() { changeFrame(); });
     for (int i = 0; i < bgData.at(id).spritesAmount; i++) {
         Vec2 textureSize = renderer.loadTexture("bg " + std::to_string(i), "resources/textures/Background_" + std::to_string(id) + "_" + std::to_string(i) + ".png");
         startOffset = {
@@ -58,7 +58,7 @@ AnimatedBackground::AnimatedBackground(int id, float spf) : Background(id) {
 }
 
 void AnimatedBackground::setAnimSpeed(int spf) {
-    timer = Timer::getInstance(spf, [this]() { changeFrame(); });
+    timer = Timer::getInstance(spf, false, [this]() { changeFrame(); });
 }
 
 void AnimatedBackground::update() {

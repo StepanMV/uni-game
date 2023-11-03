@@ -2,6 +2,7 @@
 
 #include "object.h"
 #include "timer.h"
+#include "audio.h"
 
 class Tile;
 class Projectile;
@@ -44,6 +45,7 @@ class Entity: public Object {
         std::shared_ptr<Timer> flyTimer = Timer::getInstance(currentFlightTime);
         std::shared_ptr<Timer> jumpTimer = Timer::getInstance(jumpTime);
         std::shared_ptr<Timer> damageTimer = Timer::getInstance(damageTime);
+        std::shared_ptr<Timer> flySoundTimer;
         unsigned max_health = 400;
         float health = max_health;
         friend class Level;

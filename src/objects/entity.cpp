@@ -58,6 +58,7 @@ void Entity::plane() {
 
 void Entity::falling() {
     isFlying = false;
+    flySoundTimer = nullptr;
     if(!flyTimer->isDone()) {
         currentFlightTime = flyTimer->getTimeLeft();
     }
@@ -67,17 +68,18 @@ void Entity::falling() {
 void Entity::fly() {
     if(!isFlying && !onGround) {
         isFlying = true;
+        flySoundTimer = Timer::getInstance(0.33, true, [](){Audio::playSound("Wings");});
         flyTimer = Timer::getInstance(currentFlightTime);
     } else {
-
-    
-    if(!flyTimer->isDone()) {
-        currentFlightTime = flyTimer->getTimeLeft();
-        physics->accel += Vec2(0, -1.5);
+        if(!flyTimer->isDone()) {
+            currentFlightTime = flyTimer->getTimeLeft();
+            physics->accel += Vec2(0, -1.5);
+        }
+        else {
+            flySoundTimer = nullptr;
+            currentFlightTime = 0;
+        }
     }
-    else {
-        currentFlightTime = 0;
-    }}
 }
 
 void Entity::jump() {

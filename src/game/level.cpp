@@ -67,6 +67,7 @@ void Level::loadGame(std::string filename, unsigned int levelID, unsigned int ki
     loaded = true;
     camera = CoolCamera::init();
     id = levelID;
+    totalEnemiesMaxHealth = 0;
     switch(levelID) {
         case 0: {
             KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
@@ -82,14 +83,7 @@ void Level::loadGame(std::string filename, unsigned int levelID, unsigned int ki
         }
         case 3: {
             KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
             EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            KingSlime::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EyeOfCtulhu::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
-            EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
             EowHead::spawn(Vec2(500 * tileSize, (height - 200) * tileSize), player);
             break;
         }

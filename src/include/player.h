@@ -21,6 +21,7 @@ class Player: public Entity {
         void moveEditor();
         int weaponId = 1;
         std::shared_ptr<Weapon> weapon;
+        std::shared_ptr<Timer> runSoundTimer;
         friend class PlayerBuilder;
 };
 
