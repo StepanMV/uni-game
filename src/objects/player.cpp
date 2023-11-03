@@ -6,178 +6,24 @@
 #include "enemy.h"
 #include "bosses.h"
 
-void Player::update() {
-    if (id == 1) {
-        moveEditor();
-        return;
-    }
-    physics->accel = Vec2(0, 0);
-    if(Controls::isKeyDoublePressed(KEY_D)) {
-        dash(Vec2(1, 0), 30);
-    }
-    if(Controls::isKeyDoublePressed(KEY_A)) {
-        dash(Vec2(-1, 0), 30);
-    }
-    if (IsKeyDown(KEY_A)) {
-        move(Vec2(-1.5, 0));
-    }
-    if (IsKeyDown(KEY_D)) {
-        move(Vec2(1.5, 0));
-    }
-    if(Controls::isKeyPressed(KEY_SPACE)) {
-        jump();
-    }
-    if(Controls::isKeyDown(KEY_SPACE)) {
-        fly();
-        plane();
-    }
-    else {
-        falling();
-    }
-    if(onGround) {
-        currentFlightTime = maxFlightTime;
-    }
-    if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
-        if(!isAttacking || !weapon->isAlive()) {
-            weapon = Weapon::spawn(weaponId, transform, true);
-        }
-        isAttacking = true;
-    }
-    if(Controls::isMouseReleased(MOUSE_LEFT_BUTTON)) {
-        if(!weapon->isAlive()) {
-            isAttacking = false;
-        }
-    }
-    if (Controls::isKeyDown(KEY_S)) {
-        if(onGround) {
-            skipPlatform = true;
-        }
-        platformTimer->reset();
-    }
-    if(platformTimer->isDone()) {
-        skipPlatform = false;
+std::shared_ptr<Player> Player::spawn(unsigned id, Vec2 pos, Vec2 startSize) {
+    std::shared_ptr<Player> player = std::shared_ptr<Player>(new Player());
+
+    std::string playerName = "Game";
+    if(id < 10) {
+        playerName = "Editor";
     }
 
-    if (abs(physics->speed.x) > 7 && onGround) {
-        if(!runSoundTimer) runSoundTimer = Timer::getInstance(0.15, true, [](){Audio::playSound("Run");});
-    } else {
-        runSoundTimer = nullptr;
-    }
+    player->id = id;
+    player->weaponId = id;
+    player->transform->pos = pos;
+    player->renderer = std::make_shared<CoolRenderer>(player->transform);
+    player->physics = std::make_shared<Physics>();
 
-    collider->calcHitbox();
-    onGround = false;
-    onBoard();
+    player->readStats(playerName);
 
-    if(weapon) weapon->setLeftSide(facingLeft);
+    if(startSize != Vec2(0, 0)) player->transform->size = startSize;
 
-    // if(Controls::isKeyPressed(KEY_E)) {
-    //     weaponId++;
-    // }
-    // if(Controls::isKeyPressed(KEY_Q)) {
-    //     weaponId--;
-    // }
-
-    // if(weaponId < 1) weaponId = 1;
-    // if(weaponId > 12) weaponId = 12;
-}
-
-void Player::readStats(std::string playerName) {
-    
-}
-
-void Player::moveEditor()
-{
-    onBoard();
-    physics->accel = Vec2(0, 0);
-    if (Controls::isKeyDown(KEY_A)) {
-        physics->accel += Vec2(-1, 0);
-    }
-    if (Controls::isKeyDown(KEY_D)) {
-        physics->accel += Vec2(1, 0);
-    }
-    if (Controls::isKeyDown(KEY_W)) {
-        physics->accel += Vec2(0, -1);
-    }
-    if (Controls::isKeyDown(KEY_S)) {
-        physics->accel += Vec2(0, 1);
-    }
-}
-
-void Player::render() {
-    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
-    renderer->setState("idle");
-    if (physics->speed.x > 0) {
-        facingLeft = false;
-        renderer->setState("moving");
-        renderer->setAnimationSpeed(10 * physics->speed.x / physics->maxMoveSpeed);
-    } else if (physics->speed.x < 0) {
-        facingLeft = true;
-        renderer->setState("moving");
-        renderer->setAnimationSpeed(10 * -physics->speed.x / physics->maxMoveSpeed);
-    }
-
-    if (isFlying) {
-        if (physics->speed.y < 0) {
-            renderer->setState("flying");
-        } else if (physics->speed.y > 0) {
-            renderer->setState("slowFalling");
-        }
-    } else if (!onGround) {
-        renderer->setState("inAir");
-    }
-    renderer->setFlipped(facingLeft);
-}
-
-void Player::onCollision(std::shared_ptr<Enemy> other) {
-    if(damageTimer->isDone()) {
-        takeDamage(other->getContactDamage());
-        takeKnockback(other->getPos().x);
-        damageTimer->reset();
-    }
-}
-
-void Player::onCollision(std::shared_ptr<Projectile> other) {
-    if(!other->getFromPlayer()) {
-        if(damageTimer->isDone()) {
-            takeDamage(other->getDamage());
-            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
-            damageTimer->reset();
-        }
-    }
-}
-
-bool Player::isCollideable() const {
-    return true;
-}
-
-PlayerBuilder PlayerBuilder::spawn(unsigned id, Vec2 pos, Vec2 size) {
-    PlayerBuilder builder;
-    builder.player = std::make_shared<Player>();
-    builder.player->id = id;
-    builder.player->weaponId = id;
-    builder.player->transform->pos = pos;
-    builder.player->transform->size = size;
-    builder.player->renderer = std::make_shared<CoolRenderer>(builder.player->transform);
-    builder.player->physics = std::make_shared<Physics>();
-    builder.player->destroySound = "Player_Killed";
-    builder.player->damageSound = "Player_Hit_0";
-    return builder;
-}
-
-PlayerBuilder &PlayerBuilder::setMaxSpeeds(double maxMoveSpeed, double maxFallSpeed, double maxFlySpeed) {
-    player->physics->maxMoveSpeed = maxMoveSpeed;
-    player->physics->maxFallSpeed = maxFallSpeed;
-    player->physics->maxFlySpeed = maxFlySpeed;
-    return *this;
-}
-
-PlayerBuilder &PlayerBuilder::setForces(double friction, double gravity) {
-    player->physics->friction = friction;
-    player->physics->gravity = gravity;
-    return *this;
-}
-std::shared_ptr<Player> PlayerBuilder::build()
-{
     if (player->id == 0) return player;
 
     Object::addPlayer(player);
@@ -193,7 +39,6 @@ std::shared_ptr<Player> PlayerBuilder::build()
     Vec2 wingsSize = renderer->loadTexture("wings", "resources/textures/Player_Wings_" + std::to_string(player->id) + ".png");
 
     player->damageTimer = Timer::getInstance(0.5);
-    player->knockbackResist = false;
     player->canClimb = true;
 
     renderer->addToState("idle", "wings", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "wings", wingsSize)
@@ -271,4 +116,154 @@ std::shared_ptr<Player> PlayerBuilder::build()
     renderer->setState("idle");
 
     return player;
+}
+
+void Player::update() {
+    if (id == 1) {
+        moveEditor();
+        return;
+    }
+    physics->accel = Vec2(0, 0);
+    if(Controls::isKeyDoublePressed(KEY_D)) {
+        dash(Vec2(1, 0), 30);
+    }
+    if(Controls::isKeyDoublePressed(KEY_A)) {
+        dash(Vec2(-1, 0), 30);
+    }
+    if (IsKeyDown(KEY_A)) {
+        move(Vec2(-1.5, 0));
+    }
+    if (IsKeyDown(KEY_D)) {
+        move(Vec2(1.5, 0));
+    }
+    if(Controls::isKeyPressed(KEY_SPACE)) {
+        jump();
+    }
+    if(Controls::isKeyDown(KEY_SPACE)) {
+        fly();
+        plane();
+    }
+    else {
+        falling();
+    }
+    if(onGround) {
+        currentFlightTime = maxFlightTime;
+    }
+    if(Controls::isMouseDown(MOUSE_LEFT_BUTTON)) {
+        if(!isAttacking || !weapon->isAlive()) {
+            weapon = Weapon::spawn(weaponId, transform, true);
+        }
+        isAttacking = true;
+    }
+    if(Controls::isMouseReleased(MOUSE_LEFT_BUTTON)) {
+        if(!weapon->isAlive()) {
+            isAttacking = false;
+        }
+    }
+    if (Controls::isKeyDown(KEY_S)) {
+        if(onGround) {
+            skipPlatform = true;
+        }
+        platformTimer->reset();
+    }
+    if(platformTimer->isDone()) {
+        skipPlatform = false;
+    }
+
+    if (abs(physics->speed.x) > 7 && onGround) {
+        if(!runSoundTimer) runSoundTimer = Timer::getInstance(0.15, true, [](){Audio::playSound("Run");});
+    } else {
+        runSoundTimer = nullptr;
+    }
+    if(health > max_health) {
+        health = max_health;
+    }
+
+    collider->calcHitbox();
+    onGround = false;
+    onBoard();
+
+    if(weapon) weapon->setLeftSide(facingLeft);
+}
+
+void Player::readStats(std::string playerName) {
+    IniFile ini("player.ini");
+    max_health = ini.readInt(playerName, "maxHealth");
+    damageSound = ini.readString(playerName, "damageSound");
+    destroySound = ini.readString(playerName, "destroySound");
+    health = max_health;
+    transform->size = Vec2(ini.readInt(playerName, "width"), ini.readInt(playerName, "height"));
+    tileCollide = ini.readBool(playerName, "tileCollide");
+    knockbackResist = ini.readBool(playerName, "knockbackResist");
+    physics->maxMoveSpeed = ini.readDouble(playerName, "maxMoveSpeed");
+    physics->maxFallSpeed = ini.readDouble(playerName, "maxFallSpeed");
+    physics->maxFlySpeed = ini.readDouble(playerName, "maxFlySpeed");
+    physics->friction = ini.readDouble(playerName, "friction");
+    physics->gravity = ini.readDouble(playerName, "gravity");
+    collider = std::make_shared<Collider>(transform);
+}
+
+void Player::moveEditor()
+{
+    onBoard();
+    physics->accel = Vec2(0, 0);
+    if (Controls::isKeyDown(KEY_A)) {
+        physics->accel += Vec2(-1, 0);
+    }
+    if (Controls::isKeyDown(KEY_D)) {
+        physics->accel += Vec2(1, 0);
+    }
+    if (Controls::isKeyDown(KEY_W)) {
+        physics->accel += Vec2(0, -1);
+    }
+    if (Controls::isKeyDown(KEY_S)) {
+        physics->accel += Vec2(0, 1);
+    }
+}
+
+void Player::render() {
+    auto renderer = std::dynamic_pointer_cast<CoolRenderer>(this->renderer);
+    renderer->setState("idle");
+    if (physics->speed.x > 0) {
+        facingLeft = false;
+        renderer->setState("moving");
+        renderer->setAnimationSpeed(10 * physics->speed.x / physics->maxMoveSpeed);
+    } else if (physics->speed.x < 0) {
+        facingLeft = true;
+        renderer->setState("moving");
+        renderer->setAnimationSpeed(10 * -physics->speed.x / physics->maxMoveSpeed);
+    }
+
+    if (isFlying) {
+        if (physics->speed.y < 0) {
+            renderer->setState("flying");
+        } else if (physics->speed.y > 0) {
+            renderer->setState("slowFalling");
+        }
+    } else if (!onGround) {
+        renderer->setState("inAir");
+    }
+    renderer->setFlipped(facingLeft);
+}
+
+void Player::onCollision(std::shared_ptr<Enemy> other) {
+    if(damageTimer->isDone()) {
+        takeDamage(other->getContactDamage());
+        takeKnockback(other->getPos().x);
+        damageTimer->reset();
+    }
+}
+
+void Player::onCollision(std::shared_ptr<Projectile> other) {
+    if(!other->getFromPlayer()) {
+        if(damageTimer->isDone()) {
+            takeDamage(other->getDamage());
+            if(other->getDamage()) takeKnockback(other->getCenterOffset().x + other->getPos().x);
+            damageTimer->reset();
+        }
+    }
+}
+
+bool Player::isCollideable() const {
+    return true;
 }
