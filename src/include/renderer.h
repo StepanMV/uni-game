@@ -23,7 +23,9 @@ public:
     void changeObject(std::shared_ptr<MyTransform> transform);
 
     static void loadTextures(std::string folder);
+    static void loadShaders(std::string folder);
     static void unloadTextures();
+    static void unloadShaders();
 
     virtual void render() = 0;
 
@@ -34,6 +36,7 @@ protected:
 
     static std::unordered_map<std::string, std::weak_ptr<Texture2D>> texturesVRAM;
     static std::unordered_map<std::string, Image> texturesRAM;
+    static std::unordered_map<std::string, std::shared_ptr<Shader>> shaders;
 };
 
 class TileRenderer : public Renderer {
@@ -63,8 +66,13 @@ public:
     Vec2 getTextureSize(std::string ID);
 
     void setState(std::string ID);
+    void setShader(std::string ID);
+    void setShaderLoc(std::string loc, const void* value, ShaderUniformDataType type);
+
 
     void setFlipped(bool flipped, std::string element = "");
+    void setColor(Color color, std::string element = "");
+    void setAlpha(float alpha, std::string element = "");
     void setRotation(double rotation, std::string element = "");
     void setScale(double scale, std::string element = "");
     void setDestOffset(Vec2 offset, std::string element = "");
@@ -78,6 +86,7 @@ private:
     size_t getElementIndex(std::string element);
 
     std::string currentStateID = "";
+    std::shared_ptr<Shader> shader;
 
     std::map<std::string, std::vector<std::shared_ptr<TextureData>>> objectStates;
     std::vector<std::string> stateOrder;

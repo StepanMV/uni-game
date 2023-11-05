@@ -30,13 +30,22 @@ file(GLOB_RECURSE sources src/*.cpp src/*.h)
 file(GLOB_RECURSE sources_test tests/*.cpp tests/*.h tests/*.c)
 file(GLOB_RECURSE data resources/*)
 
-add_executable(game ${sources} ${data})
+add_executable(${PROJECT_NAME} ${sources} ${data})
 add_executable(test ${sources_test})
-target_link_libraries(game raylib)
+target_link_libraries(${PROJECT_NAME} raylib)
 target_link_libraries(test raylib)
-target_include_directories(game PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
-file(COPY resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+# Copying resources
+add_custom_command(
+  OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/extra
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_SOURCE_DIR}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_SOURCE_DIR}/extra ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMENT "Copying resources"
+  DEPENDS ${data}
+)
 
-file(GLOB_RECURSE extra extra/*)
-file(COPY ${extra} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_target(copy_resources ALL DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/extra)
+add_dependencies(${PROJECT_NAME} copy_resources)

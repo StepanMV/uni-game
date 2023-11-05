@@ -19,6 +19,7 @@ public:
 
     std::string getTextureID() const;
     TextureType getType() const;
+    Color getColor() const;
     float getRotation() const;
     bool getFlipped() const;
     bool isFree() const;
@@ -27,6 +28,7 @@ public:
     virtual Rectangle getDestRect() const;
 
     void setScale(float scale);
+    void setColor(Color color);
     void setDestOffset(Vec2 destOffset);
     void setRotation(float rotation);
     virtual void setFlipped(bool flipped);
@@ -39,6 +41,7 @@ protected:
     float scale = 1;
     bool flipped = false;
     Vec2 destOffset = {0, 0};
+    Color color = WHITE;
 
     const std::string textureID;
     const Vec2 textureSize;
@@ -110,6 +113,7 @@ private:
 class TextureDataBuilder {
 public:
     static TextureDataBuilder init(TextureType type, std::string textureID, Vec2 textureSize);
+    TextureDataBuilder& setColor(Color color);
     TextureDataBuilder& setExtra(bool flipped, float rotation, float scale);
     TextureDataBuilder& setDestOffset(Vec2 destOffset);
     TextureDataBuilder& croppedTexture(Vec2 offset);

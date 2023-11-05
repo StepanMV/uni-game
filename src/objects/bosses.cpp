@@ -3,6 +3,7 @@
 #include "player.h"
 #include <iostream>
 #include "audio.h"
+#include "particle.h"
 
 std::shared_ptr<Slime> Slime::spawn(Vec2 pos, std::shared_ptr<Player> target) {
     std::shared_ptr<Slime> slime = std::shared_ptr<Slime>(new Slime());
@@ -169,6 +170,12 @@ void KingSlime::update() {
         if(!tpTimer->isDone()) {                                    // if tp is not done
             collider->setScale(currentScale * tpTimer->getTimeLeft() / tpTime);     // scale down relative to time left
             physics->accel.x = 0;                                   // stop moving
+            ParticleBuilder::init("Particle_Flame", transform->pos, 1.5, Color{0, 146, 255, 255})
+                .setAmount(30, 0.5f * transform->size)
+                .setFadeTime(0.5, 100, false)
+                .setPhys(Vec2(200, 200), 0, 0)
+                .build();
+	        //Particle::create("Particle_Flame", transform->pos, 1.5, Color{0, 146, 255, 255}, 50, 0.5f * transform->size, 0.5, Vec2(200, 200));
             return;                                                 // don't do anything else
         }
         else {                                          // if tp is done

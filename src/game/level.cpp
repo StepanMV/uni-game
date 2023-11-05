@@ -189,7 +189,10 @@ void Level::updateEditor() {
         }
     }
     if (Game::ui->isInsideUI(Controls::getMousePos())) return;
-    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) {
+        placeTile(mp, placedBlockId);
+        Particle::create("Particle_Flame", mp, 1, Color{72, 133, 238, 255}, 10, Vec2(50, 50), 1, Vec2(5, 5));
+    }
     if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     camera->setZoom(Controls::getMouseScroll() * 0.1 + camera->getCamera().zoom);
 }

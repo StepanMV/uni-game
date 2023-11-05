@@ -28,6 +28,10 @@ Game::Game(std::string title) {
 Game::~Game() noexcept
 {
 	Renderer::unloadTextures();
+	Renderer::unloadShaders();
+	Audio::unload();
+	settings->deleteSection("Runtime");
+	settings->save();
 	CloseWindow();
 }
 
@@ -46,6 +50,7 @@ void Game::load() {
 	Game::settings->writeDouble("Runtime", "screenCoefW", GetScreenWidth() / 1920.0);
 	Game::settings->writeDouble("Runtime", "screenCoefH", GetScreenHeight() / 1080.0);
 	Renderer::loadTextures("resources/textures");
+	Renderer::loadShaders("resources/shaders");
 	Audio::init("resources/audio");
 	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
 	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));

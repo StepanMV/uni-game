@@ -114,6 +114,7 @@ std::shared_ptr<Player> Player::spawn(unsigned id, Vec2 pos, Vec2 startSize) {
     renderer->addToState("slowFalling", "shoulder", TextureDataBuilder::init(TextureType::SPRITE_SHEET, "body", bodySize)
         .spriteSheet({9, 4}, {0, 1}).build());
     renderer->setState("idle");
+    renderer->setShader("my_shader");
 
     return player;
 }

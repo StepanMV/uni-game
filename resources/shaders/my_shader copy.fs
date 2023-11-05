@@ -23,8 +23,9 @@ void main()
     // vec2 myMouse = 2 * (mousePos - 0.5);
     vec2 myCoords = 2 * (fragTexCoord - 0.5); 
     vec4 texelColor0 = texture(texture0, fragTexCoord);
-    float dist = (1 - distance(fragTexCoord, myCoords)); 
-    // float ss = smoothstep(0.50, 0.75, dist);
+    // test comment asdasdqwd
+    float dist = (1 - 0.1 * distance(vec2(0, 0), myCoords)); 
+    float ss = smoothstep(0.50, 0.75, dist);
     //texelColor0 *= dist;
-    finalColor = texelColor0 * vec4(fragTexCoord, 0, 1);
+    finalColor = 0.5 * texelColor0;
 }
