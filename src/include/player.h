@@ -23,6 +23,8 @@ class Player: public Entity {
         void moveEditor();
         int weaponId = 1;
         std::shared_ptr<Weapon> weapon;
+        float max_friction;
+        std::shared_ptr<Timer> dashTimer = Timer::getInstance(0.15);
         std::shared_ptr<Timer> runSoundTimer;
         std::shared_ptr<Timer> regenerateTimer = Timer::getInstance(1, true, [this](){health++;});
 };

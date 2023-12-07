@@ -26,7 +26,9 @@ class IniFile
         /// Чтение значения типа int
         /// @param section Секция ini-файла 
         /// @param key Ключ в секции
-        /// @param def Значение по умолчанию, возвращаемое в случае отсутсвия ключа/секции
+        /// @param def Значение по умолчанию, возвращаемое в случае отсутсвия ключа/секц
+        /// Чтение значения типа unsigned int
+        unsigned long readUInt(const std::string& section, const std::string& key, unsigned def = 0);
         int readInt(const std::string& section, const std::string& key, int def = 0);
         /// Чтение значения типа double 
         double readDouble(const std::string& section, const std::string& key, double def = 0);

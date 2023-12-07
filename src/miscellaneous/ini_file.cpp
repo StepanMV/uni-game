@@ -142,7 +142,16 @@ void IniFile::save()
     }
 }
 
-int IniFile::readInt(const std::string& section, const std::string& key, int def)
+unsigned long IniFile::readUInt(const std::string &section, const std::string &key, unsigned def)
+{
+    if (!isSectionExist(section) || !isKeysExist(section, key))
+    {
+        return def;
+    }
+    return std::stoul(data[section][key]);
+}
+
+int IniFile::readInt(const std::string &section, const std::string &key, int def)
 {
     if (!isSectionExist(section) || !isKeysExist(section, key))
     {

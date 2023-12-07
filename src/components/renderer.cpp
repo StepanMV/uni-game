@@ -6,7 +6,6 @@
 
 std::unordered_map<std::string, std::weak_ptr<Texture2D>> Renderer::texturesVRAM;
 std::unordered_map<std::string, Image> Renderer::texturesRAM;
-std::unordered_map<std::string, std::shared_ptr<Shader>> Renderer::shaders;
 
 Renderer::Renderer(std::shared_ptr<MyTransform> _transform) : transform(_transform) { }
 
@@ -20,48 +19,9 @@ void Renderer::loadTextures(std::string folder)
     for (int i = 0; i < list.count; i++) texturesRAM.emplace(list.paths[i], LoadImage(list.paths[i]));
 }
 
-void Renderer::loadShaders(std::string folder) {
-    auto list = LoadDirectoryFiles(folder.c_str());
-    std::vector<std::string> vertexShaders;
-    std::vector<std::string> fragmentShaders;
-    for (int i = 0; i < list.count; i++) {
-        if(IsFileExtension(list.paths[i], ".fs")) fragmentShaders.push_back(GetFileNameWithoutExt(list.paths[i]));
-        else if (IsFileExtension(list.paths[i], ".vs")) vertexShaders.push_back(GetFileNameWithoutExt(list.paths[i]));
-    }
-    for (int i = 0; i < vertexShaders.size(); ++i) {
-        if (std::find(fragmentShaders.begin(), fragmentShaders.end(), vertexShaders[i]) != fragmentShaders.end()) {
-            fragmentShaders.erase(std::find(fragmentShaders.begin(), fragmentShaders.end(), vertexShaders[i]));
-            shaders.emplace(vertexShaders[i], std::shared_ptr<Shader>(
-                new Shader(LoadShader(
-                    TextFormat("%s/%s.vs", folder.c_str(), vertexShaders[i].c_str()),
-                    TextFormat("%s/%s.fs", folder.c_str(), vertexShaders[i].c_str())
-                )), [](Shader* shader) { UnloadShader(*shader); }));
-        } else {
-            shaders.emplace(vertexShaders[i], std::shared_ptr<Shader>(
-                new Shader(LoadShader(
-                    TextFormat("%s/%s.vs", folder.c_str(), vertexShaders[i].c_str()),
-                    0
-                )), [](Shader* shader) { UnloadShader(*shader); }));
-        }
-    }
-    for (int i = 0; i < fragmentShaders.size(); ++i) {
-        shaders.emplace(fragmentShaders[i], std::shared_ptr<Shader>(
-            new Shader(LoadShader(
-                0,
-                TextFormat("%s/%s.fs", folder.c_str(), fragmentShaders[i].c_str())
-            )), [](Shader* shader) { UnloadShader(*shader); }));
-    }
-}
-
 void Renderer::unloadTextures() {
     for (auto& texture : texturesRAM) {
         UnloadImage(texture.second);
-    }
-}
-
-void Renderer::unloadShaders() {
-    for (auto& shader : shaders) {
-        UnloadShader(*shader.second);
     }
 }
 
@@ -110,14 +70,6 @@ Vec2 CoolRenderer::getTextureSize(std::string ID) {
 
 void CoolRenderer::setState(std::string ID) {
     currentStateID = ID;
-}
-
-void CoolRenderer::setShader(std::string ID) {
-    shader = shaders[ID];
-}
-
-void CoolRenderer::setShaderLoc(std::string loc, const void *value, ShaderUniformDataType type) {
-    SetShaderValue(*shader, GetShaderLocation(*shader, loc.c_str()), value, type);
 }
 
 void CoolRenderer::setFlipped(bool flipped, std::string element) {
@@ -232,7 +184,6 @@ void CoolRenderer::render() {
         }
     }
 
-    if (shader) BeginShaderMode(*shader);
     for (auto& element : objectStates[currentStateID]) {
         std::string textureID = element->getTextureID();
         textureID = element->getFlipped() ? textureID + " flipped" : textureID;
@@ -246,7 +197,6 @@ void CoolRenderer::render() {
         float rotation = transform->angle + element->getRotation();
         DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, rotation, element->getColor());
     }
-    if (shader) EndShaderMode();
 }
 
 TileRenderer::TileRenderer(std::shared_ptr<MyTransform> transform) : Renderer(transform) { }
