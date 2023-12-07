@@ -8,7 +8,6 @@
 #include "renderer.h"
 #include <cmath>
 #include "game.h"
-#include <iostream>
 
 std::vector<std::shared_ptr<Projectile>> Object::projectiles;
 std::vector<std::shared_ptr<Enemy>> Object::enemies;
@@ -183,7 +182,7 @@ void Object::updatePlayer() {
 
     for(int i = (player->getPos().y - player->getSize().y) / Level::tileSize; i < (player->getPos().y + player->getSize().y) / Level::tileSize; i++) {
         for(int j = (player->getPos().x - player->getSize().x) / Level::tileSize; j < (player->getPos().x + player->getSize().x) / Level::tileSize; j++) {
-            if(i < 0 || j < 0 || i >= Level::height || j >= Level::width) continue;
+            if(!player->tileCollide || i < 0 || j < 0 || i >= Level::height || j >= Level::width) continue;
             if(player->collider->MyCheckCollision(std::dynamic_pointer_cast<Object>(tiles[i][j])->collider)) {
                 auto entity = std::dynamic_pointer_cast<Entity>(player);
                 entity->onCollision(tiles[i][j]);

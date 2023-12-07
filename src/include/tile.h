@@ -6,10 +6,10 @@ class Tile: public Object {
 public:
     unsigned getForm() const;
 
-    virtual void onCollision(std::shared_ptr<Tile> other) override;
-    virtual void onCollision(std::shared_ptr<Enemy> other) override;
-    virtual void onCollision(std::shared_ptr<Player> other) override;
-    virtual void onCollision(std::shared_ptr<Projectile> other) override;
+    virtual void onCollision(std::shared_ptr<Tile> other) override {};
+    virtual void onCollision(std::shared_ptr<Enemy> other) override {};
+    virtual void onCollision(std::shared_ptr<Player> other) override {};
+    virtual void onCollision(std::shared_ptr<Projectile> other) override {};
     virtual bool isCollideable() const override;
 
     void updateState();
@@ -23,7 +23,6 @@ public:
     bool isPlatform = false;
 private:
     friend class TileBuilder;
-    unsigned form = 0;
 };
 
 class TileBuilder {

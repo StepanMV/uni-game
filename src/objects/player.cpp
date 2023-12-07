@@ -30,7 +30,9 @@ std::shared_ptr<Player> Player::spawn(unsigned id, Vec2 pos, Vec2 startSize) {
 
     Object::addPlayer(player);
 
-    if (player->id == 1) return player;
+    if (player->id == 1) {
+        return player;
+    }
 
     auto renderer = std::dynamic_pointer_cast<CoolRenderer>(player->renderer);
     Vec2 size = player->transform->size;

@@ -1,26 +1,6 @@
 #include "tile.h"
 #include "audio.h"
 
-unsigned Tile::getForm() const {
-    return form;
-}
-
-void Tile::onCollision(std::shared_ptr<Tile> other) {
-
-}
-
-void Tile::onCollision(std::shared_ptr<Enemy> other) {
-    
-}
-
-void Tile::onCollision(std::shared_ptr<Projectile> other) {
-    
-}
-
-void Tile::onCollision(std::shared_ptr<Player> other) {
-    
-}
-
 bool Tile::isCollideable() const {
     return id != 0;
 }
@@ -63,11 +43,6 @@ TileBuilder &TileBuilder::setNeighbors(bool up, bool down, bool left, bool right
 TileBuilder &TileBuilder::setClimb(bool left, bool right) {
     tile->canClimbLeft = left;
     tile->canClimbRight = right;
-    return *this;
-}
-
-TileBuilder &TileBuilder::setForm(unsigned form) {
-    tile->form = form;
     return *this;
 }
 

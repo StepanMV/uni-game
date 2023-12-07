@@ -19,7 +19,7 @@ const unsigned Level::height = 1100;
 const unsigned Level::borderOffset = 50;
 std::shared_ptr<CoolCamera> Level::camera = nullptr;
 
-//posX, posY, id, form, isUp, isDown, isLeft, isRight, canClimbLeft, canClimgRight
+//posX, posY, id, isUp, isDown, isLeft, isRight, canClimbLeft, canClimbRight
 Level::Level() {
     Object::tiles.resize(height);
     for(int i = 0; i < height; i++) {
@@ -46,9 +46,8 @@ void Level::loadFile(std::string filepath) {
             if(!inf) {
                 return;
             }
-            inf >> posY >> id >> form >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
+            inf >> posY >> id >> isUp >> isDown >> isLeft >> isRight >> canClimbLeft >> canClimbRight;
             Object::tiles[posY / tileSize][posX / tileSize] = TileBuilder::spawn(id, {(float) posX, (float) posY}, {tileSize, tileSize})
-                .setForm(form)
                 .setNeighbors(isUp, isDown, isLeft, isRight)
                 .setClimb(canClimbLeft, canClimbRight)
                 .build();
@@ -106,7 +105,6 @@ void Level::save() {
                 outf << Object::tiles[i][j]->getPos().x << " " 
                 << Object::tiles[i][j]->getPos().y << " " 
                 << Object::tiles[i][j]->getId() << " " 
-                << Object::tiles[i][j]->getForm() << " "
                 << Object::tiles[i][j]->isUp << " " 
                 << Object::tiles[i][j]->isDown << " " 
                 << Object::tiles[i][j]->isLeft << " " 

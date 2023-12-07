@@ -310,7 +310,7 @@ void Game::draw() {
 
 void Game::kitButtonCallback(unsigned id) {
 	unsigned kitID = (levelID + 1) * 10 + id;
-	level.loadGame("saves/level" + std::to_string(levelID) + ".txt", levelID, kitID);
+	level.loadGame("saves/level.txt", levelID, kitID);
 	background = Background::create(1);
 	Audio::setMusic("BossRushTier2");
 	ui = uis.at("game");
