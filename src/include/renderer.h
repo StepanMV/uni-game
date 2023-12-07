@@ -64,7 +64,10 @@ public:
 
     void setState(std::string ID);
 
+
     void setFlipped(bool flipped, std::string element = "");
+    void setColor(Color color, std::string element = "");
+    void setAlpha(float alpha, std::string element = "");
     void setRotation(double rotation, std::string element = "");
     void setScale(double scale, std::string element = "");
     void setDestOffset(Vec2 offset, std::string element = "");

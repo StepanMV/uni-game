@@ -189,7 +189,9 @@ void Level::updateEditor() {
         }
     }
     if (Game::ui->isInsideUI(Controls::getMousePos())) return;
-    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) placeTile(mp, placedBlockId);
+    if (Controls::isMouseDown(MOUSE_BUTTON_LEFT)) {
+        placeTile(mp, placedBlockId);
+    }
     if (Controls::isMouseDown(MOUSE_BUTTON_RIGHT)) breakTile(mp);
     camera->setZoom(Controls::getMouseScroll() * 0.1 + camera->getCamera().zoom);
 }

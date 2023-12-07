@@ -12,6 +12,10 @@ TextureType TextureData::getType() const {
     return type;
 }
 
+Color TextureData::getColor() const {
+    return color;
+}
+
 float TextureData::getRotation() const {
     return rotation;
 }
@@ -34,6 +38,10 @@ Rectangle TextureData::getDestRect() const {
 
 void TextureData::setScale(float scale) {
     this->scale = scale;
+}
+
+void TextureData::setColor(Color color) {
+    this->color = color;
 }
 
 void TextureData::setDestOffset(Vec2 destOffset) {
@@ -159,6 +167,11 @@ TextureDataBuilder TextureDataBuilder::init(TextureType type, std::string textur
     const_cast<std::string&>(builder.textureData->textureID) = textureID;
     const_cast<Vec2&>(builder.textureData->textureSize) = textureSize;
     return builder;
+}
+
+TextureDataBuilder &TextureDataBuilder::setColor(Color color) {
+    textureData->color = color;
+    return *this;
 }
 
 TextureDataBuilder &TextureDataBuilder::setExtra(bool flipped, float rotation, float scale) {

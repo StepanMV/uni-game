@@ -4,6 +4,7 @@
 #include <iostream>
 #include "ini_file.h"
 #include "audio.h"
+#include "particle.h"
 
 std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPlayer, unsigned weaponDamage) {
     std::shared_ptr<Projectile> proj = std::shared_ptr<Projectile>(new Projectile());
@@ -23,6 +24,7 @@ std::shared_ptr<Projectile> Projectile::spawn(unsigned id, Vec2 pos, bool fromPl
 
     IniFile ini("projectiles.ini");
 
+    proj->particles = ini.readUInt(strId, "particles");
     proj->damage = ini.readInt(strId, "damage") + weaponDamage;
     proj->timer = Timer::getInstance(ini.readDouble(strId, "lifetime"));
     proj->hitCount = ini.readInt(strId, "hitcount");
@@ -81,6 +83,13 @@ void Projectile::setId(unsigned id) {
 }
 
 void Projectile::update() {
+    if(particles) {
+        ParticleBuilder::init("Particle_1", transform->pos, 0.5, GetColor(particles))
+            .setAmount(1, 1.0f * transform->size)
+            .setFadeTime(0.5, 100, true)
+            .setPhys(Vec2(50, 50), 0.1, 0)
+            .build();
+    }
     transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
     collider->calcHitbox();
     if(timer->isDone()) {

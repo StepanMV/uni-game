@@ -28,6 +28,9 @@ Game::Game(std::string title) {
 Game::~Game() noexcept
 {
 	Renderer::unloadTextures();
+	Audio::unload();
+	settings->deleteSection("Runtime");
+	settings->save();
 	CloseWindow();
 }
 

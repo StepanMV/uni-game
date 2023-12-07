@@ -2,6 +2,7 @@
 #include "tile.h"
 #include "level.h"
 #include "controls.h"
+#include "particle.h"
 #include "game.h"
 #include "enemy.h"
 #include "bosses.h"
@@ -21,6 +22,7 @@ std::shared_ptr<Player> Player::spawn(unsigned id, Vec2 pos, Vec2 startSize) {
     player->physics = std::make_shared<Physics>();
 
     player->readStats(playerName);
+    player->max_friction = player->physics->friction;
 
     if(startSize != Vec2(0, 0)) player->transform->size = startSize;
 
@@ -125,10 +127,14 @@ void Player::update() {
     }
     physics->accel = Vec2(0, 0);
     if(Controls::isKeyDoublePressed(KEY_D)) {
-        dash(Vec2(1, 0), 30);
+        dash(Vec2(1, 0), 15);
+        dashTimer->reset();
+        physics->friction = 0;
     }
     if(Controls::isKeyDoublePressed(KEY_A)) {
-        dash(Vec2(-1, 0), 30);
+        dash(Vec2(-1, 0), 15);
+        dashTimer->reset();
+        physics->friction = 0;
     }
     if (IsKeyDown(KEY_A)) {
         move(Vec2(-1.5, 0));
@@ -178,7 +184,16 @@ void Player::update() {
     if(health > max_health) {
         health = max_health;
     }
-
+    if(dashTimer->isDone()) {
+        physics->friction = max_friction;
+    }
+    else {
+        ParticleBuilder::init("Particle_2", transform->pos, 1, RED)
+            .setAmount(5, 0.5f * transform->size)
+            .setFadeTime(0.5, 100, true)
+            .setPhys(Vec2(50, 50), 0, 0)
+            .build();
+    }
     collider->calcHitbox();
     onGround = false;
     onBoard();

@@ -27,6 +27,7 @@ class Projectile: public Object {
     protected:
         Projectile() = default;
         unsigned damage;
+        unsigned int particles = 0;
         bool fromPlayer;
         int hitCount = 0;
         std::shared_ptr<Timer> hitTimer = Timer::getInstance(0.1);

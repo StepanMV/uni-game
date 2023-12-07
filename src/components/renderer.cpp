@@ -82,6 +82,28 @@ void CoolRenderer::setFlipped(bool flipped, std::string element) {
     }
 }
 
+void CoolRenderer::setColor(Color color, std::string element) {
+    if (element.empty()) {
+        for (auto& element : objectStates[currentStateID]) {
+            element->setColor({color.r, color.g, color.b, element->getColor().a});
+        }
+    } else {
+        auto el = objectStates[currentStateID][getElementIndex(element)];
+        el->setColor({color.r, color.g, color.b, el->getColor().a});
+    }
+}
+
+void CoolRenderer::setAlpha(float alpha, std::string element) {
+    if (element.empty()) {
+        for (auto& element : objectStates[currentStateID]) {
+            element->setColor({element->getColor().r, element->getColor().g, element->getColor().b, (unsigned char) (alpha * 255)});
+        }
+    } else {
+        auto el = objectStates[currentStateID][getElementIndex(element)];
+        el->setColor({el->getColor().r, el->getColor().g, el->getColor().b, (unsigned char) (alpha * 255)});
+    }
+}
+
 void CoolRenderer::setRotation(double rotation, std::string element)
 {
     if (element.empty()) {
@@ -173,7 +195,7 @@ void CoolRenderer::render() {
         dest.width *= transform->size.x == 0 ? texture->width : transform->size.x;
         dest.height *= transform->size.y == 0 ? texture->height : (element->isFree() ? transform->size.y : transform->size.x);
         float rotation = transform->angle + element->getRotation();
-        DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, rotation, WHITE);
+        DrawTexturePro(*texture, source, dest, {dest.width / 2, dest.height / 2}, rotation, element->getColor());
     }
 }
 
