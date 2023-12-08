@@ -27,13 +27,10 @@ endif()
 # Executable
 
 file(GLOB_RECURSE sources src/*.cpp src/*.h)
-file(GLOB_RECURSE sources_test tests/*.cpp tests/*.h tests/*.c)
 file(GLOB_RECURSE data resources/*)
 
-add_executable(${PROJECT_NAME} ${sources} ${data})
-add_executable(test ${sources_test})
+add_executable(${PROJECT_NAME} WIN32 ${sources} ${data} src/icon.o)
 target_link_libraries(${PROJECT_NAME} raylib)
-target_link_libraries(test raylib)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/include)
 
 # Copying resources

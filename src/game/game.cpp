@@ -22,6 +22,7 @@ Game::Game(std::string title) {
 	SetConfigFlags(FLAG_VSYNC_HINT);
 	InitWindow(settings->readInt("Screen", "screenWidth", 1920), settings->readInt("Screen", "screenHeight", 1080), title.c_str());
 	if(settings->readBool("Screen", "fullscreen")) ToggleFullscreen();
+	SetWindowIcon(LoadImage("resources/textures/Icon.png"));
 
 }
 
@@ -303,7 +304,7 @@ void Game::draw() {
 		if(level.isLoaded()) level.render();
 		ui->update();
 		
-        DrawFPS(10, 10);
+        // DrawFPS(10, 10);
         
 	EndDrawing();
 }

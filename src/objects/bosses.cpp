@@ -166,28 +166,27 @@ void Slime::slimeBehavior() {
 
 void KingSlime::update() {
     onBoard();
-    if(betweenTpTimer->isDone() && onGround) {                  // if can tp and on ground
-        if(!tpTimer->isDone()) {                                    // if tp is not done
-            collider->setScale(currentScale * tpTimer->getTimeLeft() / tpTime);     // scale down relative to time left
-            physics->accel.x = 0;                                   // stop moving
+    if(betweenTpTimer->isDone() && onGround) {
+        if(!tpTimer->isDone()) {
+            collider->setScale(currentScale * tpTimer->getTimeLeft() / tpTime);
+            physics->accel.x = 0;
             ParticleBuilder::init("Particle_2", transform->pos, 1.5, Color{0, 146, 255, 255})
                 .setAmount(30, 0.5f * transform->size)
                 .setFadeTime(0.5, 100, false)
                 .setPhys(Vec2(200, 200), 0, 0)
                 .build();
-	        //Particle::create("Particle_2", transform->pos, 1.5, Color{0, 146, 255, 255}, 50, 0.5f * transform->size, 0.5, Vec2(200, 200));
-            return;                                                 // don't do anything else
+            return;
         }
-        else {                                          // if tp is done
-            betweenTpTimer->reset();                        // reset timer between tps
-            collider->setPos(tpPos);                        // set position to tp position
-            collider->setScale(currentScale);                          // return scale to normal
+        else {
+            betweenTpTimer->reset();
+            collider->setPos(tpPos);
+            collider->setScale(currentScale);
             onGround = false;                           
         }
     }
-    else {                                              // if can't tp
-        tpPos = target->getPos() - Vec2(0, transform->size.y / 2);                                // update tp position
-        tpTimer->reset();                                   // reset tp timer
+    else {
+        tpPos = target->getPos() - Vec2(0, transform->size.y / 2);
+        tpTimer->reset();
     }
     if(health >= max_health / 1.41) {
         currentScale = (double) health / max_health;

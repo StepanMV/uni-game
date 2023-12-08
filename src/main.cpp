@@ -5,7 +5,7 @@
 
 int main()
 {
-    Game game("Low-budget Terraria");
+    Game game("Terraria BossRush");
     game.load();
 
     while (!game.shouldClose()) game.tick();

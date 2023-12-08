@@ -6,7 +6,6 @@ class Physics {
     public:
         Physics() = default;
 
-        //void target(int& x, int& y);
         Vec2& calcSpeed();
 
         Vec2 speed, accel;

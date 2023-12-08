@@ -46,3 +46,5 @@ build
 *.exe
 *.out
 *.app
+
+!src/icon.o

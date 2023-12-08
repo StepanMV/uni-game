@@ -159,10 +159,10 @@ void Level::render() {
     Object::renderAll();
     EndMode2D();
 
-    DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
-    DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
-    DrawText(std::to_string(player->getSpeed().x).c_str(), 10, 100, 20, RED);
-    DrawText(std::to_string(player->getSpeed().y).c_str(), 10, 130, 20, RED);
+    // DrawText(std::to_string(player->getPos().x / tileSize).c_str(), 10, 40, 20, RED);
+    // DrawText(std::to_string(player->getPos().y / tileSize).c_str(), 10, 70, 20, RED);
+    // DrawText(std::to_string(player->getSpeed().x).c_str(), 10, 100, 20, RED);
+    // DrawText(std::to_string(player->getSpeed().y).c_str(), 10, 130, 20, RED);
 }
 
 void Level::update() {
