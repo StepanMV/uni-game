@@ -22,7 +22,7 @@ float Vec2::length() const {
 }
 
 void Vec2::rotate(float angle) {
-    float rad = angle * M_PI / 180;
+    float rad = angle * 3.14 / 180;
     float _x = x * cos(rad) - y * sin(rad);
     float _y = x * sin(rad) + y * cos(rad);
     x = _x;
@@ -56,7 +56,7 @@ Vec2& Vec2::operator*=(const float& k) {
 }
 
 float angle(const Vec2 v1, const Vec2 v2) {
-    return acos(v1.dot(v2) / (v1.length() * v2.length())) * 180 / M_PI;
+    return acos(v1.dot(v2) / (v1.length() * v2.length())) * 180 / 3.14;
 }
 
 Vec2 operator+(const Vec2 &v1, const Vec2 &v2)

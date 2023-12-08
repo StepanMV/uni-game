@@ -90,7 +90,7 @@ void Projectile::update() {
             .setPhys(Vec2(50, 50), 0.1, 0)
             .build();
     }
-    transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / M_PI;
+    transform->angle = atan2(physics->speed.y , physics->speed.x) * 180 / 3.14;
     collider->calcHitbox();
     if(timer->isDone()) {
         destroy();

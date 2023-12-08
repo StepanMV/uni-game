@@ -256,7 +256,7 @@ void EyeOfCtulhu::phase1() {
         }
         else {
             physics->speed *= 0.2;
-            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
+            transform->angle = atan2(direction.y, direction.x) * 180 / 3.14 - 90;
         }
         direction += Vec2(0, -target->getSize().y * 5);
         direction.normalize();
@@ -276,7 +276,7 @@ void EyeOfCtulhu::phase1() {
                 dash(direction, 30);
                 Audio::playSound("RawrXD");
             }
-            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
+            transform->angle = atan2(direction.y, direction.x) * 180 / 3.14 - 90;
             betweenDashesTimer->reset();
             dashCount--;
         }
@@ -287,7 +287,7 @@ void EyeOfCtulhu::phase2() {
     if(!chaseTimer->isDone()) {
         Vec2 direction = (target->getPos() - transform->pos);
         physics->speed *= 0.2;
-        transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
+        transform->angle = atan2(direction.y, direction.x) * 180 / 3.14 - 90;
         direction += Vec2(0, -target->getSize().y * 5);
         if(transform->pos.x < target->getPos().x) {
             direction -= Vec2(target->getSize().x * 3, 0);
@@ -310,7 +310,7 @@ void EyeOfCtulhu::phase2() {
         }
         if(dashTimer->isDone()) {
             Vec2 direction = target->getPos() - transform->pos;
-            transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
+            transform->angle = atan2(direction.y, direction.x) * 180 / 3.14 - 90;
             if(dashCount != 0) {
                 dash(direction, 20);
                 Audio::playSound("RawrXD", 1, 1.5);
@@ -337,7 +337,7 @@ void EyeOfCtulhu::switchPhase() {
 void Eye::update() {
     Vec2 direction = (target->getPos() - transform->pos);
     physics->accel.normalize();
-    transform->angle = atan2(direction.y, direction.x) * 180 / M_PI - 90;
+    transform->angle = atan2(direction.y, direction.x) * 180 / 3.14 - 90;
     direction.normalize();
     direction *= 0.5;
     move(direction);
@@ -360,7 +360,7 @@ void EowSegment::update() {
     }
     Vec2 distance = nextSegment->transform->pos - transform->pos;
     distance.normalize();
-    transform->angle = atan2(distance.y, distance.x) * 180 / M_PI + 90;
+    transform->angle = atan2(distance.y, distance.x) * 180 / 3.14 + 90;
     distance *= 4 * transform->size.y / 10;
     collider->setPos(nextSegment->transform->pos - distance);
     if(projTimer->isDone()) {
@@ -409,6 +409,6 @@ void EowHead::update() {
         physics->accel.rotate(-rotateAngle - accelAngle);
     }
     physics->accel.normalize();
-    transform->angle = atan2(physics->speed.y, physics->speed.x) * 180 / M_PI + 90;
+    transform->angle = atan2(physics->speed.y, physics->speed.x) * 180 / 3.14 + 90;
     collider->calcHitbox();
 }

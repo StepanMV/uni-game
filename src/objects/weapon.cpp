@@ -88,7 +88,7 @@ void Weapon::update() {
         case WeaponType::GUN: {
             Vector2 mousePos = GetMousePosition();
             mousePos = GetScreenToWorld2D(mousePos, Level::camera->getCamera());
-            transform->angle = atan2(mousePos.y - refTransform->pos.y, mousePos.x - refTransform->pos.x) * 180 / M_PI + 90;
+            transform->angle = atan2(mousePos.y - refTransform->pos.y, mousePos.x - refTransform->pos.x) * 180 / 3.14 + 90;
             toLeft = transform->angle < 0 || transform->angle > 180;
             break;
         }
