@@ -54,7 +54,7 @@ void Game::load() {
 	Audio::setMasterVolume(settings->readDouble("Sound", "masterVolume", 1.0));
 	Audio::setMusicVolume(settings->readDouble("Sound", "musicVolume", 1.0));
 	Audio::setSoundVolume(settings->readDouble("Sound", "soundVolume", 1.0));
-	unlockedLevel = settings->readInt("Runtime", "unlockedLevel", 0);
+	unlockedLevel = settings->readInt("Game", "unlockedLevel", 0);
 	Controls::init();
 	createUIS();
 

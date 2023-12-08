@@ -211,7 +211,7 @@ void Level::updateGame() {
 	    Audio::setMusic("CalamityTitle");
         Game::unlockedLevel = id + 1 > Game::unlockedLevel ? id + 1 : Game::unlockedLevel;
         Game::unlockedLevel = Game::unlockedLevel > 2 ? 2 : Game::unlockedLevel;
-        Game::settings->writeInt("Runtime", "unlockedLevel", Game::unlockedLevel);
+        Game::settings->writeInt("Game", "unlockedLevel", Game::unlockedLevel);
     }
 }
 
