@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #define CYBER_STYLE_PROPS_COUNT  16
-
+#include <cstring>
 // Custom style name: cyber
 static const GuiStyleProp cyberStyleProps[CYBER_STYLE_PROPS_COUNT] = {
     { 0, 0, 0x2f7486ff },    // DEFAULT_BORDER_COLOR_NORMAL 

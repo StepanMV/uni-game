@@ -31,7 +31,7 @@ endif()
 file(GLOB_RECURSE sources src/*.cpp src/*.h)
 file(GLOB_RECURSE data resources/*)
 
-add_executable(${PROJECT_NAME} WIN32 ${sources} ${data} src/icon.o)
+add_executable(${PROJECT_NAME} WIN32 ${sources} ${data})
 
 if (MSVC)
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS /SUBSYSTEM:CONSOLE)
